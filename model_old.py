@@ -135,7 +135,7 @@ def objective_rule(model):
 model.Obj = Objective(rule=objective_rule, sense=maximize)
 
 # Solve the model
-solver = SolverFactory('glpk')  # Replace 'glpk' with your solver
+solver = SolverFactory('cplex')  # Replace 'glpk' with your solver
 # solver.options['mipgap'] = 0.06  # 设置为 6% 的相对间隙
 
 result = solver.solve(model, tee=True)
