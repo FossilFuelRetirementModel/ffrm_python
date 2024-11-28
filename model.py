@@ -3,11 +3,7 @@ from pyomo.opt import SolverFactory
 from pathlib import Path
 import pandas as pd
 from python_version import load_excel_data, initialize_model_data
-import math
-# Load data and initialize model data
-file_path = Path("InputDataCoalUpdated.xlsx")
-data = load_excel_data(file_path)
-model_data = initialize_model_data(data)
+import argparse
 
 def build_model(model_data, scenario, price_scenario):
     model = ConcreteModel()
@@ -32,25 +28,20 @@ def build_model(model_data, scenario, price_scenario):
     # 定义 price_Dist1 参数
     def price_dist1_init(model, y, p, t):
         if p == "MarketPrice":
-            return model.Price_dist[y, t]  # 对应 GAMS 的 Price_Dist(y, t)
+            return model.Price_dist[y, t]  #  GAMS Price_Dist(y, t)
         elif p == "AvgPPAPrice":
-            return 1  # 对应固定值 1
+            return 1  # GAMS Price_Dist1(y, t)
         else:
-            return 0  # 默认为 0，避免未定义值
+            return 0  # Default case if needed
 
     model.Price_Dist1 = Param(model.y, model.p, model.t, initialize=price_dist1_init)
-    
-    # Scenario flags
-    # model.SetScenario = Param(model.s, initialize={k: 1 if k == scenario else 0 for k in model_data.scenarios.keys()}, mutable=True)
-    # model.SetPriceScenario = Param(model.p, initialize={k: 1 if k == price_scenario else 0 for k in model_data.price_scenarios.keys()}, mutable=True)
-    # SetScenario = 1 if scenario == "BAU"  else 0
     
     # SetScenario and SetPriceScenario as Boolean Parameters
     model.SetScenario = Param(model.s, initialize=lambda model, s: 1 if s == scenario else 0)
     model.SetPriceScenario = Param(model.p, initialize=lambda model, p: 1 if p == price_scenario else 0)
 
     # Derived Parameters
-    model.DR = Param(model.y, initialize=lambda model, y: 1 / (1 + model.Other["DiscountRate", "Value"]) ** (y - 2021))
+    model.DR = Param(model.y, initialize=lambda model, y: 1 / ((1 + model.Other["DiscountRate", "Value"]) ** (y - 2021)))
     model.life = Param(model.g, initialize=lambda model, g: 2021 - model.GenData[g]["STARTYEAR"])
     model.cost = Param(model.g, model.y, initialize=lambda model, g, y: (
     model.GenData[g]["AvgPPAPrice"] * 
@@ -60,24 +51,14 @@ def build_model(model_data, scenario, price_scenario):
     model.GenData[g]["AvgPPAPrice"] * 
     (1 + model.Other["CostEsc_30plus","Value"]) ** (y - 2021)
     ))
-    # def gen_bounds(model, g, y, t):
-    #     cumulative_age = y - model.GenData[g]["STARTYEAR"] + 1
-    #     if cumulative_age > model.Other["MaxLife", "Value"]:
-    #         return (0, 0)  # Both lower and upper bounds are 0, effectively fixing the variable to 0
-    #     else:
-    #         return (0, model.GenData[g]["CAPACITY"])
 
-    # model.Gen = Var(model.g, model.y, model.t, domain=NonNegativeReals, bounds=gen_bounds)
-
-    def gen_bounds(model, g, y,t):
+    def gen_bounds(model, g, y, t):
         max_life = model.Other["MaxLife", "Value"]
-        # 如果年份超出最大寿命，发电量的上界为 0
         if (y + model.life[g] - 2021) > max_life:
             return (0, 0)  # 下界和上界都为 0，相当于固定为 0
         else:
             return (0, model.GenData[g]["CAPACITY"])  # 最大值为工厂容量
 
-    # 定义发电量变量，并动态应用上界
     model.Gen = Var(model.g, model.y, model.t, domain=NonNegativeReals,bounds=gen_bounds)
     # Variables
     model.Cap = Var(model.g, model.y, domain=NonNegativeReals)
@@ -101,7 +82,6 @@ def build_model(model_data, scenario, price_scenario):
     )
     for g in model.g:
         for y in model.y:
-            # cumulative_age = y - model.GenData[g]['STARTYEAR'] + 1  # Assuming years are integers
             if y + model.life[g] - 2021 > model.Other['MaxLife', 'Value']:
                 model.Cap[g, y].fix(0.0)
                 for t in model.t:
@@ -124,7 +104,7 @@ def build_model(model_data, scenario, price_scenario):
         return sum(
             model.Gen[g, y, t] * model.Price_dur[t] * 8.76 / 1000
             for t in model.t
-        ) >= model.Cap[g, y] * 8.76 / 1000 * 0.25 #model.Other["MinPLF", "Value"]
+        ) >= model.Cap[g, y] * 8.76 / 1000 * model.Other["MinPLF", "Value"]
     model.MinPLF = Constraint(model.g, model.y, rule=min_plf_rule)
 
     # Maximum PLF
@@ -132,7 +112,7 @@ def build_model(model_data, scenario, price_scenario):
         return sum(
             model.Gen[g, y, t] * model.Price_dur[t] * 8.76 / 1000
             for t in model.t
-        ) <= model.Cap[g, y] * 8.76 / 1000 * 0.85 #model.Other["MaxPLF", "Value"]
+        ) <= model.Cap[g, y] * 8.76 / 1000 * model.Other["MaxPLF", "Value"]
     model.MaxPLF = Constraint(model.g, model.y, rule=max_plf_rule)
 
     # Capacity Balance
@@ -140,23 +120,9 @@ def build_model(model_data, scenario, price_scenario):
         if y == 2021:
             return model.Cap[g, y] == (1- model.Retire[g, y]) * model.GenData[g]["CAPACITY"]
         else:
-            return model.Cap[g, y] == model.Cap[g, y -1 ] - model.Retire[g, y] * model.GenData[g]["CAPACITY"]
+            return model.Cap[g, y] == model.Cap[g, y-1 ] - model.Retire[g, y] * model.GenData[g]["CAPACITY"]
 
     model.CapBal = Constraint(model.g, model.y, rule=capacity_balance_rule)
-    # for g in model.g:
-    #     for y in model.y:
-    #         if y == 2021:
-    #             model.Cap[g, y].fix((1 - model.Retire[g, y].value) * model.GenData[g]["CAPACITY"])
-    #         else:
-    #             prev_year = y - 1
-    #             model.Cap[g, y].fix(model.Cap[g, prev_year].value - model.Retire[g, y].value * model.GenData[g]["CAPACITY"])
-
-    # def  capacity_balance_rule1(model, g, y):
-    #     if y == 2021:
-    #         return model.Cap[g, y] == model.GenData[g]["CAPACITY"] - model.Retire[g, y] * model.GenData[g]["CAPACITY"]
-    #     else :
-    #         return Constraint.Skip
-    # model.CapBal1 = Constraint(model.g, model.y, rule=capacity_balance_rule1)
     # Retire Plants
     def max_retire_rule(model, g):
         return sum(
@@ -198,119 +164,127 @@ def build_model(model_data, scenario, price_scenario):
 
     return model
 
-scenarios = ["BAU"]
-price_scenarios = ["MarketPrice"]#, "AvgPPAPrice"]
 
-results = {}
+if __name__ == "__main__":
+    # Load data and initialize model data
+    file_path = Path("InputDataCoalUpdated.xlsx")
+    data = load_excel_data(file_path)
+    model_data = initialize_model_data(data)
+    scenarios = ["BAU","AD"]
+    price_scenarios = ["MarketPrice"]#, ["MarketPrice","AvgPPAPrice"]
+    # 创建 Argument Parser
+    parser = argparse.ArgumentParser(description="Run Pyomo model with solver options.")
+    parser.add_argument('--solver', type=str, default='gurobi', help='Solver to use (e.g., glpk, cplex, gurobi).')
+    parser.add_argument('--solver-options', type=str, nargs='*', help='Solver options as key=value pairs.')
 
-for scenario in scenarios:
-    for price_scenario in price_scenarios:
-        # Build the model for the current scenario and price scenario
-        model = build_model(model_data, scenario, price_scenario)
-        # Comment out constraints for testing
-        # model.MinPLF.deactivate()
-        # model.MaxPLF.deactivate()
-        # model.CapBal.deactivate()
-        solver = SolverFactory('gurobi')  # Replace with your solver
+    # 解析命令行参数
+    args = parser.parse_args()
 
-        if solver is None:
-            print("Solver not found!")
-        else:
-            print("Solver is available!")
-        result = solver.solve(model, tee=True)
-        if (result.solver.status != SolverStatus.ok) or (result.solver.termination_condition != TerminationCondition.optimal):
-            print("=====================Solver failed!")
-        else:
-            print("Solver succeeded!")
-        from pyomo.util.infeasible import log_infeasible_constraints
-        import logging
+    results = {}
 
-        # 设置日志级别为 INFO
-        # Solve the model
-        # for y in model.y:
-        #     for p in model.p:
-        #         for t in model.t:
-        #             print(f"Price_Dist1[{y}, {p}, {t}] = {model.Price_Dist1[y, p, t]}")
-        # for g in model.g:
-        #     print(f"Plant {g} life: {model.Retire[g, 2021].value},{model.Cap[g, 2021].value==model.GenData[g]['CAPACITY']}")
-        # model.display()
-        # Extract results
-        totgen = {}
-        NetRev = {}
-        totalCap = {}
-        # print("MaxLife:", model.Other["MaxLife", "Value"])
-        # for g in model.g:
-        #     print(f"Plant {g} life: {model.life[g]}")
-        # print(model.Retire.get_values()) 
-        for y in model.y:
-        #     for g in model.g:
-        #         for t in model.t:
-        #             print(model.Gen[g, y, t])
-            totgen[y] = sum(
-                model.Gen[g, y, t].value * model.Price_dur[t] * 8.76 / 1000
-                for g in model.g for t in model.t
-            )
-        SetScenario = 1 if scenario == "BAU"  else 0
-        SetPriceScenario = 1 if price_scenario == "MarketPrice" else 0
-        for g in model.g:
+    for scenario in scenarios:
+        for price_scenario in price_scenarios:
+            # Build the model for the current scenario and price scenario
+            model = build_model(model_data, scenario, price_scenario)
+            # Comment out constraints for testing
+            # model.MinPLF.deactivate()
+            # model.MaxPLF.deactivate()
+            # model.CapBal.deactivate()
+            # 动态选择求解器
+            solver = SolverFactory(args.solver)
+
+            # 处理求解器选项
+            if args.solver_options:
+                options = {k: v for opt in args.solver_options for k, v in [opt.split('=')]}
+                for key, value in options.items():
+                    solver.options[key] = value
+
+            if solver is None:
+                print("Solver not found!")
+            else:
+                print("Solver is available!")
+            result = solver.solve(model, tee=True)
+            if (result.solver.status != SolverStatus.ok) or (result.solver.termination_condition != TerminationCondition.optimal):
+                print("=====================Solver failed!")
+            else:
+                print("Solver succeeded!")
+            # Extract results
+            totgen = {}
+            NetRev = {}
+            totalCap = {}
+            # print("MaxLife:", model.Other["MaxLife", "Value"])
+            # for g in model.g:
+            #     print(f"Plant {g} life: {model.life[g]}")
+            # print(model.Retire.get_values()) 
             for y in model.y:
-                # model.Retire.pprint()
-                fixed_costs = sum(
-                    model.GenData[g]['CAPACITY'] *
-                    (model.FC_PPA[g, y] * SetPriceScenario +
-                     100 * (1 - SetPriceScenario))
-                    for p in model.p
-                ) / 1e6
-                variable_revenue = sum(
-                    model.Gen[g, y, t] *
-                    model.Price_dist[y, t] *
-                    model.Price_dur[t] * 8.76 / 1000
-                    for t in model.t
+            #     for g in model.g:
+            #         for t in model.t:
+            #             print(model.Gen[g, y, t])
+                totgen[y] = sum(
+                    model.Gen[g, y, t].value * model.Price_dur[t] * 8.76 / 1000
+                    for g in model.g for t in model.t
                 )
-                NetRev[g, y] = -fixed_costs + variable_revenue
-        for y in model.y:    
-            total_capacity_mw = sum(
-                                model.Cap[g, y].value for g in model.g
-                                if model.Cap[g, y].value is not None
-                                    )
-            # print(f"Total Capacity: {total_capacity_mw}")
-            totalCap[y] = total_capacity_mw/1000
-        # total_capacity_gw = total_capacity_mw / 1000  #
-        # Store results
-        print(totalCap)
-        key = f"{scenario}_{price_scenario}"
-        results[key] = {
-            "TotGen": totgen,
-            "NetRev": NetRev,
-            "TotalNetRevenue": model.TotNetRev.value,
-            "total_capacity_gw": totalCap
-        }
-        retirement_schedule = {}
+            SetScenario = 1 if scenario == "BAU"  else 0
+            SetPriceScenario = 1 if price_scenario == "MarketPrice" else 0
+            for g in model.g:
+                for y in model.y:
+                    # model.Retire.pprint()
+                    fixed_costs = sum(
+                        model.GenData[g]['CAPACITY'] *
+                        (model.FC_PPA[g, y] * SetPriceScenario +
+                        100 * (1 - SetPriceScenario))
+                        for p in model.p
+                    ) / 1e6
+                    variable_revenue = sum(
+                        model.Gen[g, y, t].value *
+                        model.Price_dist[y, t] *
+                        model.Price_dur[t] * 8.76 / 1000
+                        for t in model.t
+                    )
+                    NetRev[g, y] = -fixed_costs + variable_revenue
+            for y in model.y:    
+                total_capacity_mw = sum(
+                                    model.Cap[g, y].value for g in model.g
+                                    if model.Cap[g, y].value is not None
+                                        )
+                # print(f"Total Capacity: {total_capacity_mw}")
+                totalCap[y] = total_capacity_mw/1000
+            # total_capacity_gw = total_capacity_mw / 1000  #
+            # Store results
+            print(totalCap)
+            key = f"{scenario}_{price_scenario}"
+            results[key] = {
+                "TotGen": totgen,
+                "NetRev": NetRev,
+                "TotalNetRevenue": model.TotNetRev.value,
+                "total_capacity_gw": totalCap
+            }
+            retirement_schedule = {}
 
-        for g in model.g:
-            retirement_years = []
-            for y in model.y:
-                if model.Retire[g, y].value == 1:  # Check if the plant is set to retire in this year
-                    retirement_years.append(1)  # Indicate retirement
-                else:
-                    retirement_years.append(0)  # Indicate no retirement
-            retirement_schedule[g] = retirement_years
+            for g in model.g:
+                retirement_years = []
+                for y in model.y:
+                    if model.Retire[g, y].value == 1:  # Check if the plant is set to retire in this year
+                        retirement_years.append(1)  # Indicate retirement
+                    else:
+                        retirement_years.append(0)  # Indicate no retirement
+                retirement_schedule[g] = retirement_years
 
-# Save results to Excel
-with pd.ExcelWriter('CoalAnalysisResults_Scenarios.xlsx') as writer:
-    for key, result in results.items():
-        # Save total generation
-        totgen_df = pd.DataFrame.from_dict(result["TotGen"], orient='index', columns=['TotalGeneration'])
-        totgen_df.to_excel(writer, sheet_name=f"{key}_TotGen")
+    # Save results to Excel
+    with pd.ExcelWriter('CoalAnalysisResults_Scenarios.xlsx') as writer:
+        for key, result in results.items():
+            # Save total generation
+            totgen_df = pd.DataFrame.from_dict(result["TotGen"], orient='index', columns=['TotalGeneration'])
+            totgen_df.to_excel(writer, sheet_name=f"{key}_TotGen")
 
-        # Save net revenue
-        netrev_df = pd.DataFrame.from_dict(result["NetRev"], orient='index')
-        netrev_df.to_excel(writer, sheet_name=f"{key}_NetRev")
+            # Save net revenue
+            netrev_df = pd.DataFrame.from_dict(result["NetRev"], orient='index')
+            netrev_df.to_excel(writer, sheet_name=f"{key}_NetRev")
 
-        # Save total net revenue
-        pd.DataFrame([result["TotalNetRevenue"]], columns=['TotalNetRevenue']).to_excel(writer, sheet_name=f"{key}_Summary")
-        totcap_df = pd.DataFrame.from_dict(result["total_capacity_gw"], orient='index', columns=['TotalCapacity'])
-        totcap_df.to_excel(writer, sheet_name=f"{key}_TotalCapacity")
-        
-        retirement_df = pd.DataFrame.from_dict(retirement_schedule, orient='index', columns=[str(year) for year in model.y])
-        retirement_df.to_excel(writer, sheet_name=f"{key}_RetireSched")
+            # Save total net revenue
+            pd.DataFrame([result["TotalNetRevenue"]], columns=['TotalNetRevenue']).to_excel(writer, sheet_name=f"{key}_Summary")
+            totcap_df = pd.DataFrame.from_dict(result["total_capacity_gw"], orient='index', columns=['TotalCapacity'])
+            totcap_df.to_excel(writer, sheet_name=f"{key}_TotalCapacity")
+            
+            retirement_df = pd.DataFrame.from_dict(retirement_schedule, orient='index', columns=[str(year) for year in model.y])
+            retirement_df.to_excel(writer, sheet_name=f"{key}_RetireSched")
