@@ -437,6 +437,24 @@ venv\Scripts\activate
 </ol>
 <pre class="hljs"><code><div>pip install -r requirements.txt
 </div></code></pre>
+<h2 id="optional-solver-installation">Optional Solver Installation</h2>
+<p>Choose one of the following solvers:</p>
+<h3 id="gurobi-recommended">Gurobi (Recommended)</h3>
+<ol>
+<li>Download from <a href="https://www.gurobi.com/downloads/">Gurobi website</a></li>
+<li>Get a license (free academic license available)</li>
+<li>Follow Gurobi installation guide</li>
+</ol>
+<h3 id="glpk-free-alternative">GLPK (Free Alternative)</h3>
+<pre class="hljs"><code><div><span class="hljs-comment"># Linux</span>
+sudo apt-get install glpk-utils
+
+<span class="hljs-comment"># Mac</span>
+brew install glpk
+
+<span class="hljs-comment"># Windows</span>
+<span class="hljs-comment"># Download binary from GLPK website</span>
+</div></code></pre>
 <h2 id="usage">Usage</h2>
 <h3 id="basic-usage">Basic Usage</h3>
 <p>Run the model with default settings:</p>

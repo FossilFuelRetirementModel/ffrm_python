@@ -43,6 +43,26 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+## Optional Solver Installation
+Choose one of the following solvers:
+
+### Gurobi (Recommended)
+1. Download from [Gurobi website](https://www.gurobi.com/downloads/)
+2. Get a license (free academic license available)
+3. Follow Gurobi installation guide
+
+### GLPK (Free Alternative)
+```bash
+# Linux
+sudo apt-get install glpk-utils
+
+# Mac
+brew install glpk
+
+# Windows
+# Download binary from GLPK website
+```
+
 ## Usage
 
 ### Basic Usage
