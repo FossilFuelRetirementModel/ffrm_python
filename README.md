@@ -1,6 +1,6 @@
-# Coal Plant Optimization Model
+# Fossil Fuel Retirement Model
 
-This repository implements a Pyomo-based optimization model for analyzing coal power plant operations, considering various scenarios and price conditions.
+This repository implements a Pyomo-based optimization model for analyzing coal power plant operations, considering various scenarios and price conditions ........
 
 ## Features
 
