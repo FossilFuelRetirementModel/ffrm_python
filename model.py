@@ -45,8 +45,8 @@ def build_model(model_data, scenario, price_scenario):
         model.t = Set(initialize=model_data.time_blocks)
         # model.s = Set(initialize=model_data.scenarios.keys())
         # model.p = Set(initialize=model_data.price_scenarios.keys())
-        model.s = Set(initialize={scenario})
-        model.p = Set(initialize={price_scenario})
+        model.s = Set(initialize=[scenario])
+        model.p = Set(initialize=[price_scenario])
         
         # Parameters
         model.GenData = Param(model.g, initialize=model_data.gen_data.to_dict('index'))
@@ -56,9 +56,8 @@ def build_model(model_data, scenario, price_scenario):
         model.Price_dur = Param(
             model.t, 
             initialize=lambda model, t: model_data.price_dur.loc[t, "PercentTime"] 
-            if t in model_data.price_dur.index else 0
+            # if t in model_data.price_dur.index else 0
             )
-        
         model.Other = Param(
             model_data.other.index.tolist(), 
             model_data.other.columns.tolist(),
@@ -84,7 +83,7 @@ def build_model(model_data, scenario, price_scenario):
             elif p == "AvgPPAPrice":
                 return 1  
             else:
-                return 0  # Default case if needed
+                raise NameError(f"Invalid price scenario: {p}")
 
         model.Price_Dist1 = Param(model.y, model.p, model.t, initialize=price_dist1_init)
         
@@ -114,14 +113,19 @@ def build_model(model_data, scenario, price_scenario):
         model.cost = Param(
             model.g, model.y, 
             initialize=lambda model, g, y: (
-                                    model.GenData[g]["COST"] * 
-                                    (1 + model.Other["CostEsc_Lessthan10","Value"]) ** (y - 2021) if model.life[g] < 10 else
-                                    model.GenData[g]["COST"] * 
-                                    (1 + model.Other["CostEsc_10-30years","Value"]) ** (y - 2021) if model.life[g] <= 30 else
-                                    model.GenData[g]["COST"] * 
-                                    (1 + model.Other["CostEsc_30plus","Value"]) ** (y - 2021)
-                                    )
-                                )
+                # Scenario 1:  < 10 years
+                model.GenData[g]["COST"] * 
+                (1 + model.Other["CostEsc_Lessthan10","Value"]) ** (y - 2021) 
+                    if model.life[g] < 10 
+                # Scenario 2: 10 years ≤ operating years ≤ 30 years
+                else model.GenData[g]["COST"] * 
+                (1 + model.Other["CostEsc_10-30years","Value"]) ** (y - 2021) 
+                    if model.life[g] <= 30 
+                # Scenario 3: operating years > 30 years
+                else model.GenData[g]["COST"] * 
+                (1 + model.Other["CostEsc_30plus","Value"]) ** (y - 2021)
+            )
+        )
 
 
         # Variables
@@ -140,6 +144,9 @@ def build_model(model_data, scenario, price_scenario):
         model.Retire = Var(model.g, model.y, domain=Binary)
         model.TotNetRev = Var(domain=Reals)
         
+        # for g in model.g:
+        #     if 2021 + model.life[g] - 2021 < model.Other["MaxLife", "Value"]:
+        #         model.Retire[g, 2021].fix(0)     
 
         def rev_unit_init(model, g, y, price_scenario):
             '''
@@ -148,12 +155,12 @@ def build_model(model_data, scenario, price_scenario):
             if price_scenario == "MarketPrice":
                 return model.GenData[g]["MarketPrice"]
             elif price_scenario == "AvgPPAPrice":
-                return model.GenData[g]["FIXED COST"] + model.cost[g, y]
+                return model.GenData[g]["FIXED COST"] + model.cost[g,y]
                 ############################################################
                 # IS "FIXED COST" Correct? Should it be "AvgPPAPrice"?
                 ############################################################
             else:
-                return 0  # Default case if needed
+                raise NameError(f"Invalid price scenario: {price_scenario}")
 
         # model.rev_unit = Constraint(model.g, model.y, model.p, rule=rev_unit_rule)
         model.rev_unit = Param(
@@ -169,6 +176,7 @@ def build_model(model_data, scenario, price_scenario):
                     model.Cap[g, y].fix(0.0)
                     for t in model.t:
                         model.Gen[g, y, t].fix(0.0)
+        
         #####################################################################################
 
         ##### Constraints
@@ -190,9 +198,9 @@ def build_model(model_data, scenario, price_scenario):
             This function is used to set the MINIMUM PLF rule
             """
             return sum(
-                model.Gen[g, y, t] * model.Price_dur[t] * 8.76 / 1000
+                model.Gen[g, y, t] * model.Price_dur[t] #* 8.76 / 1000
                 for t in model.t
-            ) >= model.Cap[g, y] * 8.76 / 1000 * model.Other["MinPLF", "Value"]
+            ) >= model.Cap[g, y] * model.Other["MinPLF", "Value"]#* 8.76 / 1000
             
         model.MinPLF = Constraint(model.g, model.y, rule=min_plf_rule)
 
@@ -202,9 +210,10 @@ def build_model(model_data, scenario, price_scenario):
             This function is used to set the MAXIMUM PLF rule
             """
             return sum(
-                model.Gen[g, y, t] * model.Price_dur[t] * 8.76 / 1000
+                model.Gen[g, y, t] * model.Price_dur[t] #* 8.76 / 1000
                 for t in model.t
-            ) <= model.Cap[g, y] * 8.76 / 1000 * model.Other["MaxPLF", "Value"]
+            ) <= model.Cap[g, y] * model.Other["MaxPLF", "Value"]#* 8.76 / 1000
+            
         model.MaxPLF = Constraint(model.g, model.y, rule=max_plf_rule)
 
         # Capacity Balance
@@ -213,7 +222,7 @@ def build_model(model_data, scenario, price_scenario):
             This function is used to set the CAPACITY BALANCE rule
             """
             if y == 2021:
-                return model.Cap[g, y] == (1- model.Retire[g, y]) * model.GenData[g]["CAPACITY"]
+                return model.Cap[g, y] == model.GenData[g]["CAPACITY"]- model.Retire[g, y]* model.GenData[g]["CAPACITY"]
             else:
                 return model.Cap[g, y] == model.Cap[g, y-1] - model.Retire[g, y] * model.GenData[g]["CAPACITY"]
 
@@ -229,17 +238,18 @@ def build_model(model_data, scenario, price_scenario):
         model.MaxRetire = Constraint(model.g, rule=max_retire_rule)
 
         # Minimum Capacity
-        def min_capacity_rule(model, y):
+        def min_capacity_rule(model, y, s):
             """
             This function is used to set the MINIMUM CAPACITY rule
             """
             return sum(
                 model.Cap[g, y] for g in model.g
-            ) >= model.Price_gen[y][scenario]* 1e6 / (8760 *0.75)
+            ) >= model.Price_gen[y][s]* 1e6 / (8760 *0.75)
             
-        model.MinCapacity = Constraint(model.y, rule=min_capacity_rule)
+        model.MinCapacity = Constraint(model.y, model.s, rule=min_capacity_rule)
 
         # 定义目标函数
+        
         def objective_rule(model):
             """
             This function is used to set the OBJECTIVE function
@@ -250,31 +260,73 @@ def build_model(model_data, scenario, price_scenario):
                             (
                                 #Universal Expression for both BAU and AD
                                 #For BAU, use the capacity from GenData, as SetScenario = 1
-                                model.GenData[g]["CAPACITY"] * model.SetScenario[scenario] +
+                                model.GenData[g]["CAPACITY"] * model.SetScenario[s] +
                                 #For AD, use the capacity from Cap, as SetScenario = 0
-                                model.Cap[g, y] * (1 - model.SetScenario[scenario])
+                                model.Cap[g, y] * (1 - model.SetScenario[s])
                             ) 
                             *
                             (
                                 #Universal Expression for both MarketPrice and AvgPPAPrice
-                                #For MarketPrice, use the PPA from FC_PPA, as SetPriceScenario = 1
-                                model.FC_PPA[g, y] * model.SetPriceScenario[price_scenario] +
-                                #For AvgPPAPrice, use 100, as SetPriceScenario = 0
-                                100 * (1 - model.SetPriceScenario[price_scenario])
+                                #For AvgPPAPrice, use the PPA from FC_PPA, as SetPriceScenario = 1
+                                model.FC_PPA[g, y] * (1- model.SetPriceScenario[p]) +
+                                #For MarketPrice, use 100, as SetPriceScenario = 0
+                                100 * model.SetPriceScenario[p]
                             )
-                            for g in model.g #for s in model.s for p in model.p
+                            for g in model.g for p in model.p for s in model.s #for p in model.p
                         ) / 1e6 #Divide by 1e6 to convert from MWh to TWh
                     + sum(
                         ( 
                             model.rev_unit[g, y, p] * model.Price_Dist1[y, p, t] - model.cost[g, y]
                         ) 
                         * model.Gen[g, y, t] * model.Price_dur[t] * 8.76 / 1000
-                        for g in model.g for t in model.t for p in model.p
+                        for g in model.g for t in model.t for p in model.p 
                         )
                 )
                 for y in model.y
                 )
-
+        
+        '''
+        # 添加Flag参数
+        def flag_init(model, s):
+            return 1 if s == "BAU" else 0
+        model.Flag = Param(model.s, initialize=flag_init)
+        
+        # 添加Index参数（之前可能也缺少）
+        def index_init(model, p):
+            return 1 if p == "AvgPPAPrice" else 0
+        model.Index = Param(model.p, initialize=index_init)
+        # model.display()  
+        def objective_rule(model):
+            return sum(
+                model.DR[y] * (
+                    # 容量支付成本（负项）
+                    - sum(
+                        sum(
+                            sum(
+                                (model.GenData[g]["CAPACITY"] * model.Flag[s] + model.Cap[g,y] * (1-model.Flag[s])) *
+                                (model.FC_PPA[g,y] * model.Index[p] + 100 * (1-model.Index[p]))
+                                for s in model.s if value(model.SetScenario[s])
+                            )
+                            for g in model.g
+                        )
+                        for p in model.p
+                    ) / 1e6
+                    # 运营收入
+                    + sum(
+                        sum(
+                            sum(
+                                (model.rev_unit[g,y,p] * model.Price_Dist1[y,p,t] - model.cost[g,y]) *
+                                model.Gen[g,y,t] * model.Price_dur[t] * 8.76/1000
+                                for t in model.t
+                            )
+                            for p in model.p if value(model.SetPriceScenario[p])
+                        )
+                        for g in model.g
+                    )
+                )
+                for y in model.y
+            )
+        '''
         model.Obj = Objective(rule=objective_rule, sense=maximize)
 
         return model
@@ -295,11 +347,11 @@ def setup_argument_parser():
     parser.add_argument('--solver-options', type=str, nargs='*',
                        help='Solver options as key=value pairs.')
     parser.add_argument('--scenarios', type=str, nargs='+', 
-                       default=["BAU"],
+                       default=["AD","BAU"],
                        choices=["BAU", "AD"],
                        help='Scenarios to run.')
     parser.add_argument('--price-scenarios', type=str, nargs='+',
-                       default=["MarketPrice"],
+                       default=["MarketPrice","AvgPPAPrice"],
                        choices=["MarketPrice", "AvgPPAPrice"],
                        help='Price scenarios to run.')
     parser.add_argument('--input-file', type=str,
@@ -344,8 +396,17 @@ def run_scenario(model_data, scenario, price_scenario, solver):
     Returns:
     dict: Results for the scenario
     """
+    from model_check import check_plf_constraints, verify_cost_calculations,check_capacity_constraints,validate_retirement_economics
     model = build_model(model_data, scenario, price_scenario)
+
     result = solver.solve(model, tee=True)
+    
+    # print("\nPost-solve checks:")    
+    # check_capacity_constraints(model)
+    # verify_cost_calculations(model)
+    # check_plf_constraints(model)
+    # validate_retirement_economics(model)
+ 
     
     if (result.solver.status != SolverStatus.ok) or \
        (result.solver.termination_condition != TerminationCondition.optimal):
@@ -402,72 +463,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    # try:
-    #     # Load data and initialize model data
-    #     file_path = Path("InputDataCoalUpdated.xlsx")
-    #     if not file_path.exists():
-    #         raise FileNotFoundError(f"Input file not found: {file_path}")
-        
-    #     data = load_excel_data(file_path)
-    #     model_data = initialize_model_data(data)
-        
-    #     # Argument Parser for solver options
-    #     parser = argparse.ArgumentParser(description="Run Pyomo model with solver options.")
-    #     parser.add_argument('--solver', type=str, default='gurobi', 
-    #                         choices=['glpk', 'cplex', 'gurobi', 'cbc'],
-    #                         help='Solver to use (e.g., glpk, cplex, gurobi, cbc).')
-    #     parser.add_argument('--solver-options', type=str, nargs='*',
-    #                         help='Solver options as key=value pairs.')
-
-    #     # Parse command line arguments
-    #     args = parser.parse_args()
-
-    #     # Solver validation
-    #     solver = SolverFactory(args.solver)
-    #     if solver is None:
-    #         raise RuntimeError(f"Solver {args.solver} not available")
-        
-    #     # Handle solver options from command line, default is Gurobi
-    #     if args.solver_options:
-    #         options = {k: v for opt in args.solver_options for k, v in [opt.split('=')]}
-    #         for key, value in options.items():
-    #             solver.options[key] = value
-                      
-    #     # Scenarios and PriceScenarios
-    #     ## This should be add to the argument parser in the future
-    #     scenarios = ["BAU"] # ["BAU", "AD"]
-    #     price_scenarios = ["MarketPrice"]#, ["MarketPrice","AvgPPAPrice"]
-        
-    #     results = {}
-
-    #     for scenario in scenarios:
-    #         for price_scenario in price_scenarios:
-    #             # Build the model for the current scenario and price scenario
-    #             try:
-    #                 model = build_model(model_data, scenario, price_scenario)
-    #                 # Comment out constraints for testing
-    #                 # model.MinPLF.deactivate()
-    #                 # model.MaxPLF.deactivate()
-    #                 # model.CapBal.deactivate()
-
-    #                 result = solver.solve(model, tee=True)
-                    
-    #                 # Validate solution
-    #                 if (result.solver.status != SolverStatus.ok) or \
-    #                     (result.solver.termination_condition != TerminationCondition.optimal):
-    #                     print (f"Solver failed for scenario {scenario}_{price_scenario}")
-    #                 # Process results/Extract Some of the results
-    #                 key = f"{scenario}_{price_scenario}"
-    #                 results[key] = process_model_results(model)
-                    
-    #             except Exception as e:
-    #                 print(f"Error building model for scenario {scenario}_{price_scenario}: {str(e)}")
-    #                 continue
-                                    
-    #             # Save results
-    #             try:
-    #                 save_results_to_excel(results, 'CoalAnalysisResults_Scenarios.xlsx')
-    #             except Exception as e:
-    #                 print(f"Error saving results: {str(e)}")
-    # except Exception as e:
-    #     print(f"Fatal error: {str(e)}")

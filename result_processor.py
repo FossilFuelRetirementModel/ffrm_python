@@ -15,13 +15,14 @@ def process_model_results(model):
         net_rev = calculate_net_revenue(model)
         total_cap = calculate_total_capacity(model)
         retirement_schedule = calculate_retirement_schedule(model)
-        
+        plant_cap = calculate_plant_capacity(model)
         return {
             "TotGen": totgen,
             "NetRev": net_rev,
             # "TotalNetRevenue": model.TotNetRev.value,
             "tot_cap_gw": total_cap,
-            "retire_sched": retirement_schedule
+            "retire_sched": retirement_schedule,
+            "plant_cap": plant_cap
         }
     except Exception as e:
         raise RuntimeError(f"Error processing model results: {str(e)}")
@@ -120,16 +121,9 @@ def calculate_total_capacity(model):
     """
     try:
         total_capacity = {}
-        '''
-        for g in model.g:
-            total_capacity[g] = {}
-            for y in model.y:
-                total_capacity[g][y] = model.Cap[g, y].value
-        '''
         for y in model.y:    
             total_capacity_mw = sum(
                 model.Cap[g, y].value for g in model.g
-                if model.Cap[g, y].value is not None
             )
             # print(f"Total Capacity: {total_capacity_mw}")
             total_capacity[y] = total_capacity_mw/1000
@@ -137,6 +131,27 @@ def calculate_total_capacity(model):
         return total_capacity
     except Exception as e:
         raise RuntimeError(f"Error calculating total capacity: {str(e)}")
+    
+def calculate_plant_capacity(model):
+    """
+    Calculate capacity for each plant and year.
+    
+    Parameters:
+    model (ConcreteModel): The solved Pyomo model
+    
+    Returns:
+    dict: Capacity by plant and year in MW
+    """
+    try:
+        plant_capacity = {}
+        for g in model.g:
+            plant_capacity[g] = {}
+            for y in model.y:
+                plant_capacity[g][y] = model.Cap[g, y].value
+        return plant_capacity
+    except Exception as e:
+        raise RuntimeError(f"Error calculating plant capacity: {str(e)}")
+
 
 def calculate_retirement_schedule(model):
     """

@@ -72,13 +72,14 @@ def load_excel_data(file_path: Path) -> dict:
             **Config.EXCEL_CONFIG['Price_Distribution']['time_blocks']
         )
         print("==============================================")
-        print(Config.EXCEL_CONFIG['Price_Distribution']['price_dur'])
+        # print(time_blocks)
         # Read price duration
         price_duration = pd.read_excel(
             file_path,
             sheet_name=Config.SHEETS['PRICE_DIST'],
             **Config.EXCEL_CONFIG['Price_Distribution']['price_dur']
         )
+        # print(price_duration)
 
         # Read price generation data
         price_gen = pd.read_excel(

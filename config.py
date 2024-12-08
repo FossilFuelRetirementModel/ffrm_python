@@ -36,7 +36,7 @@ class Config:
             'price_dur': {
                 'usecols': 'N:O',
                 'skiprows': 2,
-                'nrows': 11,
+                'nrows': 10,
                 'index_col': 0
             }
         },
