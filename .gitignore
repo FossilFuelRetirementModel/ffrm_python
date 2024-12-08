@@ -12,6 +12,11 @@ __pycache__/
 test.py
 testing.py
 trial.py
+pyomo_exercise.py
+model_old.py
+
+#PDF
+*.pdf
 
 #GAMS
 *.gms
