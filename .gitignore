@@ -1,8 +1,8 @@
 # Virtual Environment
-# ffrm/
-# venv/
-# env/
-# .env/
+ffrm/
+venv/
+env/
+.env/
 
 # Python
 __pycache__/
