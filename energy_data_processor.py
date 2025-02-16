@@ -32,6 +32,9 @@ def initialize_model_data(data: dict) -> ModelData:
     Returns:
         ModelData object containing all model structures
     """
+    print(data['price_distribution'])
+    print(data["price_dur"])
+    print(data['other'],data['fc_ppa'])
     return ModelData(
         years=Config.YEARS,
         plants=data['coal_plant_data'].index.tolist(),  # Assuming plant ID is index
@@ -72,7 +75,7 @@ def load_excel_data(file_path: Path) -> dict:
             **Config.EXCEL_CONFIG['Price_Distribution']['time_blocks']
         )
         print("==============================================")
-        # print(time_blocks)
+        print(time_blocks)
         # Read price duration
         price_duration = pd.read_excel(
             file_path,
@@ -156,7 +159,8 @@ if __name__ == "__main__":
         print(f"Price Distribution Shape: {model_data.price_dist.shape}")
         
         print("\nPrice Duration Preview:")
-        print(model_data.price_dur.head())
+        # print(model_data.price_dur.head())
+        print(model_data.price_dur['PercentTime']["Peak1"])        
         print(f"Price Duration Shape: {model_data.price_dur.shape}")
         
         print("\nFC PPA Data Preview:")

@@ -1,10 +1,12 @@
 from pyomo.environ import *
 from pyomo.opt import SolverFactory
+from pyomo.core.util import quicksum
 from pathlib import Path
 import pandas as pd
 from energy_data_processor import load_excel_data, initialize_model_data
 from result_processor import process_model_results, save_results_to_excel
 import argparse
+import time
 
 def build_model(model_data, scenario, price_scenario):
     """
@@ -43,6 +45,9 @@ def build_model(model_data, scenario, price_scenario):
         model.g = Set(initialize=model_data.plants)
         model.y = RangeSet(min(model_data.years), max(model_data.years))
         model.t = Set(initialize=model_data.time_blocks)
+        # print("Sets:===========")
+        # model.t.pprint()
+        # time.sleep(15)
         # model.s = Set(initialize=model_data.scenarios.keys())
         # model.p = Set(initialize=model_data.price_scenarios.keys())
         model.s = Set(initialize=[scenario])
@@ -51,8 +56,7 @@ def build_model(model_data, scenario, price_scenario):
         # Parameters
         model.GenData = Param(model.g, initialize=model_data.gen_data.to_dict('index'))
         model.Price_gen = Param(model.y, initialize=model_data.price_gen.to_dict('index'))
-        model.Price_dist = Param(model.y, model.t, initialize=model_data.price_dist.stack().to_dict())
-        
+        model.Price_Dist = Param(model.y, model.t, initialize=model_data.price_dist.stack().to_dict())
         model.Price_dur = Param(
             model.t, 
             initialize=lambda model, t: model_data.price_dur.loc[t, "PercentTime"] 
@@ -62,14 +66,15 @@ def build_model(model_data, scenario, price_scenario):
             model_data.other.index.tolist(), 
             model_data.other.columns.tolist(),
             initialize=lambda model, k, v: model_data.other.loc[k, v] 
-            if (k in model_data.other.index) and (v in model_data.other.columns) else 0
+            # if (k in model_data.other.index) and (v in model_data.other.columns) else 0
             )
         
         model.FC_PPA = Param(
             model.g, model.y, 
             initialize=lambda model, g, y: model_data.fc_ppa.loc[g, str(y)] 
-            if g in model_data.fc_ppa.index and str(y) in model_data.fc_ppa.columns else 0
-            )
+            if g in model_data.fc_ppa.index and str(y) in model_data.fc_ppa.columns else 100
+            )#possible error here: 'HARDUAGANJ'
+        
 
         # Define price_Dist1 parameter, this parameter is used classify different price scenarios
         def price_dist1_init(model, y, p, t):
@@ -79,53 +84,38 @@ def build_model(model_data, scenario, price_scenario):
             Returns: float: The price distribution value based on the scenario.
             """
             if p == "MarketPrice":
-                return model.Price_dist[y, t]  #  GAMS Price_Dist(y, t)
+                return model.Price_Dist[y, t]  #  GAMS Price_Dist(y, t)
             elif p == "AvgPPAPrice":
-                return 1  
+                return 1#model.Price_Dist[y, t]#1  
             else:
                 raise NameError(f"Invalid price scenario: {p}")
 
         model.Price_Dist1 = Param(model.y, model.p, model.t, initialize=price_dist1_init)
+        # model.Price_Dist1.pprint()
         
-        # Scenario and PriceScenario as Boolean Parameters
-        # BAU = 1, AD = 0
-        ############################################################
-        # Here we have a possible error in the code,
-        ############################################################
-        model.SetScenario = Param(model.s, initialize=lambda model, s: 1 if s == "BAU" else 0)
-        # MarketPrice = 1, AvgPPAPrice = 0
-        model.SetPriceScenario = Param(model.p, initialize=lambda model, p: 1 if p == "MarketPrice" else 0)
-
-
         # We now compute those derived Parameters
-        model.DR = Param(
-            model.y, 
-            initialize=lambda model, 
-            y: 1 / (1 + model.Other["DiscountRate", "Value"]) ** (y - 2021)
-            )
+        def discount_rate_init(model, y):
+            """Calculate the discount rate for a given year."""
+            return 1 / (1 + model.Other["DiscountRate", "Value"]) ** (y - 2021)
+
+        model.DR = Param(model.y, initialize=discount_rate_init, domain=NonNegativeReals)
         
-        model.life = Param(
-            model.g, 
-            initialize=lambda model, 
-            g: 2021 - model.GenData[g]["STARTYEAR"]
-            )
+        def initialize_life(model, g):
+            """Calculate the life of the plant based on its start year."""
+            return 2021 - model.GenData[g]["STARTYEAR"]
+
+        model.life = Param(model.g, initialize=initialize_life, domain=NonNegativeIntegers)
         
-        model.cost = Param(
-            model.g, model.y, 
-            initialize=lambda model, g, y: (
-                # Scenario 1:  < 10 years
-                model.GenData[g]["COST"] * 
-                (1 + model.Other["CostEsc_Lessthan10","Value"]) ** (y - 2021) 
-                    if model.life[g] < 10 
-                # Scenario 2: 10 years ≤ operating years ≤ 30 years
-                else model.GenData[g]["COST"] * 
-                (1 + model.Other["CostEsc_10-30years","Value"]) ** (y - 2021) 
-                    if model.life[g] <= 30 
-                # Scenario 3: operating years > 30 years
-                else model.GenData[g]["COST"] * 
-                (1 + model.Other["CostEsc_30plus","Value"]) ** (y - 2021)
-            )
-        )
+        def initialize_cost(model, g, y):
+            """Initialize the cost parameter based on the plant's age."""
+            if model.life[g] < 10:
+                return model.GenData[g]["COST"] * (1 + model.Other["CostEsc_Lessthan10", "Value"]) ** (y - 2021)
+            elif model.life[g] <= 30:
+                return model.GenData[g]["COST"] * (1 + model.Other["CostEsc_10-30years", "Value"]) ** (y - 2021)
+            else:
+                return model.GenData[g]["COST"] * (1 + model.Other["CostEsc_30plus", "Value"]) ** (y - 2021)
+
+        model.cost = Param(model.g, model.y, initialize=initialize_cost, domain=NonNegativeReals)
 
 
         # Variables
@@ -143,7 +133,11 @@ def build_model(model_data, scenario, price_scenario):
         model.Cap = Var(model.g, model.y, domain=NonNegativeReals)
         model.Retire = Var(model.g, model.y, domain=Binary)
         model.TotNetRev = Var(domain=Reals)
-        
+            
+        for g in model.g:
+            for y in model.y:
+                if y + model.life[g] - 2021 > model.Other['MaxLife', 'Value']:
+                    model.Cap[g, y].fix(0.0)
         # for g in model.g:
         #     if 2021 + model.life[g] - 2021 < model.Other["MaxLife", "Value"]:
         #         model.Retire[g, 2021].fix(0)     
@@ -168,14 +162,8 @@ def build_model(model_data, scenario, price_scenario):
             initialize=rev_unit_init,
             within=NonNegativeReals
             )
-        
-        # Fixing the generation and capacity of plants that have exceeded their maximum life
-        for g in model.g:
-            for y in model.y:
-                if y + model.life[g] - 2021 > model.Other['MaxLife', 'Value']:
-                    model.Cap[g, y].fix(0.0)
-                    for t in model.t:
-                        model.Gen[g, y, t].fix(0.0)
+        # print(model.GenData["UDUPI"])
+        # print(model.rev_unit["UDUPI",2021,price_scenario])
         
         #####################################################################################
 
@@ -184,14 +172,17 @@ def build_model(model_data, scenario, price_scenario):
             '''
             This function is used to set the maximum generation of coal plants
             '''
-            return sum(
-                model.Gen[g, y, t] * model.Price_dur[t] * 8.76 / 1000
-                for g in model.g for t in model.t
-                    ) == sum(
-                model.Price_gen[y][s] for s in model.s
-                    )
+            
+            
+            # ((g,t), Gen(g,y,t)*Price_Dur(t,"PercentTime")*8.76/1000) =e= Sum(s$SetScenario(s), Price_Gen(y,s)) ;
+            return quicksum(quicksum(
+                model.Gen[g, y, t] * model.Price_dur[t] 
+                for t in model.t
+                    )for g in model.g )* 8.76/1000  == model.Price_gen[y][scenario]#sum(
+                 #for s in model.s
+        
         model.MaxCoalGen = Constraint(model.y, rule=max_coal_gen_rule)
-
+        # print("OFFPEAK",model.Price_dur['Offpeak1'])
         # Minimum PLF
         def min_plf_rule(model, g, y):
             """
@@ -200,10 +191,8 @@ def build_model(model_data, scenario, price_scenario):
             return sum(
                 model.Gen[g, y, t] * model.Price_dur[t] #* 8.76 / 1000
                 for t in model.t
-            ) >= model.Cap[g, y] * model.Other["MinPLF", "Value"]#* 8.76 / 1000
-            
+            ) >= model.Cap[g, y] *model.Other["MinPLF", "Value"]#* 8.76 / 1000            
         model.MinPLF = Constraint(model.g, model.y, rule=min_plf_rule)
-
         # Maximum PLF
         def max_plf_rule(model, g, y):
             """
@@ -215,18 +204,24 @@ def build_model(model_data, scenario, price_scenario):
             ) <= model.Cap[g, y] * model.Other["MaxPLF", "Value"]#* 8.76 / 1000
             
         model.MaxPLF = Constraint(model.g, model.y, rule=max_plf_rule)
-
+        
         # Capacity Balance
         def capacity_balance_rule(model, g, y):
             """
             This function is used to set the CAPACITY BALANCE rule
             """
-            if y == 2021:
-                return model.Cap[g, y] == model.GenData[g]["CAPACITY"]- model.Retire[g, y]* model.GenData[g]["CAPACITY"]
-            else:
+            if y>2021:
                 return model.Cap[g, y] == model.Cap[g, y-1] - model.Retire[g, y] * model.GenData[g]["CAPACITY"]
-
+            else:
+                return Constraint.Skip
         model.CapBal = Constraint(model.g, model.y, rule=capacity_balance_rule)
+        
+        def capacity_balance_rule1(model,g):
+            return model.Cap[g, 2021] == model.GenData[g]["CAPACITY"]- model.Retire[g, 2021]* model.GenData[g]["CAPACITY"]
+        
+        model.CapBal1 = Constraint(model.g, rule=capacity_balance_rule1)
+
+        
         # Retire Plants
         def max_retire_rule(model, g):
             """
@@ -238,96 +233,71 @@ def build_model(model_data, scenario, price_scenario):
         model.MaxRetire = Constraint(model.g, rule=max_retire_rule)
 
         # Minimum Capacity
-        def min_capacity_rule(model, y, s):
+        def min_capacity_rule(model, y):
             """
             This function is used to set the MINIMUM CAPACITY rule
             """
+            #unit of Capacity is MW, unit of Price_gen is TWh
             return sum(
                 model.Cap[g, y] for g in model.g
-            ) >= model.Price_gen[y][s]* 1e6 / (8760 *0.75)
-            
-        model.MinCapacity = Constraint(model.y, model.s, rule=min_capacity_rule)
-
-        # 定义目标函数
+            ) >= model.Price_gen[y][scenario] *1000000 / (8760 * 0.75)
+          
+        model.MinCapacity = Constraint(model.y, rule=min_capacity_rule)
         
+        def min_capacity_rule1(model, y):
+            """
+            This function is used to set the MINIMUM CAPACITY rule
+            """
+            #unit of Capacity is MW, unit of Price_gen is TWh
+            return sum(
+                model.Cap[g, y] for g in model.g
+            ) <= model.Price_gen[y][scenario] *1000000 / (8760 * 0.74)
+          
+        model.MinCapacity1 = Constraint(model.y, rule=min_capacity_rule1)
+                # Fixing the generation and capacity of plants that have exceeded their maximum life
+        # 定义目标函数
+        # print("DR:::::")
+        # model.DR.pprint()
+        # model.Price_dur.pprint()
         def objective_rule(model):
             """
             This function is used to set the OBJECTIVE function
             """
-            return sum(
-                model.DR[y] * (
-                    - sum(
-                            (
-                                #Universal Expression for both BAU and AD
-                                #For BAU, use the capacity from GenData, as SetScenario = 1
-                                model.GenData[g]["CAPACITY"] * model.SetScenario[s] +
-                                #For AD, use the capacity from Cap, as SetScenario = 0
-                                model.Cap[g, y] * (1 - model.SetScenario[s])
-                            ) 
-                            *
-                            (
-                                #Universal Expression for both MarketPrice and AvgPPAPrice
-                                #For AvgPPAPrice, use the PPA from FC_PPA, as SetPriceScenario = 1
-                                model.FC_PPA[g, y] * (1- model.SetPriceScenario[p]) +
-                                #For MarketPrice, use 100, as SetPriceScenario = 0
-                                100 * model.SetPriceScenario[p]
-                            )
-                            for g in model.g for p in model.p for s in model.s #for p in model.p
-                        ) / 1e6 #Divide by 1e6 to convert from MWh to TWh
-                    + sum(
-                        ( 
-                            model.rev_unit[g, y, p] * model.Price_Dist1[y, p, t] - model.cost[g, y]
-                        ) 
-                        * model.Gen[g, y, t] * model.Price_dur[t] * 8.76 / 1000
-                        for g in model.g for t in model.t for p in model.p 
-                        )
-                )
-                for y in model.y
-                )
-        
-        '''
-        # 添加Flag参数
-        def flag_init(model, s):
-            return 1 if s == "BAU" else 0
-        model.Flag = Param(model.s, initialize=flag_init)
-        
-        # 添加Index参数（之前可能也缺少）
-        def index_init(model, p):
-            return 1 if p == "AvgPPAPrice" else 0
-        model.Index = Param(model.p, initialize=index_init)
-        # model.display()  
-        def objective_rule(model):
-            return sum(
-                model.DR[y] * (
-                    # 容量支付成本（负项）
-                    - sum(
-                        sum(
-                            sum(
-                                (model.GenData[g]["CAPACITY"] * model.Flag[s] + model.Cap[g,y] * (1-model.Flag[s])) *
-                                (model.FC_PPA[g,y] * model.Index[p] + 100 * (1-model.Index[p]))
-                                for s in model.s if value(model.SetScenario[s])
-                            )
-                            for g in model.g
-                        )
-                        for p in model.p
-                    ) / 1e6
-                    # 运营收入
-                    + sum(
-                        sum(
-                            sum(
-                                (model.rev_unit[g,y,p] * model.Price_Dist1[y,p,t] - model.cost[g,y]) *
-                                model.Gen[g,y,t] * model.Price_dur[t] * 8.76/1000
-                                for t in model.t
-                            )
-                            for p in model.p if value(model.SetPriceScenario[p])
-                        )
-                        for g in model.g
-                    )
-                )
-                for y in model.y
-            )
-        '''
-        model.Obj = Objective(rule=objective_rule, sense=maximize)
+            total_objective = 0
+
+            for y in model.y:
+                year_contribution =  0
+
+                # Calculate the first part of the objective function
+                capacity = 0
+                cost_per_mw= 0
+                cost = 0 
+                for g in model.g:
+                    if scenario == "AD":
+                        capacity = model.Cap[g, y]
+                    elif scenario == "BAU":
+                        capacity = model.GenData[g]["CAPACITY"]
+                
+                    if price_scenario == "AvgPPAPrice":
+                        cost_per_mw = model.FC_PPA[g, y]/1000
+                    elif price_scenario == "MarketPrice":
+                        cost_per_mw = 100
+                    cost+=cost_per_mw * capacity
+                # year_contribution += -(capacity_sum * price_sum)  # to billion dollars
+                
+                # Calculate the second part of the objective function
+                revenue_sum = 0
+                for g in model.g:
+                    for t in model.t:
+                        revenue_sum +=  (model.rev_unit[g, y, price_scenario] *model.Price_Dist1[y, price_scenario, t]- 
+                                        model.cost[g, y])* model.Gen[g, y, t] * model.Price_dur[t]
+                        # print(t, model.Gen[g, y, t].value, model.Price_dur[t],model.Price_Dist1[y, price_scenario, t])
+                # year_contribution += # to billion dollars
+                
+                total_objective += model.DR[y]*(revenue_sum*8760 -cost)
+            
+            return total_objective/1e6
+        model.Obj = Objective(rule=objective_rule,sense=maximize)
 
         return model
     
@@ -351,14 +321,14 @@ def setup_argument_parser():
                        choices=["BAU", "AD"],
                        help='Scenarios to run.')
     parser.add_argument('--price-scenarios', type=str, nargs='+',
-                       default=["MarketPrice","AvgPPAPrice"],
+                       default=["AvgPPAPrice", "MarketPrice"],
                        choices=["MarketPrice", "AvgPPAPrice"],
                        help='Price scenarios to run.')
     parser.add_argument('--input-file', type=str,
                        default="InputDataCoalUpdated.xlsx",
                        help='Path to input Excel file.')
     parser.add_argument('--output-file', type=str,
-                       default="CoalAnalysisResults_Scenarios.xlsx",
+                       default="Results.xlsx",
                        help='Path to output Excel file.')
     return parser
 
@@ -372,7 +342,13 @@ def initialize_solver(args):
     Returns:
     SolverFactory: Configured solver instance
     """
-    solver = SolverFactory(args.solver)
+    # solvername='glpk'
+
+    # solverpath_folder='C:/w64/glpk-4.65' #does not need to be directly on c drive
+
+    # solverpath_exe='C:/w64/glpk-4.65/w64/glpsol' 
+    
+    solver = SolverFactory(args.solver)#,executable=solverpath_exe)
     if solver is None:
         raise RuntimeError(f"Solver {args.solver} not available")
     
@@ -396,24 +372,51 @@ def run_scenario(model_data, scenario, price_scenario, solver):
     Returns:
     dict: Results for the scenario
     """
-    from model_check import check_plf_constraints, verify_cost_calculations,check_capacity_constraints,validate_retirement_economics
+    # from model_check import check_plf_constraints, verify_cost_calculations,check_capacity_constraints,validate_retirement_economics
     model = build_model(model_data, scenario, price_scenario)
 
     result = solver.solve(model, tee=True)
-    
+    # if scenario == "AD":
+    # debug_AD_scenario(model,scenario)
     # print("\nPost-solve checks:")    
     # check_capacity_constraints(model)
     # verify_cost_calculations(model)
     # check_plf_constraints(model)
     # validate_retirement_economics(model)
  
-    
+    # check_constraints(model)
+
     if (result.solver.status != SolverStatus.ok) or \
        (result.solver.termination_condition != TerminationCondition.optimal):
         raise RuntimeError(f"Solver failed for scenario {scenario}_{price_scenario}")
     
     return process_model_results(model)
 
+def check_constraints(model):
+    """验证关键约束是否被满足"""
+    print("\nConstraint Verification:")
+    
+    # 检查最小PLF约束
+    for g in model.g:
+        for y in model.y:
+            plf = sum(
+                model.Gen[g, y, t].value * model.Price_dur[t]
+                for t in model.t
+            ) / (model.Cap[g, y].value * 8760) if model.Cap[g, y].value > 0 else 0
+            
+            if model.Retire[g, y].value == 0 and plf<0.25:  # 只打印没有退役的电厂
+                print(f"Plant {g} Year {y} PLF: {plf:.2f}")
+    
+    # 检查容量约束
+    for y in model.y:
+        total_cap = sum(model.Cap[g, y].value for g in model.g)
+        required_cap = model.Price_gen[y][model.s[1]] * 1e6 / (8760 * 0.75)
+        if total_cap < required_cap:
+            print(f"Year {y} Capacity Check:")
+            print(f"  Total: {total_cap:.2f} MW")
+            print(f"  Required: {required_cap:.2f} MW")
+
+# 在求解后调用
 def main():
     """
     Main function to run the optimization model.
@@ -446,13 +449,12 @@ def main():
                 except Exception as e:
                     print(f"Error in scenario {key}: {str(e)}")
                     continue
-        
-        # Save results
-        try:
-            save_results_to_excel(results, args.output_file)
-            print(f"Results saved to {args.output_file}")
-        except Exception as e:
-            print(f"Error saving results: {str(e)}")
+                # Save results
+                try:
+                    save_results_to_excel(results, args.output_file)
+                    print(f"Results saved to {args.output_file}")
+                except Exception as e:
+                    print(f"Error saving results: {str(e)}")
             
     except Exception as e:
         print(f"Fatal error: {str(e)}")
@@ -460,6 +462,53 @@ def main():
     
     return 0
 
+def debug_AD_scenario(model,s):
+    """
+    打印AD场景的关键变量进行对比
+    """
+    print(f"\n{s} Scenario Debug Info:")
+    
+    # 1. 检查容量值
+    print("\nCapacity Values:")
+    for g in model.g:
+        for y in model.y:
+            print(f"Plant {g}, Year {y}:")
+            print(f"Cap: {model.Cap[g, y].value}")
+            print(f"GenData Capacity: {model.GenData[g]['CAPACITY']}")
+    
+    # 2. 检查收入计算
+    print("\nRevenue Calculation:")
+    for g in model.g:
+        for y in model.y:
+            for p in model.p:
+                revenue = sum(
+                    (
+                        model.rev_unit[g, y, p] * 
+                        model.Price_Dist1[y, p, t] - 
+                        model.cost[g, y]
+                    ) * model.Gen[g, y, t].value * 
+                    model.Price_dur[t] * 8.76 / 1000
+                    for t in model.t
+                )
+                print(f"Plant {g}, Year {y}, Price Scenario {p}:")
+                print(f"Revenue: {revenue}")
+    
+    # 3. 检查固定成本
+    print("\nFixed Cost Calculation:")
+    for g in model.g:
+        for y in model.y:
+            fixed_cost = sum(
+                (
+                    model.Cap[g, y].value * 
+                    (
+                        model.FC_PPA[g, y] * (1-model.SetPriceScenario[p])/1e3 +
+                        100 * model.SetPriceScenario[p]
+                    )
+                )
+                for p in model.p
+            ) / 1e6
+            print(f"Plant {g}, Year {y}:")
+            print(f"Fixed Cost: {fixed_cost}")
 
 if __name__ == "__main__":
     main()

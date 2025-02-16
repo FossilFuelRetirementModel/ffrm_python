@@ -19,29 +19,30 @@ class Config:
         'CoalPlantData': {
             'usecols': 'A:G',
             'skiprows': 2,
+            # 'nrows': ,
             'index_col': 0
         },
         'Price_Distribution': {
             'time_blocks': {
-                'usecols': 'A:K',
-                'skiprows': 2,
+                'usecols': 'B:K',
+                'skiprows': 1,
                 'nrows': 1
             },
             'price_dist': {
                 'usecols': 'A:K',
                 'skiprows': 2,
-                'nrows': 21,
+                # 'nrows': 21,
                 'index_col': 0
             },
             'price_dur': {
                 'usecols': 'N:O',
                 'skiprows': 2,
-                'nrows': 10,
+                # 'nrows': 10,
                 'index_col': 0
             }
         },
         'Price_Gen': {
-            'usecols': 'A:F',
+            'usecols': 'A:E',
             'skiprows': 2,
             'index_col': 0
         },
