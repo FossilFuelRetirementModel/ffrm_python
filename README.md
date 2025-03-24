@@ -153,4 +153,13 @@ The model includes **comprehensive error handling** for:
 
 ## Contact
 
-## Acknowledgments
+## Dependencies
+FFRM relies on numerous open-source community supported tools. Below is a list of the heavily used packages.
+
+Python
+All data processing is written in the Python programming language
+GLPK
+Open-source linear programming toolkit
+CBC
+Open-source linear program solver
+
