@@ -132,10 +132,20 @@ The script supports various command-line arguments:
 
 ## **Input Data Format**
 The input **Excel file** must contain the following sheets:
-- **Plant data**
+- **Plant data** 
+
+
+ | Plant Input Data           | Description |
+|---------------------|-------------|
+| `Generation Capacity` | Capacity of powerplants *(MW)*  |
+| `Variable Costs`| This consists of operational, maintenance, and fuel costs  *(USD/MWh)*  |
+| `Annual Fixed Costs` | This details annual fixed costs for the original PPA period only  |
+| `Market Price` | Dual Values (shadow prices) from models such as OSeMOSYS if this information isn’t available open source  |
+| `Commission Year ` | The start year of a power plant; the year when the plant is connected to the grid and starts generating electricity  | 
+
 - **Time blocks**
 - **Price scenarios**
-- *[Add other required sheets]*
+ 
 
 ## **Output Format**
 The model generates an **Excel file** containing:
