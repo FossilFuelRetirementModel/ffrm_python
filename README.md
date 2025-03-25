@@ -157,12 +157,17 @@ The model includes **comprehensive error handling** for:
 - **Scenario processing errors**
 - **Result saving issues**
 
-## Contributing
+## Contributing to FFRM
+We are very grateful that you are looking into how you can contribute to FFRM.
 
-[contribution guidelines]
+Contributing to FFRM is open to everyone who is interested, and we adopt an inclusive and open policy which is described in our code of conduct. If you have general questions or comments on the project, please submit them to our community discussion board or our Discord forum is a great place to ask general FFRM questions.
 
-## Contact
-
+If you are experiencing issues please submit a new issue. 
+ 
+## Change Log
+Version 1.0
+Initial release version 
+ 
 ## Dependencies
 FFRM relies on numerous open-source community supported tools. Below is a list of the heavily used packages.
 
