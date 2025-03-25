@@ -177,3 +177,5 @@ FFRM relies on numerous open-source community supported tools. Below is a list o
 
 [CBC](https://github.com/coin-or/Cbc):Open-source linear program solver
 
+## Key publications
+Suski, A., Hong, L., and Chattopadhyay, D. (2022) 'Modeling coal plant stranded costs for decarbonization pathway analyses', Energy for Sustainable Development, 71, pp. 480-489. Available at: https://www.sciencedirect.com/science/article/pii/S0973082622002022 
