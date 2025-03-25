@@ -11,9 +11,12 @@ The model is designed to complement more detailed long-term capacity expansion m
 A model was developed by the [World Bank](https://www.worldbank.org/ext/en/home) to assess stranded cost under various defined scenarios. The model defines stranded cost as the difference in  plant revenue. In particular, the foregone revenue of plants that reach the end of their economic life in the decarbonisation scenarios, relative to the baseline scenario.
  
 ## Aims
-● The model is currently run for two different decarbonisation scenarios. These scenarios provide the basis for the foregone revenue calculation.
-● The difference between the base level and the decarbonisation, specifically the lost profits from decarbonisatio
-
+The objective function of the model is set as maximisation of the net revenue at the fossil fuel power plants fleet, based on either: 
+- Financial analysis of Power Purchase Agreements (PPAs),  where these are in place with known contractual terms 
+- Or economic optimization of the market price, where marginal costs derived from a least-cost planning are 
+ 
+The difference in net revenue between the BAU and a decarbonization scenario is used as a measure of foregone revenue.
+ 
 ## Features
 
 - Multi-scenario analysis (Business As Usual, Accelerated Decarbonisation)
