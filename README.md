@@ -1,21 +1,22 @@
 # Welcome to the FFRM Documentation
 
-Fossil Fuel Retirement Model (FFRM) is an open-source python based fossil fuel retirement model. It was originally developed by the World Bank as a coal retirement optimisation model. It can be used to estimate the stranded cost associated with retiring fossil fuel power plants.
+Fossil Fuel Retirement Model (FFRM) is an open-source python based fossil fuel retirement model. It was originally developed by the [World Bank](https://www.worldbank.org/ext/en/home) as a coal retirement optimisation model. It can be used to estimate the stranded cost associated with retiring fossil fuel power plants.
 
 The model utilises a Pyomo-based optimisation framework to endogenously calculate stranded cost taking into consideration commercial and market issues. It uses projections for capacity and production of fossil fuel power plants to explore their retirement profile under two types of price regimes, PPA and market price regime to assess at what capacity does fossil fuel power plants become stranded and explores how this influences total compensation for stranded plants. 
 
-The model is designed to complement more detailed long-term capacity expansion models, such as OSeMOSYS, but can also be used as a standalone retirement model.  
+The model is designed to complement more detailed long-term capacity expansion models, such as [OSeMOSYS](http://www.osemosys.org)
+, but can also be used as a standalone retirement model.  
 
 ## Background
-A model developed by the World Bank, whereby it endogenously calculates stranded assets taking into consideration commercial and market issues.
-
+A model was developed by the [World Bank](https://www.worldbank.org/ext/en/home) to assess stranded cost under various defined scenarios. The model defines stranded cost as the difference in  plant revenue. In particular, the foregone revenue of plants that reach the end of their economic life in the decarbonisation scenarios, relative to the baseline scenario.
+ 
 ## Aims
 ● The model is currently run for two different decarbonisation scenarios. These scenarios provide the basis for the foregone revenue calculation.
 ● The difference between the base level and the decarbonisation, specifically the lost profits from decarbonisatio
 
 ## Features
 
-- Multi-scenario analysis (BAU, AD)
+- Multi-scenario analysis (Business As Usual, Accelerated Decarbonisation)
 - Multiple price scenario support (Market Price, Average PPA Price)
 - Flexible solver options (Gurobi, CPLEX, GLPK, CBC)
 - Comprehensive result processing and Excel output
@@ -156,13 +157,9 @@ The model includes **comprehensive error handling** for:
 ## Dependencies
 FFRM relies on numerous open-source community supported tools. Below is a list of the heavily used packages.
 
-Python
+[Python](https://www.python.org/): All data processing is written in the Python programming language
 
-All data processing is written in the Python programming language
+[GLPK](https://www.gnu.org/software/glpk/): Open-source linear programming toolkit
 
-GLPK
-Open-source linear programming toolkit
-
-CBC
-Open-source linear program solver
+[CBC](https://github.com/coin-or/Cbc):Open-source linear program solver
 
