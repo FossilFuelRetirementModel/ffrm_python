@@ -13,8 +13,8 @@ A model was developed by the [World Bank](https://www.worldbank.org/ext/en/home)
 ## Aims
 The objective function of the model is set as maximisation of the net revenue at the fossil fuel power plants fleet, based on either: 
 - Financial analysis of Power Purchase Agreements (PPAs),  where these are in place with known contractual terms 
-- Or economic optimization of the market price, where marginal costs derived from a least-cost planning are 
- 
+- Or economic optimization of the market price, where marginal costs derived from a least-cost planning are  
+
 The difference in net revenue between the BAU and a decarbonization scenario is used as a measure of foregone revenue.
  
 ## Features
@@ -132,9 +132,7 @@ The script supports various command-line arguments:
 
 ## **Input Data Format**
 The input **Excel file** must contain the following sheets:
-- **Plant data** 
-
-
+ 
  | Plant Input Data           | Description |
 |---------------------|-------------|
 | `Generation Capacity` | Capacity of powerplants *(MW)*  |
@@ -142,11 +140,9 @@ The input **Excel file** must contain the following sheets:
 | `Annual Fixed Costs` | This details annual fixed costs for the original PPA period only  |
 | `Market Price` | Dual Values (shadow prices) from models such as OSeMOSYS if this information isn’t available open source  |
 | `Commission Year ` | The start year of a power plant; the year when the plant is connected to the grid and starts generating electricity  | 
-
-- **Time blocks**
-- **Price scenarios**
+| `Time blocks ` | Duration of the 10 time-blocks as percentage of hours in the year, reflecting average Market Prices for each of the time-blocks based on the model period *(USD/MWh)* |  
+| `Generation targets` | Annual generation targets for defined scenario *(TWh)*|  
  
-
 ## **Output Format**
 The model generates an **Excel file** containing:
 - **Total generation** by plant and year
