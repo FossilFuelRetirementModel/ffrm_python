@@ -145,10 +145,10 @@ The input **Excel file** must contain the following sheets:
  
 ## **Output Format**
 The model generates an **Excel file** containing:
-- **Total generation** by plant and year
-- **Net revenue calculations**
-- **Capacity data**
-- **Retirement schedules**
+- Total generation by plant and year
+- Net revenue calculations
+- Capacity data
+- Retirement schedules
 
 ## **Error Handling**
 The model includes **comprehensive error handling** for:
