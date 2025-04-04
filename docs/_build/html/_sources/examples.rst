@@ -38,19 +38,19 @@ The input **Excel file** must contain the following sheets:
 
    * - **Sheet Name**
      - **Description**
-   * - `Generation Capacity`
-     - Capacity of powerplants *(MW)*
-   * - `Variable Costs`
-     - Operational, maintenance, and fuel costs *(USD/MWh)*
-   * - `Annual Fixed Costs`
+   * - Generation Capacity
+     - Capacity of powerplants  *(MW)* 
+   * - Variable Costs
+     - Operational, maintenance, and fuel costs  *(USD/MWh)* 
+   * - Annual Fixed Costs
      - Annual fixed costs for the original PPA period only
-   * - `Market Price`
+   * - Market Price
      - Dual values (shadow prices) from models like OSeMOSYS if this information isn’t open source
-   * - `Commission Year`
+   * - Commission Year
      - The start year when a plant connects to the grid and starts generating electricity
-   * - `Time blocks`
+   * - Time blocks
      - Duration of the 10 time blocks, as a percentage of hours in the year, reflecting average Market Prices for each time block *(USD/MWh)*
-   * - `Generation targets`
+   * - Generation targets
      - Annual generation targets for defined scenarios *(TWh)*
 
 Output Format
@@ -58,7 +58,7 @@ Output Format
 The model generates an **Excel file** containing:
 
 .. code-block:: text
-    
+
     - Total generation by plant and year
     - Net revenue calculations
     - Capacity data

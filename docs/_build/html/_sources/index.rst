@@ -40,15 +40,14 @@ Contents
  
    welcome <welcome>
    Install <install>
-   Examples <examples>
-   KeyPublications <KeyPublications>
-   Contributing <Contributing>
+   Examples <examples> 
+   Contributors <contributors>
    License <License>  
    ChangeLog <ChangeLog>
+   KeyPublications <KeyPublications>
 
 Indices and tables
 ==================
 
-* :ref:`genindex`
-* :ref:`modindex`
+* :ref:`genindex` 
 * :ref:`search`
