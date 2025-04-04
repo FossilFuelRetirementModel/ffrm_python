@@ -41,7 +41,7 @@ Contents
    welcome <welcome>
    Install <install>
    Examples <examples>
-   CoreFunctionality <CoreFunctionality>
+   KeyPublications <KeyPublications>
    Contributing <Contributing>
    License <License>  
    ChangeLog <ChangeLog>

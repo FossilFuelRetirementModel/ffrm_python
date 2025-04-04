@@ -43,7 +43,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'examples';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Core Functionality" href="CoreFunctionality.html" />
+    <link rel="next" title="Key Publications" href="KeyPublications.html" />
     <link rel="prev" title="Getting Started" href="install.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -157,7 +157,7 @@
         <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="install.html">Install</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="CoreFunctionality.html">CoreFunctionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="KeyPublications.html">KeyPublications</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="License.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ChangeLog.html">ChangeLog</a></li>
@@ -286,7 +286,9 @@ document.write(`
   </button>
 `);
 </script>
-
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
 </div></div>
       
     </div>
@@ -302,6 +304,19 @@ document.write(`
     <div id="print-main-content">
         <div id="jb-print-toc">
             
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#run-with-specific-solver-options">Run with specific solver options</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#run-multiple-scenarios">Run multiple scenarios</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#specify-custom-input-output-files">Specify custom input/output files</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input-data-format">Input Data Format</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output-format">Output Format</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#error-handling">Error Handling</a></li>
+</ul>
+            </nav>
         </div>
     </div>
 </div>
@@ -313,31 +328,86 @@ document.write(`
                   
   <section id="examples">
 <span id="id1"></span><h1>Examples<a class="headerlink" href="#examples" title="Link to this heading">#</a></h1>
-<blockquote>
-<div><p>### <strong>Examples</strong></p>
-</div></blockquote>
-<ol class="arabic simple" start="7">
-<li><p><strong>Run with specific solver options:</strong>
-<a href="#id2"><span class="problematic" id="id3">``</span></a><a href="#id4"><span class="problematic" id="id5">`</span></a>bash
-python model.py –solver cplex –solver-options threads=4 timelimit=3600</p></li>
-</ol>
-<p>python model.py –scenarios BAU AD –price-scenarios MarketPrice AvgPPAPrice</p>
-<p>python model.py –input-file data/custom_input.xlsx –output-file results/output.xlsx</p>
-<p>### Explanation:
-1. <strong>Code blocks</strong>:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>The code blocks (e.g., bash commands) are wrapped in triple backticks (<a href="#id6"><span class="problematic" id="id7">``</span></a><a href="#id8"><span class="problematic" id="id9">``</span></a>) for proper syntax highlighting.</p></li>
-</ul>
-</div></blockquote>
-<ol class="arabic simple" start="2">
-<li><p><strong>Tables</strong>:
-- I’ve formatted the table using <cite>+</cite> signs to separate columns. The <cite>|</cite> character is used to separate individual columns.
-- Each table entry is clearly defined in the columns.</p></li>
-<li><p><strong>Headings</strong>:
-- The headings are correctly formatted using <cite>##</cite> and <cite>###</cite> depending on the depth you need.</p></li>
-</ol>
-<p>This formatting should make it easy to read and well-structured in Sphinx-generated documentation. Let me know if you need further modifications!</p>
+<section id="run-with-specific-solver-options">
+<h2>Run with specific solver options<a class="headerlink" href="#run-with-specific-solver-options" title="Link to this heading">#</a></h2>
+<p>Run the following command to specify solver options:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>model.py<span class="w"> </span>--solver<span class="w"> </span>cplex<span class="w"> </span>--solver-options<span class="w"> </span><span class="nv">threads</span><span class="o">=</span><span class="m">4</span><span class="w"> </span><span class="nv">timelimit</span><span class="o">=</span><span class="m">3600</span>
+</pre></div>
+</div>
+</section>
+<section id="run-multiple-scenarios">
+<h2>Run multiple scenarios<a class="headerlink" href="#run-multiple-scenarios" title="Link to this heading">#</a></h2>
+<p>Run the following command to specify multiple scenarios:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>model.py<span class="w"> </span>--scenarios<span class="w"> </span>BAU<span class="w"> </span>AD<span class="w"> </span>--price-scenarios<span class="w"> </span>MarketPrice<span class="w"> </span>AvgPPAPrice
+</pre></div>
+</div>
+</section>
+<section id="specify-custom-input-output-files">
+<h2>Specify custom input/output files<a class="headerlink" href="#specify-custom-input-output-files" title="Link to this heading">#</a></h2>
+<p>Run the following command to specify custom input/output files:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>model.py<span class="w"> </span>--input-file<span class="w"> </span>data/custom_input.xlsx<span class="w"> </span>--output-file<span class="w"> </span>results/output.xlsx
+</pre></div>
+</div>
+</section>
+<section id="input-data-format">
+<h2>Input Data Format<a class="headerlink" href="#input-data-format" title="Link to this heading">#</a></h2>
+<p>The input <strong>Excel file</strong> must contain the following sheets:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 80.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Sheet Name</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><cite>Generation Capacity</cite></p></td>
+<td><p>Capacity of powerplants <em>(MW)</em></p></td>
+</tr>
+<tr class="row-odd"><td><p><cite>Variable Costs</cite></p></td>
+<td><p>Operational, maintenance, and fuel costs <em>(USD/MWh)</em></p></td>
+</tr>
+<tr class="row-even"><td><p><cite>Annual Fixed Costs</cite></p></td>
+<td><p>Annual fixed costs for the original PPA period only</p></td>
+</tr>
+<tr class="row-odd"><td><p><cite>Market Price</cite></p></td>
+<td><p>Dual values (shadow prices) from models like OSeMOSYS if this information isn’t open source</p></td>
+</tr>
+<tr class="row-even"><td><p><cite>Commission Year</cite></p></td>
+<td><p>The start year when a plant connects to the grid and starts generating electricity</p></td>
+</tr>
+<tr class="row-odd"><td><p><cite>Time blocks</cite></p></td>
+<td><p>Duration of the 10 time blocks, as a percentage of hours in the year, reflecting average Market Prices for each time block <em>(USD/MWh)</em></p></td>
+</tr>
+<tr class="row-even"><td><p><cite>Generation targets</cite></p></td>
+<td><p>Annual generation targets for defined scenarios <em>(TWh)</em></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="output-format">
+<h2>Output Format<a class="headerlink" href="#output-format" title="Link to this heading">#</a></h2>
+<p>The model generates an <strong>Excel file</strong> containing:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>- Total generation by plant and year
+- Net revenue calculations
+- Capacity data
+- Retirement schedules
+</pre></div>
+</div>
+</section>
+<section id="error-handling">
+<h2>Error Handling<a class="headerlink" href="#error-handling" title="Link to this heading">#</a></h2>
+<p>The model includes <strong>comprehensive error handling</strong> for:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>- Missing input files
+- Invalid solver configurations
+- Scenario processing errors
+- Result saving issues
+</pre></div>
+</div>
+</section>
 </section>
 
 
@@ -361,11 +431,11 @@ python model.py –solver cplex –solver-options threads=4 timelimit=3600</p></
       </div>
     </a>
     <a class="right-next"
-       href="CoreFunctionality.html"
+       href="KeyPublications.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Core Functionality</p>
+        <p class="prev-next-title">Key Publications</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -375,6 +445,26 @@ python model.py –solver cplex –solver-options threads=4 timelimit=3600</p></
             </div>
             
             
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#run-with-specific-solver-options">Run with specific solver options</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#run-multiple-scenarios">Run multiple scenarios</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#specify-custom-input-output-files">Specify custom input/output files</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input-data-format">Input Data Format</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output-format">Output Format</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#error-handling">Error Handling</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
               
             
           </div>
