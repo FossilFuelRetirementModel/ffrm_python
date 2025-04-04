@@ -38,7 +38,7 @@ Contents
 .. toctree::
    :maxdepth: 1
  
-
+   welcome <welcome>
    Install <install>
    Examples <examples>
    CoreFunctionality <CoreFunctionality>
