@@ -26,3 +26,10 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 html_theme = 'sphinx_book_theme'
 html_static_path = ['_static']
+html_logo = '_static/FFRM_2.png'
+# Set a lower level of ToC depth
+toc_depth = 2  # or whatever depth works for you
+
+# Exclude specific files or sections
+exclude_patterns = ['**/section-to-ignore.rst', '**/another-section.rst']
+
