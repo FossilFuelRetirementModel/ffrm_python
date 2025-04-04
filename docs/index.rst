@@ -9,9 +9,9 @@
 Welcome to the documentation of ``FFRM``!
 ===========================================
 
-**F**\ossil **F**\uel **R**\etirement **M**\odel (FFRM) is an open-source Python-based fossil fuel retirement model. It was originally developed by the World Bank as a coal retirement optimisation model. It can be used to estimate the stranded cost associated with retiring fossil fuel power plants.
+**F**\ossil **F**\uel **R**\etirement **M**\odel (FFRM) is an open-source Python-based fossil fuel retirement model. It was originally developed by the `World Bank <https://www.worldbank.org/>`_ as a coal retirement optimisation model. It can be used to estimate the stranded cost associated with retiring fossil fuel power plants.
 
-The model utilises a `Pyomo-based optimisation framework <http://www.pyomo.org>`_ to endogenously calculate stranded cost, taking into consideration commercial and market issues. It uses projections for capacity and production of fossil fuel power plants to explore their retirement profile under two types of price regimes: PPA and market price regime. The model assesses at what capacity fossil fuel power plants become stranded and explores how this influences total compensation for stranded plants.
+The model utilises a `Pyomo-based optimisation framework <http://www.pyomo.org>`_ to endogenously calculate stranded cost, taking into consideration commercial and market issues. It uses projections for capacity and production of fossil fuel power plants to explore their retirement profile under two types of price regimes: **PPA** and **Market Price regime**. The model assesses at what capacity fossil fuel power plants become stranded and explores how this influences total compensation for stranded plants.
 
 The model is designed to complement more detailed long-term capacity expansion models, such as OSeMOSYS, but can also be used as a standalone retirement model.
 
@@ -43,8 +43,8 @@ Contents
    Examples <examples> 
    Contributors <contributors>
    License <License>  
-   ChangeLog <ChangeLog>
-   KeyPublications <KeyPublications>
+   Change Log <ChangeLog>
+   Key Publications <KeyPublications>
 
 Indices and tables
 ==================
