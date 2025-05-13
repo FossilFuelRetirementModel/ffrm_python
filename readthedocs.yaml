@@ -3,6 +3,13 @@ version: 2
 # Specify the Python version you want to use
 python:
   version: "3.10"
+  install:
+    - requirements: docs/requirements.txt
+
+# Specify the operating system and image for your build environment
+build:
+  os: ubuntu-22.04  # You can also use other supported OS like ubuntu-20.04
+  image: latest      # You can specify a particular image if needed
 
 # Ask RTD to install the OS tree package
 apt_packages:
@@ -10,7 +17,4 @@ apt_packages:
 
 sphinx:
   configuration: docs/conf.py
-
-python:
-  install:
-    - requirements: docs/requirements.txt
+ 
