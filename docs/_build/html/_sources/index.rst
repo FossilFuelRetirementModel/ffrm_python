@@ -43,7 +43,7 @@ Contents
 .. toctree::
    :maxdepth: 1
  
-   welcome <welcome>
+   
    Install <install>
    Examples <examples> 
    Contributors <contributors>
