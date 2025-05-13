@@ -1,23 +1,23 @@
 version: 2
 
-# Specify the Python version you want to use
+# Specify the Python version to use in the build environment
 python:
   version: "3.10"
-
-# Ask RTD to install the OS tree package
-apt_packages:
-  - tree
-
-# Specify the build tools required for Sphinx
-build:
-  tools:
-    - sphinx
-
-# Specify the Sphinx configuration file
-sphinx:
-  configuration: docs/conf.py
 
 # Install dependencies from requirements.txt
 python:
   install:
     - requirements: docs/requirements.txt
+
+# Specify the build environment image
+build:
+  image: "latest"
+
+# Ask RTD to install the OS tree package (optional)
+apt_packages:
+  - tree
+
+# Specify the Sphinx configuration file
+sphinx:
+  configuration: docs/conf.py
+ 
