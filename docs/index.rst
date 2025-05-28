@@ -25,7 +25,7 @@ Background
 
 A model was developed by the World Bank to assess stranded cost under various defined scenarios. 
 The model defines stranded cost as the difference in plant revenue. In particular, the foregone revenue 
-of plants that reach the end of their economic life in the decarbonisation scenarios, relative to the baseline scenario. A recent application of the tool by Suski et al (2022) can be found `here <https://www.sciencedirect.com/science/article/abs/pii/S0973082622002022>`_, in which a GAMS-based version of the FFRM was applied to the power sectors of India and the Philippines to calculate the stranded cost implications of early retirement of its coal fleet.
+of plants that reach the end of their economic life in the decarbonisation scenarios, relative to the baseline scenario. A recent application of the tool by Suski et al (2022) can be found `here <https://www.sciencedirect.com/science/article/abs/pii/S0973082622002022>`_, in which a GAMS-based version of FFRM was applied to the power sectors of India and the Philippines to calculate the stranded cost implications of early retirement of its coal fleet.
 
 Aims
 ====
@@ -45,6 +45,7 @@ Contents
  
    
    Install <install>
+   Structure <equations>
    Examples <examples> 
    Contributors <contributors>
    License <License>  

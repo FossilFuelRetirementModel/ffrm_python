@@ -15,11 +15,11 @@ To clone the repository and navigate into it, run:
 
 .. code-block:: bash
 
-   git clone [repository-url]
-   cd [repository-name]
+   git clone [https://github.com/FossilFuelRetirementModel/ffrm_python.git]
+   cd [ffrm_python]
 
 .. _ignore:
-Create and activate a virtual environment
+Create and activate the FFRM Python environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 On **Linux/Mac**, use:

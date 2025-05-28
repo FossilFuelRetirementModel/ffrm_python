@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Contributors and Partners &#8212; FFRM 1.0 documentation</title>
+    <title>Structure of FFRM &#8212; FFRM 1.0 documentation</title>
   
   
   
@@ -40,11 +40,13 @@
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'contributors';</script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["\\(", "\\)"]], "displayMath": [["\\[", "\\]"]]}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'equations';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="License" href="License.html" />
-    <link rel="prev" title="Examples" href="examples.html" />
+    <link rel="next" title="Examples" href="examples.html" />
+    <link rel="prev" title="Getting Started" href="install.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -156,10 +158,9 @@
     <div class="bd-toc-item navbar-nav active">
         <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="install.html">Install</a></li>
-<li class="toctree-l1"><a class="reference internal" href="equations.html">Structure of FFRM</a></li>
-
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Structure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributors.html">Contributors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="License.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ChangeLog.html">Change Log</a></li>
 <li class="toctree-l1"><a class="reference internal" href="KeyPublications.html">Key Publications</a></li>
@@ -217,7 +218,7 @@
       
       
       
-      <li><a href="_sources/contributors.rst" target="_blank"
+      <li><a href="_sources/equations.rst" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -299,7 +300,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Contributors and Partners</h1>
+    <h1>Structure of FFRM</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -313,26 +314,30 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="contributors-and-partners">
-<span id="contributors"></span><h1>Contributors and Partners<a class="headerlink" href="#contributors-and-partners" title="Link to this heading">#</a></h1>
-<ul class="simple">
-<li><p>Zixuan Liu <a class="github reference external" href="https://github.com/zixuan-liu-17">zixuan-liu-17</a></p></li>
-<li><p>Simone Osei-Owusu <a class="github reference external" href="https://github.com/SimoneOseiOwusu">SimoneOseiOwusu</a></p></li>
-<li><p>Hannah Luscombe <a class="github reference external" href="https://github.com/hannahluscombe">hannahluscombe</a></p></li>
-<li><p>Naomi Tan <a class="github reference external" href="https://github.com/naomiyct">naomiyct</a></p></li>
-<li><p>Adam Suski <a class="github reference external" href="https://github.com/adamsuski">adamsuski</a></p></li>
-</ul>
-<p>We are very grateful that you are looking into how you can contribute to FFRM.</p>
-<p>Contributing to FFRM is open to everyone who is interested, and we adopt an inclusive and open policy. If you have general questions or if you are experiencing issues, please submit them to our community discussion board or our <a class="reference external" href="https://forum.u4ria.org">Energy Modelling Community Discussion Forum</a></p>
-<div class="pst-scrollable-table-container"><table class="table table-center">
-<tbody>
-<tr class="row-odd"><td><a class="reference external image-reference" href="https://climatecompatiblegrowth.com"><img alt="CCG logo" class="align-center" src="_images/CCG.png" style="height: 100px;" />
-</a>
-</td>
-</tr>
-</tbody>
-</table>
-</div>
+  <section id="structure-of-ffrm">
+<span id="equations"></span><h1>Structure of FFRM<a class="headerlink" href="#structure-of-ffrm" title="Link to this heading">#</a></h1>
+<p>The structure of the FFRM comprises eight core mathematical equations used to determine the foregone net revenue of fossil fuel fleets. This is analysed under two regimes: the <strong>PPA</strong> regime, which is based on commercially negotiated power purchase agreements or the <strong>market-based</strong> regime, which reflects projected hourly spot prices that are determined exogenously.</p>
+<p><strong>Equation 1</strong></p>
+<div class="math notranslate nohighlight">
+\[NR = \left\{
+    \sum_{y,g,t,s,p} (P_{y,p,t} - Cost_{g,y}) \cdot Gen_{g,y,t,s,p}
+    - \sum_{y,g,t,s,p} FC_{g,y} \cdot \left(Capacity_g - RetireC_{g,y,s,p}\right)
+\right.\]</div>
+<p><strong>Equation 2</strong></p>
+<div class="math notranslate nohighlight">
+\[\frac{NR'_{g,s',p'} - NR_{g,s,p}}{NR'_{g,s',p'}} \leq \alpha\]</div>
+<p><strong>Equation 3</strong></p>
+<div class="math notranslate nohighlight">
+\[\sum_t \sum_g Gen_{g,y,t,s,p} \cdot H_t = Target_{y,s,p}\]</div>
+<p><strong>Equation 4</strong></p>
+<div class="math notranslate nohighlight">
+\[\sum_t Gen_{g,y,t,s,p} \cdot H_t \geq MinGen_g\]</div>
+<p><strong>Equation 5</strong></p>
+<div class="math notranslate nohighlight">
+\[\sum_t Gen_{g,y,t,s,p} \cdot H_t \leq MaxGen_g\]</div>
+<p><strong>Equation 6</strong></p>
+<div class="math notranslate nohighlight">
+\[Cap_{g,y,s,p} = Cap_{g,y-1,s,p} - Retire_{g,y,s,p} \cdot Capacity_g\]</div>
 </section>
 
 
@@ -347,20 +352,20 @@ document.write(`
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="examples.html"
+       href="install.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Examples</p>
+        <p class="prev-next-title">Getting Started</p>
       </div>
     </a>
     <a class="right-next"
-       href="License.html"
+       href="examples.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">License</p>
+        <p class="prev-next-title">Examples</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
