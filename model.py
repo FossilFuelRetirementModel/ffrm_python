@@ -255,7 +255,7 @@ def build_model(model_data, scenario, price_scenario):
           
         model.MinCapacity1 = Constraint(model.y, rule=min_capacity_rule1)
                 # Fixing the generation and capacity of plants that have exceeded their maximum life
-        # 定义目标函数
+        # Define objective function
         # print("DR:::::")
         # model.DR.pprint()
         # model.Price_dur.pprint()
@@ -396,7 +396,7 @@ def check_constraints(model):
     """验证关键约束是否被满足"""
     print("\nConstraint Verification:")
     
-    # 检查最小PLF约束
+    # Check minimum PLF constraints
     for g in model.g:
         for y in model.y:
             plf = sum(
@@ -407,7 +407,7 @@ def check_constraints(model):
             if model.Retire[g, y].value == 0 and plf<0.25:  # 只打印没有退役的电厂
                 print(f"Plant {g} Year {y} PLF: {plf:.2f}")
     
-    # 检查容量约束
+    # Check capacity constraints
     for y in model.y:
         total_cap = sum(model.Cap[g, y].value for g in model.g)
         required_cap = model.Price_gen[y][model.s[1]] * 1e6 / (8760 * 0.75)
@@ -416,7 +416,6 @@ def check_constraints(model):
             print(f"  Total: {total_cap:.2f} MW")
             print(f"  Required: {required_cap:.2f} MW")
 
-# 在求解后调用
 def main():
     """
     Main function to run the optimization model.
@@ -468,7 +467,7 @@ def debug_AD_scenario(model,s):
     """
     print(f"\n{s} Scenario Debug Info:")
     
-    # 1. 检查容量值
+    # 1. Check capacity values
     print("\nCapacity Values:")
     for g in model.g:
         for y in model.y:
@@ -476,7 +475,7 @@ def debug_AD_scenario(model,s):
             print(f"Cap: {model.Cap[g, y].value}")
             print(f"GenData Capacity: {model.GenData[g]['CAPACITY']}")
     
-    # 2. 检查收入计算
+    # 2. Check revenue calculation
     print("\nRevenue Calculation:")
     for g in model.g:
         for y in model.y:
@@ -493,7 +492,7 @@ def debug_AD_scenario(model,s):
                 print(f"Plant {g}, Year {y}, Price Scenario {p}:")
                 print(f"Revenue: {revenue}")
     
-    # 3. 检查固定成本
+    # 3. Check fixed cost
     print("\nFixed Cost Calculation:")
     for g in model.g:
         for y in model.y:
