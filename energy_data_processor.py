@@ -32,9 +32,27 @@ def initialize_model_data(data: dict) -> ModelData:
     Returns:
         ModelData object containing all model structures
     """
+    # Validate data for duplicate indices and remove nonsense indices like " " or nan (at the end)
+    for key, df in data.items():
+        if isinstance(df, pd.DataFrame):
+            # Remove nonsense indices: empty strings or NaN at the end
+            nonsense_indices = df.index[(df.index == " ") | (pd.isna(df.index))]
+            if len(nonsense_indices) > 0:
+                print(f"Removing nonsense indices from {key}: {list(nonsense_indices)}")
+                df = df[~df.index.isin(nonsense_indices)]
+                data[key] = df  # update in-place
+
+            if df.index.duplicated().any():
+                print(f"Warning: Duplicate indices found in {key}")
+                print("Duplicate indices:", df.index[df.index.duplicated()].tolist())
+                # Remove duplicates by keeping the first occurrence
+                # data[key] = df[~df.index.duplicated(keep='first')]
+    
     print(data['price_distribution'])
     print(data["price_dur"])
     print(data['other'],data['fc_ppa'])
+    print(data['coal_plant_data'],data['coal_plant_data'].index.tolist())
+    
     return ModelData(
         years=Config.YEARS,
         plants=data['coal_plant_data'].index.tolist(),  # Assuming plant ID is index
