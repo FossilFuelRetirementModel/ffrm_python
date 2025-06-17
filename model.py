@@ -102,18 +102,26 @@ def build_model(model_data, scenario, price_scenario):
         
         def initialize_life(model, g):
             """Calculate the life of the plant based on its start year."""
-            return 2021 - model.GenData[g]["STARTYEAR"]
+            start_year = model.GenData[g]["STARTYEAR"]
+            if start_year > 2021:
+                return 0  # For plants that haven't started yet
+            return 2021 - start_year
 
         model.life = Param(model.g, initialize=initialize_life, domain=NonNegativeIntegers)
         
         def initialize_cost(model, g, y):
             """Initialize the cost parameter based on the plant's age."""
+            # Get cost value, handling both 'COST' and 'VARIABLE COST' column names
+            cost = model.GenData[g].get("COST") or model.GenData[g].get("VARIABLE COST")
+            if cost is None:
+                raise ValueError(f"Neither 'COST' nor 'VARIABLE COST' found for plant {g}")
+            
             if model.life[g] < 10:
-                return model.GenData[g]["COST"] * (1 + model.Other["CostEsc_Lessthan10", "Value"]) ** (y - 2021)
+                return cost * (1 + model.Other["CostEsc_Lessthan10", "Value"]) ** (y - 2021)
             elif model.life[g] <= 30:
-                return model.GenData[g]["COST"] * (1 + model.Other["CostEsc_10-30years", "Value"]) ** (y - 2021)
+                return cost * (1 + model.Other["CostEsc_10-30years", "Value"]) ** (y - 2021)
             else:
-                return model.GenData[g]["COST"] * (1 + model.Other["CostEsc_30plus", "Value"]) ** (y - 2021)
+                return cost * (1 + model.Other["CostEsc_30plus", "Value"]) ** (y - 2021)
 
         model.cost = Param(model.g, model.y, initialize=initialize_cost, domain=NonNegativeReals)
 
@@ -124,10 +132,13 @@ def build_model(model_data, scenario, price_scenario):
             This function is used to set the bounds for the 'generation' variable, model.Gen
             '''
             max_life = model.Other["MaxLife", "Value"]
-            if (y + model.life[g] - 2021) > max_life:
-                return (0, 0)  
+            start_year = model.GenData[g]["STARTYEAR"]
+            
+            # If plant hasn't started yet or has exceeded max life, set generation to 0
+            if y < start_year or (y + model.life[g] - 2021) > max_life:
+                return (0, 0)
             else:
-                return (0, model.GenData[g]["CAPACITY"])  
+                return (0, model.GenData[g]["CAPACITY"])
 
         model.Gen = Var(model.g, model.y, model.t, domain=NonNegativeReals,bounds=calculate_generation_bounds)
         model.Cap = Var(model.g, model.y, domain=NonNegativeReals)
@@ -302,7 +313,9 @@ def build_model(model_data, scenario, price_scenario):
         return model
     
     except Exception as e:
-        raise RuntimeError(f"Error creating optimization model: {str(e)}")
+        import traceback
+        tb = traceback.format_exc()
+        raise RuntimeError(f"Error creating optimization model: {str(e)}\nTraceback:\n{tb}")
 def setup_argument_parser():
     """
     Set up and return the argument parser for command line options.
