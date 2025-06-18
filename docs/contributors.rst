@@ -1,9 +1,10 @@
 .. _contributors:
  
  
-========================
+========================= 
 Contributors and Partners
-========================
+=========================
+
   
 * Zixuan Liu https://github.com/zixuan-liu-17
 * Simone Osei-Owusu https://github.com/SimoneOseiOwusu 
@@ -26,8 +27,4 @@ Contributing to FFRM is open to everyone who is interested, and we adopt an incl
           :alt: CCG logo 
           :target: https://climatecompatiblegrowth.com
           :align: center
-     - .. image:: _static/WB.jpg
-          :height: 100
-          :alt: World Bank logo ank.org/ext/en/home
-          :target: https://www.worldbank.org/
-          :align: center
+ 
