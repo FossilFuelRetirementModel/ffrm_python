@@ -388,6 +388,9 @@ def run_scenario(model_data, scenario, price_scenario, solver):
     # from model_check import check_plf_constraints, verify_cost_calculations,check_capacity_constraints,validate_retirement_economics
     model = build_model(model_data, scenario, price_scenario)
 
+    # Write the model to an LP file before solving
+    model.write(f"{scenario}_{price_scenario}.lp", io_options={'symbolic_solver_labels': True})
+
     result = solver.solve(model, tee=True)
     # if scenario == "AD":
     # debug_AD_scenario(model,scenario)
@@ -401,6 +404,7 @@ def run_scenario(model_data, scenario, price_scenario, solver):
 
     if (result.solver.status != SolverStatus.ok) or \
        (result.solver.termination_condition != TerminationCondition.optimal):
+        print(f"\nModel is infeasible. LP file has been written to {scenario}_{price_scenario}.lp")
         raise RuntimeError(f"Solver failed for scenario {scenario}_{price_scenario}")
     
     return process_model_results(model)
