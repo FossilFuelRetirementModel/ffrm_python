@@ -1,8 +1,8 @@
 from pyomo.environ import *
-import logging
-logging.basicConfig(level=logging.INFO)
-from pyomo.util.infeasible import log_infeasible_constraints
-logging.basicConfig(level=logging.INFO) 
+#import logging
+#logging.basicConfig(level=logging.INFO)
+#from pyomo.util.infeasible import log_infeasible_constraints
+#logging.basicConfig(level=logging.INFO) 
 from pyomo.opt import SolverFactory
 from pyomo.core.util import quicksum
 from pathlib import Path
@@ -374,11 +374,11 @@ def initialize_solver(args):
             solver.options[key] = value
     
     return solver
-results = solver.solve(model, tee=True)
+#results = solver.solve(model, tee=True)
 
     # Log infeasible constraints if solver failed
-if (results.solver.status != SolverStatus.ok) or (results.solver.termination_condition != TerminationCondition.optimal):
-        log_infeasible_constraints(model)
+#if (results.solver.status != SolverStatus.ok) or (results.solver.termination_condition != TerminationCondition.optimal):
+#        log_infeasible_constraints(model)
 
 
 def run_scenario(model_data, scenario, price_scenario, solver):
@@ -400,18 +400,18 @@ def run_scenario(model_data, scenario, price_scenario, solver):
     # Write the model to an LP file before solving
     model.write(f"{scenario}_{price_scenario}.lp", io_options={'symbolic_solver_labels': True})
 
-    result = solver.solve(model, tee=True)
-    from pyomo.util.infeasible import log_infeasible_constraints
-    log_infeasible_constraints(model, log_expression=True)
-    logging.getLogger('pyomo.core').setLevel(logging.INFO)
-    log_infeasible_constraints(model, log_expression=True)
-    from pyomo.util.infeasible import log_infeasible_constraints
-    import logging
+  #  result = solver.solve(model, tee=True)
+  #  from pyomo.util.infeasible import log_infeasible_constraints
+  #  log_infeasible_constraints(model, log_expression=True)
+  #  logging.getLogger('pyomo.core').setLevel(logging.INFO)
+  #  log_infeasible_constraints(model, log_expression=True)
+  #  from pyomo.util.infeasible import log_infeasible_constraints
+  #  import logging
 
-    log = logging.getLogger('pyomo.core')
-    log.setLevel(logging.INFO)
+  #  log = logging.getLogger('pyomo.core')
+  #  log.setLevel(logging.INFO)
 
-    log_infeasible_constraints(model, log)
+  #  log_infeasible_constraints(model, log)
 
     # if scenario == "AD":
     # debug_AD_scenario(model,scenario)
