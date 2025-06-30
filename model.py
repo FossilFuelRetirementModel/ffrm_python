@@ -11,6 +11,7 @@ from energy_data_processor import load_excel_data, initialize_model_data
 from result_processor import process_model_results, save_results_to_excel
 import argparse
 import time
+import logging
 
 def build_model(model_data, scenario, price_scenario):
     """
@@ -374,12 +375,6 @@ def initialize_solver(args):
             solver.options[key] = value
     
     return solver
-results = solver.solve(model, tee=True)
-
-    # Log infeasible constraints if solver failed
-if (results.solver.status != SolverStatus.ok) or (results.solver.termination_condition != TerminationCondition.optimal):
-        log_infeasible_constraints(model)
-
 
 def run_scenario(model_data, scenario, price_scenario, solver):
     """
@@ -401,12 +396,8 @@ def run_scenario(model_data, scenario, price_scenario, solver):
     model.write(f"{scenario}_{price_scenario}.lp", io_options={'symbolic_solver_labels': True})
 
     result = solver.solve(model, tee=True)
-    from pyomo.util.infeasible import log_infeasible_constraints
-    log_infeasible_constraints(model, log_expression=True)
     logging.getLogger('pyomo.core').setLevel(logging.INFO)
-    log_infeasible_constraints(model, log_expression=True)
-    from pyomo.util.infeasible import log_infeasible_constraints
-    import logging
+    log_infeasible_constraints(model, log_expression=True)    
 
     log = logging.getLogger('pyomo.core')
     log.setLevel(logging.INFO)
@@ -426,6 +417,7 @@ def run_scenario(model_data, scenario, price_scenario, solver):
     if (result.solver.status != SolverStatus.ok) or \
        (result.solver.termination_condition != TerminationCondition.optimal):
         print(f"\nModel is infeasible. LP file has been written to {scenario}_{price_scenario}.lp")
+        log_infeasible_constraints(model, log_expression=True)
         raise RuntimeError(f"Solver failed for scenario {scenario}_{price_scenario}")
     
     return process_model_results(model)
