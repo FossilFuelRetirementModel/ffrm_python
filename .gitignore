@@ -23,6 +23,10 @@ model_old.py
 *.log
 *.lst
 *.lxi
+
+# Generated model files
+*.lp
+
 # IDE
 .vscode/
 .idea/
