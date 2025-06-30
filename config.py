@@ -2,7 +2,7 @@ from pathlib import Path
 
 class Config:
     DATA_DIR = Path("")
-    INPUT_FILE = "sample_input_file.xlsx"
+    INPUT_FILE = "InputDataCoalUpdated.xlsx"
     EXCEL_PATH = DATA_DIR / INPUT_FILE
     
     # Sheet names
@@ -47,7 +47,7 @@ class Config:
             'index_col': 0
         },
         'Other': {
-            'usecols': 'A:C',
+            'usecols': 'A:B',
             'skiprows': 1,
             'index_col': 0
         },

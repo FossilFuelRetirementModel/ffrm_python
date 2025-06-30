@@ -374,11 +374,11 @@ def initialize_solver(args):
             solver.options[key] = value
     
     return solver
-results = solver.solve(model, tee=True)
+# results = solver.solve(model, tee=True)
 
-    # Log infeasible constraints if solver failed
-if (results.solver.status != SolverStatus.ok) or (results.solver.termination_condition != TerminationCondition.optimal):
-        log_infeasible_constraints(model)
+#     # Log infeasible constraints if solver failed
+# if (results.solver.status != SolverStatus.ok) or (results.solver.termination_condition != TerminationCondition.optimal):
+#         log_infeasible_constraints(model)
 
 
 def run_scenario(model_data, scenario, price_scenario, solver):
