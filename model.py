@@ -376,6 +376,7 @@ def initialize_solver(args):
     
     return solver
 <<<<<<< HEAD
+<<<<<<< HEAD
 # results = solver.solve(model, tee=True)
 
 #     # Log infeasible constraints if solver failed
@@ -384,6 +385,8 @@ def initialize_solver(args):
 
 =======
 >>>>>>> 9186da8 (rearrange imports)
+=======
+>>>>>>> Ghana
 
 def run_scenario(model_data, scenario, price_scenario, solver):
     """
