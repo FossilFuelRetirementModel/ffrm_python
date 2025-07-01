@@ -40,17 +40,18 @@ The difference in net revenue between the BAU and a decarbonization scenario is 
 Contents
 ========
 
+ 
 .. toctree::
    :maxdepth: 1
- 
-   
+
    Install <install>
-   Structure <equations>
-   Examples <examples> 
+   Structure <structure>
+   Examples <examples>
    Contributors <contributors>
-   License <License>  
+   License <License>
    Change Log <ChangeLog>
    Key Publications <KeyPublications>
+
 
 Indices and tables
 ==================
