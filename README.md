@@ -13,7 +13,7 @@ The model utilises a Pyomo-based optimisation framework to endogenously calculat
 - Command-line interface for easy configuration
  
 ## **Installation**
-Installation steps can be on the FFRM Readthedoc [Documentation](https://ffrm-python.readthedocs.io/en/latest/index.html). 
+Installation steps can be found on the FFRM Readthedoc [Documentation](https://ffrm-python.readthedocs.io/en/latest/index.html). 
  
 ## Contributing to FFRM
 We are very grateful that you are looking into how you can contribute to FFRM.
@@ -29,9 +29,7 @@ FFRM relies on numerous open-source community supported tools. Below is a list o
 
 [GLPK](https://www.gnu.org/software/glpk/): Open-source linear programming toolkit
 
-[CBC](https://github.com/coin-or/Cbc):Open-source linear program solver
-
-## [Documentation](https://ffrm-python.readthedocs.io/en/latest/index.html)
+[CBC](https://github.com/coin-or/Cbc):Open-source linear program solver 
 
 ## Key publications
 Suski, A., Hong, L., and Chattopadhyay, D. (2022) 'Modeling coal plant stranded costs for decarbonization pathway analyses', Energy for Sustainable Development, 71, pp. 480-489. Available at: https://www.sciencedirect.com/science/article/pii/S0973082622002022 
