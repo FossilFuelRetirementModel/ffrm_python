@@ -1,3 +1,5 @@
+.. _equations:
+
 Structure Overview
 ==================
  
@@ -50,6 +52,7 @@ This equation shows a constraint whereby the electricity generated per generator
     sum {t} Gen[g,y,t,s,p] * H[t] >= MinGen[g]
 
 **Equation 5**
+
 This equation is similar to **Equation 4**. However it represents the upper bound whereby the total electricity generation by a generator **(g)** over time **(t)**, scenario **(s)**, price regime **(p)** multiplied by the number of hours in a time period **does not exceed** the specified maximum allowed generation for a generator **(g)**. 
 
 .. code-block:: ampl

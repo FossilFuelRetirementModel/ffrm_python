@@ -44,7 +44,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Examples" href="examples.html" />
-    <link rel="prev" title="Sets" href="sets.html" />
+    <link rel="prev" title="Nomenclature" href="Nomenclature.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -157,7 +157,7 @@
         <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="install.html">Install</a></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="structure.html">Structure</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="sets.html">Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Nomenclature.html">Nomenclature</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Equations</a></li>
 </ul>
 </details></li>
@@ -317,7 +317,7 @@ document.write(`
                 <article class="bd-article">
                   
   <section id="structure-overview">
-<h1>Structure Overview<a class="headerlink" href="#structure-overview" title="Link to this heading">#</a></h1>
+<span id="equations"></span><h1>Structure Overview<a class="headerlink" href="#structure-overview" title="Link to this heading">#</a></h1>
 <p>The structure of the FFRM comprises <strong>eight core mathematical equations</strong> used to determine the foregone net revenue of fossil fuel fleets. This is analysed under two regimes: the <strong>PPA</strong> regime, which is based on commercially negotiated power purchase agreements or the <strong>market-based</strong> regime, which reflects projected hourly spot prices that are determined exogenously.</p>
 <p><strong>Equation 1</strong></p>
 <p>The equation is calculating fleetwide net revenue either for the <strong>market regime</strong> (projected hourly spot prices are exogenously inputted into the model) or a <strong>commercial power purchasing agreement</strong>.</p>
@@ -348,8 +348,8 @@ A user defined threshold represent alpha. A constraint is set in the model where
 <div class="highlight-ampl notranslate"><div class="highlight"><pre><span></span><span class="kr">sum</span><span class="w"> </span><span class="p">{</span>t<span class="p">}</span><span class="w"> </span>Gen<span class="p">[</span>g<span class="p">,</span>y<span class="p">,</span>t<span class="p">,</span>s<span class="p">,</span>p<span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span>H<span class="p">[</span>t<span class="p">]</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span>MinGen<span class="p">[</span>g<span class="p">]</span>
 </pre></div>
 </div>
-<p><strong>Equation 5</strong>
-This equation is similar to <strong>Equation 4</strong>. However it represents the upper bound whereby the total electricity generation by a generator <strong>(g)</strong> over time <strong>(t)</strong>, scenario <strong>(s)</strong>, price regime <strong>(p)</strong> multiplied by the number of hours in a time period <strong>does not exceed</strong> the specified maximum allowed generation for a generator <strong>(g)</strong>.</p>
+<p><strong>Equation 5</strong></p>
+<p>This equation is similar to <strong>Equation 4</strong>. However it represents the upper bound whereby the total electricity generation by a generator <strong>(g)</strong> over time <strong>(t)</strong>, scenario <strong>(s)</strong>, price regime <strong>(p)</strong> multiplied by the number of hours in a time period <strong>does not exceed</strong> the specified maximum allowed generation for a generator <strong>(g)</strong>.</p>
 <div class="highlight-ampl notranslate"><div class="highlight"><pre><span></span><span class="kr">sum</span><span class="w"> </span><span class="p">{</span>t<span class="p">}</span><span class="w"> </span>Gen<span class="p">[</span>g<span class="p">,</span>y<span class="p">,</span>t<span class="p">,</span>s<span class="p">,</span>p<span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span>H<span class="p">[</span>t<span class="p">]</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span>MaxGen<span class="p">[</span>g<span class="p">]</span>
 </pre></div>
 </div>
@@ -383,12 +383,12 @@ This equation is similar to <strong>Equation 4</strong>. However it represents t
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="sets.html"
+       href="Nomenclature.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Sets</p>
+        <p class="prev-next-title">Nomenclature</p>
       </div>
     </a>
     <a class="right-next"
