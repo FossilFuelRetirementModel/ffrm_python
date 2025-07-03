@@ -18,7 +18,7 @@ Welcome to the documentation of ``FFRM``!
 
 The model utilises a `Pyomo-based optimisation framework <http://www.pyomo.org>`_ to endogenously calculate stranded cost, taking into consideration commercial and market issues. It uses projections for capacity and production of fossil fuel power plants to explore their retirement profile under two types of price regimes: **PPA** and **Market Price regime**. The model assesses at what capacity fossil fuel power plants become stranded and explores how this influences total compensation for stranded plants.
 
-The model is designed to complement more detailed long-term capacity expansion models, such as OSeMOSYS, TIMES, LEAP, and others, but but can also be used as a standalone retirement model.
+The model is designed to complement more detailed long-term capacity expansion models, such as OSeMOSYS, TIMES, LEAP, and others, but can also be used as a standalone retirement model.
 
 Background
 ==========
