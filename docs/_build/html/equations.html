@@ -1,0 +1,459 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Structure Overview &#8212; FFRM 1.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=eba8b062" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/documentation_options.js?v=a681ed88"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'equations';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Examples" href="examples.html" />
+    <link rel="prev" title="Nomenclature" href="Nomenclature.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/FFRM_2.png" class="logo__image only-light" alt="FFRM 1.0 documentation - Home"/>
+    <script>document.write(`<img src="_static/FFRM_2.png" class="logo__image only-dark" alt="FFRM 1.0 documentation - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="structure.html">Structure</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Nomenclature.html">Nomenclature</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Equations</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributors.html">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="License.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ChangeLog.html">Change Log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="KeyPublications.html">Key Publications</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/equations.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Structure Overview</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="structure-overview">
+<span id="equations"></span><h1>Structure Overview<a class="headerlink" href="#structure-overview" title="Link to this heading">#</a></h1>
+<p>The structure of the FFRM comprises <strong>eight core mathematical equations</strong> used to determine the foregone net revenue of fossil fuel fleets. This is analysed under two regimes: the <strong>PPA</strong> regime, which is based on commercially negotiated power purchase agreements or the <strong>market-based</strong> regime, which reflects projected hourly spot prices that are determined exogenously.</p>
+<p><strong>Equation 1</strong></p>
+<p>The equation is calculating fleetwide net revenue either for the <strong>market regime</strong> (projected hourly spot prices are exogenously inputted into the model) or a <strong>commercial power purchasing agreement</strong>.</p>
+<ul class="simple">
+<li><p>The first part of the equation represents the revenue subtracted by variable cost. This is where electricity price at given year <strong>(y)</strong>, price <strong>(p)</strong> and time <strong>(t)</strong> is subtracted from variable cost of the generator in year <strong>(y)</strong>. Then this is then multiplied by electricity generated.</p></li>
+<li><p>The second part of the equation represents fixed cost multiped by retired capacity. This total is subtracted from the first part of the equation.</p></li>
+</ul>
+<p>Therefore the difference in the <strong>systemwide net revenue</strong> between the business-as-usual scenario and the decarbonisation scenario would be used to calculate the <strong>foregone revenue</strong>. Retired capacity can use the foregone revenue as a calculation of <strong>stranded cost</strong>.</p>
+<div class="highlight-ampl notranslate"><div class="highlight"><pre><span></span>NR<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kr">sum</span><span class="w"> </span><span class="p">{</span>y<span class="p">,</span><span class="w"> </span>g<span class="p">,</span><span class="w"> </span>t<span class="p">,</span><span class="w"> </span>s<span class="p">,</span><span class="w"> </span>p<span class="p">}</span><span class="w"> </span><span class="p">(</span>P<span class="p">[</span>y<span class="p">,</span>p<span class="p">,</span>t<span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span>Cost<span class="p">[</span>g<span class="p">,</span>y<span class="p">])</span><span class="w"> </span><span class="o">*</span><span class="w"> </span>Gen<span class="p">[</span>g<span class="p">,</span>y<span class="p">,</span>t<span class="p">,</span>s<span class="p">,</span>p<span class="p">]</span>
+<span class="w">     </span><span class="o">-</span><span class="w"> </span><span class="kr">sum</span><span class="w"> </span><span class="p">{</span>y<span class="p">,</span><span class="w"> </span>g<span class="p">,</span><span class="w"> </span>t<span class="p">,</span><span class="w"> </span>s<span class="p">,</span><span class="w"> </span>p<span class="p">}</span><span class="w"> </span>FC<span class="p">[</span>g<span class="p">,</span>y<span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span>Capacity<span class="p">[</span>g<span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span>RetireC<span class="p">[</span>g<span class="p">,</span>y<span class="p">,</span>s<span class="p">,</span>p<span class="p">]);</span>
+</pre></div>
+</div>
+<p><strong>Equation 2</strong></p>
+<p>This equation is defined as a fraction that sets a limit on how far a generating power plant’s unit net revenue can deviate from the business-as-usual scenario. So the fraction illustrates <strong>the proportional loss in net revenue</strong>.
+On the numerator, we have the net revenue for a unit <strong>(g)</strong> under the decarbonisation scenario subtracted from the net revenue from the business-as-usual scenario, with the net revenue from the business-as-usual scenario on the denominator.
+A user defined threshold represent alpha. A constraint is set in the model whereby a <strong>loss in net revenue cannot exceed alpha.</strong></p>
+<div class="highlight-ampl notranslate"><div class="highlight"><pre><span></span><span class="p">(</span>NR_prime<span class="p">[</span>g<span class="p">,</span>s_prime<span class="p">,</span>p_prime<span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span>NR<span class="p">[</span>g<span class="p">,</span>s<span class="p">,</span>p<span class="p">])</span><span class="w"> </span><span class="o">/</span><span class="w"> </span>NR_prime<span class="p">[</span>g<span class="p">,</span>s_prime<span class="p">,</span>p_prime<span class="p">]</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span>alpha
+</pre></div>
+</div>
+<p><strong>Equation 3</strong></p>
+<p>This equation sets a constraint, which requires the fleetwide generation to follow a trajectory defined by the user. It shows that the sum of electricity generated by all units <strong>(g)</strong> over all time blocks <strong>(t)</strong> multiplied by the hours in each time block <strong>H[t]</strong> must be <strong>equal to the system target generation</strong> for that year and specified scenario.</p>
+<p>Under a decarbonisation trajectory, it is assumed that fossil fuel generation will reduce over the years. As a result, the net revenue under a decarbonisation scenario will be <strong>reduced</strong> relative the business-as-usual scenario. <strong>Equation 2</strong> which defines the loss in net revenue will drive the generation allocation.</p>
+<div class="highlight-ampl notranslate"><div class="highlight"><pre><span></span><span class="kr">sum</span><span class="w"> </span><span class="p">{</span>t<span class="p">,</span><span class="w"> </span>g<span class="p">}</span><span class="w"> </span>Gen<span class="p">[</span>g<span class="p">,</span>y<span class="p">,</span>t<span class="p">,</span>s<span class="p">,</span>p<span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span>H<span class="p">[</span>t<span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>Target<span class="p">[</span>y<span class="p">,</span>s<span class="p">,</span>p<span class="p">]</span>
+</pre></div>
+</div>
+<p><strong>Equation 4</strong></p>
+<p>This equation shows a constraint whereby the electricity generated per generator <strong>(g)</strong>, in year <strong>(y)</strong>, time period <strong>(t)</strong>,scenario <strong>(s)</strong> and price regime <strong>(p)</strong>, multiped by the number of hours in that period should be <strong>equal to or be greater than</strong> minimum generation of that generator <strong>(g)</strong>.</p>
+<div class="highlight-ampl notranslate"><div class="highlight"><pre><span></span><span class="kr">sum</span><span class="w"> </span><span class="p">{</span>t<span class="p">}</span><span class="w"> </span>Gen<span class="p">[</span>g<span class="p">,</span>y<span class="p">,</span>t<span class="p">,</span>s<span class="p">,</span>p<span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span>H<span class="p">[</span>t<span class="p">]</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span>MinGen<span class="p">[</span>g<span class="p">]</span>
+</pre></div>
+</div>
+<p><strong>Equation 5</strong></p>
+<p>This equation is similar to <strong>Equation 4</strong>. However it represents the upper bound whereby the total electricity generation by a generator <strong>(g)</strong> over time <strong>(t)</strong>, scenario <strong>(s)</strong>, price regime <strong>(p)</strong> multiplied by the number of hours in a time period <strong>does not exceed</strong> the specified maximum allowed generation for a generator <strong>(g)</strong>.</p>
+<div class="highlight-ampl notranslate"><div class="highlight"><pre><span></span><span class="kr">sum</span><span class="w"> </span><span class="p">{</span>t<span class="p">}</span><span class="w"> </span>Gen<span class="p">[</span>g<span class="p">,</span>y<span class="p">,</span>t<span class="p">,</span>s<span class="p">,</span>p<span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span>H<span class="p">[</span>t<span class="p">]</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span>MaxGen<span class="p">[</span>g<span class="p">]</span>
+</pre></div>
+</div>
+<p><strong>Equation 6</strong></p>
+<p>This equation <strong>tracks generation capacity over time</strong> decreasing capacity when units a retired. Therefore the avaliable capacity is equal to the capacity from the previous year minus any capacity that is retired in year <strong>(y)</strong>.</p>
+<div class="highlight-ampl notranslate"><div class="highlight"><pre><span></span>Cap<span class="p">[</span>g<span class="p">,</span>y<span class="p">,</span>s<span class="p">,</span>p<span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>Cap<span class="p">[</span>g<span class="p">,</span>y<span class="o">-</span><span class="mi">1</span><span class="p">,</span>s<span class="p">,</span>p<span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span>Retire<span class="p">[</span>g<span class="p">,</span>y<span class="p">,</span>s<span class="p">,</span>p<span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span>Capacity<span class="p">[</span>g<span class="p">]</span>
+</pre></div>
+</div>
+<p><strong>Equation 7</strong></p>
+<p>This equation illustrates the <strong>minimum level of fleetwide capacity</strong> that needs to be maintained. It shows the <strong>total avaliable generation capacity must be equal or greater than the target value</strong>. It specifies that there must be enough capacity in the system to meet the target.</p>
+<p>The target could represent a <strong>proxy</strong> for various considerations, which could include capacity, spinning reserves and load shape in the system.</p>
+<div class="highlight-ampl notranslate"><div class="highlight"><pre><span></span><span class="kr">sum</span><span class="w"> </span><span class="p">{</span>g<span class="p">}</span><span class="w"> </span>Cap<span class="p">[</span>g<span class="p">,</span>y<span class="p">,</span>s<span class="p">,</span>p<span class="p">]</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span>Target<span class="p">[</span>y<span class="p">,</span>s<span class="p">,</span>p<span class="p">]</span><span class="w"> </span><span class="o">/</span><span class="w"> </span>Phi<span class="p">[</span>s<span class="p">,</span>p<span class="p">]</span>
+</pre></div>
+</div>
+<p><strong>Equation 8</strong></p>
+<p>This equation defines the <strong>cumulative retirement</strong> in each year.</p>
+<div class="highlight-ampl notranslate"><div class="highlight"><pre><span></span>RetireC<span class="p">[</span>g<span class="p">,</span>y<span class="p">,</span>s<span class="p">,</span>p<span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kr">sum</span><span class="w"> </span><span class="p">{</span>y_prime<span class="w"> </span><span class="kr">in</span><span class="w"> </span>Years<span class="p">:</span><span class="w"> </span>y_prime<span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span>y<span class="p">}</span><span class="w"> </span>Retire<span class="p">[</span>g<span class="p">,</span>y_prime<span class="p">,</span>s<span class="p">,</span>p<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="Nomenclature.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Nomenclature</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="examples.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Examples</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Zixuan Liu, Simone Osei-Owusu, Hannah Luscombe
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2025, Zixuan Liu, Simone Osei-Owusu, Hannah Luscombe.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

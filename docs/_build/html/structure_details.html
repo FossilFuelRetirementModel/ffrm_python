@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Welcome to the documentation of FFRM! &#8212; FFRM 1.0 documentation</title>
+    <title>Structure Details &#8212; FFRM 1.0 documentation</title>
   
   
   
@@ -40,10 +40,11 @@
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'structure_details';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Getting Started" href="install.html" />
+    <link rel="next" title="Examples" href="examples.html" />
+    <link rel="prev" title="Structure Overview" href="structure_overview.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -106,8 +107,6 @@
       
       
       
-        
-      
       <div class="bd-sidebar-primary bd-sidebar">
         
 
@@ -126,7 +125,7 @@
     
   
 
-<a class="navbar-brand logo" href="#">
+<a class="navbar-brand logo" href="index.html">
   
   
   
@@ -155,11 +154,11 @@
  </script></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
-        <ul class="nav bd-sidenav">
+        <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="install.html">Install</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="structure.html">Structure</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="Nomenclature.html">Nomenclature</a></li>
-<li class="toctree-l2"><a class="reference internal" href="equations.html">Equations</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="structure.html">Structure</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="structure_overview.html">Structure Overview</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Structure Details</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
@@ -221,7 +220,7 @@
       
       
       
-      <li><a href="_sources/index.rst" target="_blank"
+      <li><a href="_sources/structure_details.rst" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -305,7 +304,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Welcome to the documentation of FFRM!</h1>
+    <h1>Structure Details</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -315,10 +314,9 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#background">Background</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#aims">Aims</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#contents">Contents</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#indices-and-tables">Indices and tables</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#sets">Sets</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameters">Parameters</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#variables">Variables</a></li>
 </ul>
             </nav>
         </div>
@@ -330,54 +328,44 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="welcome-to-the-documentation-of-ffrm">
-<span id="welcome"></span><h1>Welcome to the documentation of <code class="docutils literal notranslate"><span class="pre">FFRM</span></code>!<a class="headerlink" href="#welcome-to-the-documentation-of-ffrm" title="Link to this heading">#</a></h1>
-<ul>
-<li><ul>
-<li><a class="reference internal image-reference" href="_images/FFRMWorkflow.jpg"><img alt="FFRMWorkflow" class="align-center" src="_images/FFRMWorkflow.jpg" style="width: 80%;" />
-</a>
-</li>
-</ul>
-</li>
-</ul>
-<p><strong>F</strong>ossil <strong>F</strong>uel <strong>R</strong>etirement <strong>M</strong>odel (FFRM) is an open-source Python-based fossil fuel retirement model. It was originally developed by the <a class="reference external" href="https://www.worldbank.org/">World Bank</a> as a coal retirement optimisation model. It can be used to estimate the stranded cost associated with retiring fossil fuel power plants.</p>
-<p>The model utilises a <a class="reference external" href="http://www.pyomo.org">Pyomo-based optimisation framework</a> to endogenously calculate stranded cost, taking into consideration commercial and market issues. It uses projections for capacity and production of fossil fuel power plants to explore their retirement profile under two types of price regimes: <strong>PPA</strong> and <strong>Market Price regime</strong>. The model assesses at what capacity fossil fuel power plants become stranded and explores how this influences total compensation for stranded plants.</p>
-<p>The model is designed to complement more detailed long-term capacity expansion models, such as OSeMOSYS, TIMES, LEAP, and others, but but can also be used as a standalone retirement model.</p>
-<section id="background">
-<h2>Background<a class="headerlink" href="#background" title="Link to this heading">#</a></h2>
-<p>A model was developed by the World Bank to assess stranded cost under various defined scenarios.
-The model defines stranded cost as the difference in plant revenue. In particular, the foregone revenue
-of plants that reach the end of their economic life in the decarbonisation scenarios, relative to the baseline scenario. A recent application of the tool by Suski et al (2022) can be found <a class="reference external" href="https://www.sciencedirect.com/science/article/abs/pii/S0973082622002022">here</a>, in which a GAMS-based version of FFRM was applied to the power sectors of India and the Philippines to calculate the stranded cost implications of early retirement of its coal fleet.</p>
-</section>
-<section id="aims">
-<h2>Aims<a class="headerlink" href="#aims" title="Link to this heading">#</a></h2>
-<p>The objective function of the model is set as maximisation of the net revenue at the fossil fuel power plants fleet, based on either:</p>
-<ul class="simple">
-<li><p><strong>Financial analysis</strong> of Power Purchase Agreements (PPAs), where these are in place with known contractual terms.</p></li>
-<li><p><strong>Economic optimization</strong> of the market price, where marginal costs derived from a least-cost planning are considered.</p></li>
-</ul>
-<p>The difference in net revenue between the BAU and a decarbonization scenario is used as a measure of foregone revenue.</p>
-</section>
-<section id="contents">
-<h2>Contents<a class="headerlink" href="#contents" title="Link to this heading">#</a></h2>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="install.html">Install</a></li>
-<li class="toctree-l1"><a class="reference internal" href="structure.html">Structure</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="contributors.html">Contributors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="License.html">License</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ChangeLog.html">Change Log</a></li>
-<li class="toctree-l1"><a class="reference internal" href="KeyPublications.html">Key Publications</a></li>
-</ul>
+  <section id="structure-details">
+<h1>Structure Details<a class="headerlink" href="#structure-details" title="Link to this heading">#</a></h1>
+<section id="sets">
+<h2>Sets<a class="headerlink" href="#sets" title="Link to this heading">#</a></h2>
+<div class="highlight-ampl notranslate"><div class="highlight"><pre><span></span>t<span class="w">   </span><span class="c1"># Hours/sub-hours of the day</span>
+y<span class="w">   </span><span class="c1"># Years</span>
+g<span class="w">   </span><span class="c1"># Powerplant units</span>
+s<span class="w">   </span><span class="c1"># Scenarios (BAU or Decarbonization)</span>
+p<span class="w">   </span><span class="c1"># Price scenarios (market price or PPA)</span>
+</pre></div>
 </div>
 </section>
-<section id="indices-and-tables">
-<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading">#</a></h2>
-<ul class="simple">
-<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
-<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
-</ul>
+<section id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
+<div class="highlight-ampl notranslate"><div class="highlight"><pre><span></span>alpha<span class="w">           </span><span class="c1"># Net revenue minimum threshold to be maintained</span>
+MinGen_g<span class="w">        </span><span class="c1"># Minimum plant load factor below which plant must be shut down</span>
+MaxGen_g<span class="w">        </span><span class="c1"># Maximum plant load factor</span>
+Capacity_g<span class="w">      </span><span class="c1"># Capacity of specified fossil fuel powerplant unit g</span>
+Cost<span class="p">[</span>g<span class="p">,</span><span class="w"> </span>y<span class="p">]</span><span class="w">      </span><span class="c1"># Variable cost of unit g in year y</span>
+FC<span class="p">[</span>g<span class="p">,</span><span class="w"> </span>y<span class="p">]</span><span class="w">        </span><span class="c1"># Fixed cost of unit in year y</span>
+theta_y<span class="w">         </span><span class="c1"># Discount rate applied to cost parameters and net revenues</span>
+P<span class="p">[</span>y<span class="p">,</span><span class="w"> </span>p<span class="p">,</span><span class="w"> </span>t<span class="p">]</span><span class="w">      </span><span class="c1"># Hourly price forecast for scenario p</span>
+H_t<span class="w">             </span><span class="c1"># Number of hours in block t</span>
+Target<span class="p">[</span>y<span class="p">,</span><span class="w"> </span>s<span class="p">]</span><span class="w">    </span><span class="c1"># Target specified fossil fuel powerplant generation in year y</span>
+Phi<span class="p">[</span>y<span class="p">,</span><span class="w"> </span>s<span class="p">,</span><span class="w"> </span>p<span class="p">]</span><span class="w">    </span><span class="c1"># Minimum load factor</span>
+</pre></div>
+</div>
+</section>
+<section id="variables">
+<h2>Variables<a class="headerlink" href="#variables" title="Link to this heading">#</a></h2>
+<div class="highlight-ampl notranslate"><div class="highlight"><pre><span></span>NR<span class="w">                      </span><span class="c1"># Total system net revenue – objective function</span>
+NR<span class="p">[</span>g<span class="p">,</span><span class="w"> </span>s<span class="p">,</span><span class="w"> </span>p<span class="p">]</span><span class="w">             </span><span class="c1"># Net revenue for scenarios (s, p) for specified fossil fuel powerplant unit g</span>
+Gen<span class="p">[</span>g<span class="p">,</span><span class="w"> </span>y<span class="p">,</span><span class="w"> </span>t<span class="p">,</span><span class="w"> </span>s<span class="p">,</span><span class="w"> </span>p<span class="p">]</span><span class="w">      </span><span class="c1"># Generation from specified fossil fuel powerplant unit g</span>
+RetireC<span class="p">[</span>g<span class="p">,</span><span class="w"> </span>y<span class="p">,</span><span class="w"> </span>s<span class="p">,</span><span class="w"> </span>p<span class="p">]</span><span class="w">     </span><span class="c1"># Retirement (cumulative) of specified fossil fuel powerplant unit g</span>
+Cap<span class="p">[</span>g<span class="p">,</span><span class="w"> </span>y<span class="p">,</span><span class="w"> </span>s<span class="p">,</span><span class="w"> </span>p<span class="p">]</span><span class="w">         </span><span class="c1"># Remaining capacity of specified fossil fuel powerplant unit g</span>
+Retire<span class="p">[</span>g<span class="p">,</span><span class="w"> </span>y<span class="p">,</span><span class="w"> </span>s<span class="p">,</span><span class="w"> </span>p<span class="p">]</span><span class="w">      </span><span class="c1"># Retirement of specified fossil fuel powerplant unit g {0, 1}</span>
+</pre></div>
+</div>
 </section>
 </section>
 
@@ -392,12 +380,21 @@ of plants that reach the end of their economic life in the decarbonisation scena
                 <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
+    <a class="left-prev"
+       href="structure_overview.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Structure Overview</p>
+      </div>
+    </a>
     <a class="right-next"
-       href="install.html"
+       href="examples.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Getting Started</p>
+        <p class="prev-next-title">Examples</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -417,10 +414,9 @@ of plants that reach the end of their economic life in the decarbonisation scena
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#background">Background</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#aims">Aims</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#contents">Contents</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#indices-and-tables">Indices and tables</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#sets">Sets</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameters">Parameters</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#variables">Variables</a></li>
 </ul>
   </nav></div>
 
