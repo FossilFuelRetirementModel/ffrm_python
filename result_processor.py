@@ -182,10 +182,10 @@ def calculate_plant_netrev(model):
                     print
                 '''
                 netrev = -(
-                            # 根据场景直接使用相应的容量
+                            # Use the corresponding capacity based on scenario
                             model.Cap[g, y].value if model.s.at(1) == "AD" else model.GenData[g]["CAPACITY"]
                         ) *(
-                            # 根据价格场景直接使用相应的价格
+                            # Use the corresponding price based on price scenario
                             model.FC_PPA[g, y]/1e3 if model.p.at(1) == "AvgPPAPrice" else 100
                         ) + quicksum(
                         (
@@ -223,15 +223,15 @@ def calculate_annual_total_netrev(model):
     try:
         annual_netrev = {"nominal": {}, "discounted": {}}
         
-        # 使用已有的 calculate_net_revenue 函数获取每个电厂的净收入
+        # Use the existing calculate_net_revenue function to get the net revenue for each plant
         plant_netrev = calculate_net_revenue(model)
         
-        # 获取所有年份
+        # Get all years
         years = list(plant_netrev[list(plant_netrev.keys())[0]].keys())
         
-        # 计算每年的总净收入
+        # Calculate total net revenue for each year
         for year in years:
-            # 计算名义值：所有电厂该年的净收入之和
+            # Calculate nominal value: sum of net revenue for all plants in the year
             annual_netrev["nominal"][year] = sum(
                 plant_netrev[plant][year] 
                 for plant in plant_netrev.keys()

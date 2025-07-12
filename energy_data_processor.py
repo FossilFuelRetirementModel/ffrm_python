@@ -32,9 +32,27 @@ def initialize_model_data(data: dict) -> ModelData:
     Returns:
         ModelData object containing all model structures
     """
-    print(data['price_distribution'])
-    print(data["price_dur"])
-    print(data['other'],data['fc_ppa'])
+    # Validate data for duplicate indices and remove nonsense indices like " " or nan (at the end)
+    for key, df in data.items():
+        if isinstance(df, pd.DataFrame):
+            # Remove nonsense indices: empty strings or NaN at the end
+            nonsense_indices = df.index[(df.index == " ") | (pd.isna(df.index))]
+            if len(nonsense_indices) > 0:
+                print(f"Removing nonsense indices from {key}: {list(nonsense_indices)}")
+                df = df[~df.index.isin(nonsense_indices)]
+                data[key] = df  # update in-place
+
+            if df.index.duplicated().any():
+                print(f"Warning: Duplicate indices found in {key}")
+                print("Duplicate indices:", df.index[df.index.duplicated()].tolist())
+                # Remove duplicates by keeping the first occurrence
+                # data[key] = df[~df.index.duplicated(keep='first')]
+    
+    # print(data['price_distribution'])
+    # print(data["price_dur"])
+    # print(data['other'],data['fc_ppa'])
+    print(data['coal_plant_data'],data['coal_plant_data'].index.tolist())
+    
     return ModelData(
         years=Config.YEARS,
         plants=data['coal_plant_data'].index.tolist(),  # Assuming plant ID is index
@@ -184,6 +202,32 @@ if __name__ == "__main__":
             missing = df.isnull().sum().sum()
             print(f"{attr_name}: {missing} missing values")
         
+        # Detailed check for NaN values in each dataframe
+        print("\n=== Detailed NaN Value Analysis ===")
+        for attr_name, df in {
+            'gen_data': model_data.gen_data,
+            'price_gen': model_data.price_gen, 
+            'price_dist': model_data.price_dist,
+            'price_dur': model_data.price_dur,
+            'fc_ppa': model_data.fc_ppa,
+            'other': model_data.other
+        }.items():
+            print(f"\nChecking {attr_name}:")
+            # Get columns with NaN values and their counts
+            nan_cols = df.isna().sum()
+            nan_cols = nan_cols[nan_cols > 0]  # Only show columns with NaNs
+            
+            if len(nan_cols) > 0:
+                print("Columns containing NaN values:")
+                for col, count in nan_cols.items():
+                    print(f"  - {col}: {count} NaN values")
+                    # Show rows with NaN values in this column
+                    nan_rows = df[df[col].isna()]
+                    if not nan_rows.empty:
+                        print("    Rows with NaN values:")
+                        print(nan_rows)
+            else:
+                print("No NaN values found")
     except Exception as e:
         print(f"Error in data initialization: {str(e)}")
         raise
