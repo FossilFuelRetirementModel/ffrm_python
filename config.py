@@ -79,6 +79,13 @@ class Config:
         'AD': 0     # Accelerated Decarbonization
     }
     
+    # NEW: Intermediate decarbonization scenarios
+    INTERMEDIATE_SCENARIOS = {
+        'AD_25': 0.25,   # 25% of the way from BAU to AD (1/4 AD)
+        'AD_50': 0.50,   # 50% of the way from BAU to AD (1/2 AD) 
+        'AD_75': 0.75    # 75% of the way from BAU to AD (3/4 AD)
+    }
+    
     # Price scenarios
     PRICE_SCENARIOS = {
         'MarketPrice': 1,

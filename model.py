@@ -35,7 +35,7 @@ def build_model(model_data, scenario, price_scenario):
     if missing_attrs:
         raise ValueError(f"Missing required model data attributes: {missing_attrs}")
     
-    valid_scenarios = ["BAU", "AD"]
+    valid_scenarios = ["BAU", "AD", "AD_25", "AD_50", "AD_75"]
     valid_price_scenarios = ["MarketPrice", "AvgPPAPrice"]
     
     if scenario not in valid_scenarios:
@@ -279,7 +279,8 @@ def build_model(model_data, scenario, price_scenario):
                 cost_per_mw= 0
                 cost = 0 
                 for g in model.g:
-                    if scenario == "AD":
+                    # NEW: Handle intermediate scenarios - use capacity for AD and intermediate scenarios, fixed capacity for BAU
+                    if scenario in ["AD", "AD_25", "AD_50", "AD_75"]:
                         capacity = model.Cap[g, y]
                     elif scenario == "BAU":
                         capacity = model.GenData[g]["CAPACITY"]
@@ -326,8 +327,8 @@ def setup_argument_parser():
                        help='Solver options as key=value pairs.')
     parser.add_argument('--scenarios', type=str, nargs='+', 
                        default=["AD","BAU"],
-                       choices=["BAU", "AD"],
-                       help='Scenarios to run.')
+                       choices=["BAU", "AD", "AD_25", "AD_50", "AD_75"],
+                       help='Scenarios to run. Available: BAU, AD, AD_25 (1/4 AD), AD_50 (1/2 AD), AD_75 (3/4 AD).')
     parser.add_argument('--price-scenarios', type=str, nargs='+',
                        default=["AvgPPAPrice", "MarketPrice"],
                        choices=["MarketPrice", "AvgPPAPrice"],
@@ -453,6 +454,12 @@ def main():
         
         data = load_excel_data(file_path)
         model_data = initialize_model_data(data)
+        
+        # NEW: Generate intermediate scenarios if any are requested
+        if any(scenario in args.scenarios for scenario in ["AD_25", "AD_50", "AD_75"]):
+            print("Generating intermediate decarbonization scenarios...")
+            from energy_data_processor import generate_intermediate_scenarios
+            model_data = generate_intermediate_scenarios(model_data)
         
         # Initialize solver
         solver = initialize_solver(args)
