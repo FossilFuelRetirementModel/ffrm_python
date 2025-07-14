@@ -71,7 +71,7 @@ class Config:
     OPTCR = 0.06  # Optimality criterion
     
     # Year range
-    YEARS = list(range(2021, 2051))  # 2021 to 2050
+    YEARS = list(range(2021, 2041))  # 2021 to 2040 (matching Excel data)
     
     # Scenarios
     SCENARIOS = {

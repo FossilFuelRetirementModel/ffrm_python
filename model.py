@@ -204,7 +204,7 @@ def build_model(model_data, scenario, price_scenario):
             """
             This function is used to set the MINIMUM PLF rule
             """
-                    return sum(
+            return sum(
             model.Gen[g, y, t] * model.Price_dur[t] #* Config.HOURS_PER_YEAR / Config.USD_TO_THOUSANDS
             for t in model.t
         ) >= model.Cap[g, y] *model.Other["MinPLF", "Value"]#* Config.HOURS_PER_YEAR / Config.USD_TO_THOUSANDS            
@@ -214,7 +214,7 @@ def build_model(model_data, scenario, price_scenario):
             """
             This function is used to set the MAXIMUM PLF rule
             """
-                    return sum(
+            return sum(
             model.Gen[g, y, t] * model.Price_dur[t] #* Config.HOURS_PER_DAY / Config.USD_TO_THOUSANDS
             for t in model.t
         ) <= model.Cap[g, y] * model.Other["MaxPLF", "Value"]#* Config.HOURS_PER_DAY / Config.USD_TO_THOUSANDS
@@ -391,10 +391,10 @@ def run_scenario(model_data, scenario, price_scenario, solver):
     logging.getLogger('pyomo.core').setLevel(logging.INFO)
     log_infeasible_constraints(model, log_expression=True)    
 
-    log = logging.getLogger('pyomo.core')
-    log.setLevel(logging.INFO)
-
-    log_infeasible_constraints(model, log)
+    # FIXED: Removed problematic log_infeasible_constraints call with logger object
+    # log = logging.getLogger('pyomo.core')
+    # log.setLevel(logging.INFO)
+    # log_infeasible_constraints(model, log)
 
     # if scenario == "AD":
     # debug_AD_scenario(model,scenario)
