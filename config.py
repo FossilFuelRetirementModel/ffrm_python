@@ -70,8 +70,6 @@ class Config:
     # Optimization parameter
     OPTCR = 0.06  # Optimality criterion
     
-    # Year range
-    YEARS = list(range(2021, 2041))  # 2021 to 2040 (matching Excel data)
     
     # Scenarios
     SCENARIOS = {
@@ -129,8 +127,17 @@ class Config:
     # NEW: Base Year and Time Period Constants (moved from hardcoded values)
     # ============================================================================
     
-    BASE_YEAR = 2021  # Base year for all calculations
-    INITIAL_YEAR = 2021  # Initial year of the model
+    BASE_YEAR = 2024  # The START YEAR of the model
+    INITIAL_YEAR = BASE_YEAR  
+    END_YEAR = 2050  # The END YEAR of the model
+    # Year range
+    YEARS = list(range(INITIAL_YEAR, END_YEAR + 1))
+    # ============================================================================
+    # NEW: Plant Life Categories (moved from hardcoded values)
+    # ============================================================================
+    
+    YOUNG_PLANT_THRESHOLD = 10  # Plants younger than this are "young"
+    OLD_PLANT_THRESHOLD = 30  # Plants older than this are "old"
     
     # ============================================================================
     # NEW: Plant Life Categories (moved from hardcoded values)
