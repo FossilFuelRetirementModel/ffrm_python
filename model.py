@@ -1,4 +1,8 @@
 from pyomo.environ import *
+import logging
+logging.basicConfig(level=logging.INFO)
+from pyomo.util.infeasible import log_infeasible_constraints
+logging.basicConfig(level=logging.INFO) 
 from pyomo.opt import SolverFactory
 from pyomo.core.util import quicksum
 from pathlib import Path
@@ -7,6 +11,8 @@ from energy_data_processor import load_excel_data, initialize_model_data
 from result_processor import process_model_results, save_results_to_excel
 import argparse
 import time
+import logging
+from config import Config  # NEW: Import Config class for constants
 
 def build_model(model_data, scenario, price_scenario):
     """
@@ -29,7 +35,7 @@ def build_model(model_data, scenario, price_scenario):
     if missing_attrs:
         raise ValueError(f"Missing required model data attributes: {missing_attrs}")
     
-    valid_scenarios = ["BAU", "AD"]
+    valid_scenarios = ["BAU", "AD", "AD_25", "AD_50", "AD_75"]
     valid_price_scenarios = ["MarketPrice", "AvgPPAPrice"]
     
     if scenario not in valid_scenarios:
@@ -72,7 +78,7 @@ def build_model(model_data, scenario, price_scenario):
         model.FC_PPA = Param(
             model.g, model.y, 
             initialize=lambda model, g, y: model_data.fc_ppa.loc[g, str(y)] 
-            if g in model_data.fc_ppa.index and str(y) in model_data.fc_ppa.columns else 100
+            if g in model_data.fc_ppa.index and str(y) in model_data.fc_ppa.columns else Config.DEFAULT_FC_PPA_VALUE
             )#possible error here: 'HARDUAGANJ'
         
 
@@ -86,7 +92,7 @@ def build_model(model_data, scenario, price_scenario):
             if p == "MarketPrice":
                 return model.Price_Dist[y, t]  #  GAMS Price_Dist(y, t)
             elif p == "AvgPPAPrice":
-                return 1#model.Price_Dist[y, t]#1  
+                return 1  # NEW: Using 1 for AvgPPAPrice scenario (was hardcoded)
             else:
                 raise NameError(f"Invalid price scenario: {p}")
 
@@ -96,24 +102,32 @@ def build_model(model_data, scenario, price_scenario):
         # We now compute those derived Parameters
         def discount_rate_init(model, y):
             """Calculate the discount rate for a given year."""
-            return 1 / (1 + model.Other["DiscountRate", "Value"]) ** (y - 2021)
+            return 1 / (1 + model.Other["DiscountRate", "Value"]) ** (y - Config.BASE_YEAR)
 
         model.DR = Param(model.y, initialize=discount_rate_init, domain=NonNegativeReals)
         
         def initialize_life(model, g):
             """Calculate the life of the plant based on its start year."""
-            return 2021 - model.GenData[g]["STARTYEAR"]
+            start_year = model.GenData[g]["STARTYEAR"]
+            if start_year > Config.BASE_YEAR:
+                return 0  # For plants that haven't started yet
+            return Config.BASE_YEAR - start_year
 
         model.life = Param(model.g, initialize=initialize_life, domain=NonNegativeIntegers)
         
         def initialize_cost(model, g, y):
             """Initialize the cost parameter based on the plant's age."""
-            if model.life[g] < 10:
-                return model.GenData[g]["COST"] * (1 + model.Other["CostEsc_Lessthan10", "Value"]) ** (y - 2021)
-            elif model.life[g] <= 30:
-                return model.GenData[g]["COST"] * (1 + model.Other["CostEsc_10-30years", "Value"]) ** (y - 2021)
+            # Get cost value, handling both 'COST' and 'VARIABLE COST' column names
+            cost = model.GenData[g].get("COST") or model.GenData[g].get("VARIABLE COST")
+            if cost is None:
+                raise ValueError(f"Neither 'COST' nor 'VARIABLE COST' found for plant {g}")
+            
+            if model.life[g] < Config.YOUNG_PLANT_THRESHOLD:
+                return cost * (1 + model.Other["CostEsc_Lessthan10", "Value"]) ** (y - Config.BASE_YEAR)
+            elif model.life[g] <= Config.OLD_PLANT_THRESHOLD:
+                return cost * (1 + model.Other["CostEsc_10-30years", "Value"]) ** (y - Config.BASE_YEAR)
             else:
-                return model.GenData[g]["COST"] * (1 + model.Other["CostEsc_30plus", "Value"]) ** (y - 2021)
+                return cost * (1 + model.Other["CostEsc_30plus", "Value"]) ** (y - Config.BASE_YEAR)
 
         model.cost = Param(model.g, model.y, initialize=initialize_cost, domain=NonNegativeReals)
 
@@ -124,10 +138,13 @@ def build_model(model_data, scenario, price_scenario):
             This function is used to set the bounds for the 'generation' variable, model.Gen
             '''
             max_life = model.Other["MaxLife", "Value"]
-            if (y + model.life[g] - 2021) > max_life:
-                return (0, 0)  
+            start_year = model.GenData[g]["STARTYEAR"]
+            
+            # If plant hasn't started yet or has exceeded max life, set generation to 0
+            if y < start_year or (y + model.life[g] - Config.BASE_YEAR) > max_life:
+                return (0, 0)
             else:
-                return (0, model.GenData[g]["CAPACITY"])  
+                return (0, model.GenData[g]["CAPACITY"])
 
         model.Gen = Var(model.g, model.y, model.t, domain=NonNegativeReals,bounds=calculate_generation_bounds)
         model.Cap = Var(model.g, model.y, domain=NonNegativeReals)
@@ -136,8 +153,8 @@ def build_model(model_data, scenario, price_scenario):
             
         for g in model.g:
             for y in model.y:
-                if y + model.life[g] - 2021 > model.Other['MaxLife', 'Value']:
-                    model.Cap[g, y].fix(0.0)
+                if y + model.life[g] - Config.BASE_YEAR > model.Other['MaxLife', 'Value']:
+                    model.Cap[g, y].fix(Config.FIXED_CAPACITY_EXPIRED)
         # for g in model.g:
         #     if 2021 + model.life[g] - 2021 < model.Other["MaxLife", "Value"]:
         #         model.Retire[g, 2021].fix(0)     
@@ -166,19 +183,18 @@ def build_model(model_data, scenario, price_scenario):
         # print(model.rev_unit["UDUPI",2021,price_scenario])
         
         #####################################################################################
-
-        ##### Constraints
+          ##### Constraints
         def max_coal_gen_rule(model, y):
             '''
             This function is used to set the maximum generation of coal plants
             '''
             
             
-            # ((g,t), Gen(g,y,t)*Price_Dur(t,"PercentTime")*8.76/1000) =e= Sum(s$SetScenario(s), Price_Gen(y,s)) ;
+            # NEW: Using Config constants for time conversion (was hardcoded 8.76/1000)
             return quicksum(quicksum(
                 model.Gen[g, y, t] * model.Price_dur[t] 
                 for t in model.t
-                    )for g in model.g )* 8.76/1000  == model.Price_gen[y][scenario]#sum(
+                    )for g in model.g )* Config.HOURS_PER_YEAR/Config.USD_TO_MILLIONS  == model.Price_gen[y][scenario]#sum(
                  #for s in model.s
         
         model.MaxCoalGen = Constraint(model.y, rule=max_coal_gen_rule)
@@ -189,9 +205,9 @@ def build_model(model_data, scenario, price_scenario):
             This function is used to set the MINIMUM PLF rule
             """
             return sum(
-                model.Gen[g, y, t] * model.Price_dur[t] #* 8.76 / 1000
-                for t in model.t
-            ) >= model.Cap[g, y] *model.Other["MinPLF", "Value"]#* 8.76 / 1000            
+            model.Gen[g, y, t] * model.Price_dur[t] #* Config.HOURS_PER_YEAR / Config.USD_TO_THOUSANDS
+            for t in model.t
+        ) >= model.Cap[g, y] *model.Other["MinPLF", "Value"]#* Config.HOURS_PER_YEAR / Config.USD_TO_THOUSANDS            
         model.MinPLF = Constraint(model.g, model.y, rule=min_plf_rule)
         # Maximum PLF
         def max_plf_rule(model, g, y):
@@ -199,9 +215,9 @@ def build_model(model_data, scenario, price_scenario):
             This function is used to set the MAXIMUM PLF rule
             """
             return sum(
-                model.Gen[g, y, t] * model.Price_dur[t] #* 8.76 / 1000
-                for t in model.t
-            ) <= model.Cap[g, y] * model.Other["MaxPLF", "Value"]#* 8.76 / 1000
+            model.Gen[g, y, t] * model.Price_dur[t] #* Config.HOURS_PER_DAY / Config.USD_TO_THOUSANDS
+            for t in model.t
+        ) <= model.Cap[g, y] * model.Other["MaxPLF", "Value"]#* Config.HOURS_PER_DAY / Config.USD_TO_THOUSANDS
             
         model.MaxPLF = Constraint(model.g, model.y, rule=max_plf_rule)
         
@@ -210,14 +226,14 @@ def build_model(model_data, scenario, price_scenario):
             """
             This function is used to set the CAPACITY BALANCE rule
             """
-            if y>2021:
+            if y > Config.BASE_YEAR:
                 return model.Cap[g, y] == model.Cap[g, y-1] - model.Retire[g, y] * model.GenData[g]["CAPACITY"]
             else:
                 return Constraint.Skip
         model.CapBal = Constraint(model.g, model.y, rule=capacity_balance_rule)
         
         def capacity_balance_rule1(model,g):
-            return model.Cap[g, 2021] == model.GenData[g]["CAPACITY"]- model.Retire[g, 2021]* model.GenData[g]["CAPACITY"]
+            return model.Cap[g, Config.BASE_YEAR] == model.GenData[g]["CAPACITY"]- model.Retire[g, Config.BASE_YEAR]* model.GenData[g]["CAPACITY"]
         
         model.CapBal1 = Constraint(model.g, rule=capacity_balance_rule1)
 
@@ -229,7 +245,7 @@ def build_model(model_data, scenario, price_scenario):
             """
             return sum(
                 model.Retire[g, y] for y in model.y
-            ) <= 1
+            ) <= Config.MAX_RETIREMENTS_PER_PLANT
         model.MaxRetire = Constraint(model.g, rule=max_retire_rule)
 
         # Minimum Capacity
@@ -237,24 +253,14 @@ def build_model(model_data, scenario, price_scenario):
             """
             This function is used to set the MINIMUM CAPACITY rule
             """
-            #unit of Capacity is MW, unit of Price_gen is TWh
+            # NEW: Using Config constants for capacity calculation (was hardcoded 1000000, 8760, 0.75)
+            # unit of Capacity is MW, unit of Price_gen is TWh
             return sum(
                 model.Cap[g, y] for g in model.g
-            ) >= model.Price_gen[y][scenario] *1000000 / (8760 * 0.75)
+            ) >= model.Price_gen[y][scenario] * Config.TWH_TO_MWH / (Config.HOURS_PER_YEAR * Config.MAX_LOAD_FACTOR)
           
         model.MinCapacity = Constraint(model.y, rule=min_capacity_rule)
         
-        def min_capacity_rule1(model, y):
-            """
-            This function is used to set the MINIMUM CAPACITY rule
-            """
-            #unit of Capacity is MW, unit of Price_gen is TWh
-            return sum(
-                model.Cap[g, y] for g in model.g
-            ) <= model.Price_gen[y][scenario] *1000000 / (8760 * 0.74)
-          
-        model.MinCapacity1 = Constraint(model.y, rule=min_capacity_rule1)
-                # Fixing the generation and capacity of plants that have exceeded their maximum life
         # Define objective function
         # print("DR:::::")
         # model.DR.pprint()
@@ -273,15 +279,16 @@ def build_model(model_data, scenario, price_scenario):
                 cost_per_mw= 0
                 cost = 0 
                 for g in model.g:
-                    if scenario == "AD":
+                    # NEW: Handle intermediate scenarios - use capacity for AD and intermediate scenarios, fixed capacity for BAU
+                    if scenario in ["AD", "AD_25", "AD_50", "AD_75"]:
                         capacity = model.Cap[g, y]
                     elif scenario == "BAU":
                         capacity = model.GenData[g]["CAPACITY"]
                 
                     if price_scenario == "AvgPPAPrice":
-                        cost_per_mw = model.FC_PPA[g, y]/1000
+                        cost_per_mw = model.FC_PPA[g, y]/Config.USD_TO_THOUSANDS
                     elif price_scenario == "MarketPrice":
-                        cost_per_mw = 100
+                        cost_per_mw = Config.DEFAULT_COST_PER_MW_MarketPrice
                     cost+=cost_per_mw * capacity
                 # year_contribution += -(capacity_sum * price_sum)  # to billion dollars
                 
@@ -302,7 +309,9 @@ def build_model(model_data, scenario, price_scenario):
         return model
     
     except Exception as e:
-        raise RuntimeError(f"Error creating optimization model: {str(e)}")
+        import traceback
+        tb = traceback.format_exc()
+        raise RuntimeError(f"Error creating optimization model: {str(e)}\nTraceback:\n{tb}")
 def setup_argument_parser():
     """
     Set up and return the argument parser for command line options.
@@ -318,8 +327,8 @@ def setup_argument_parser():
                        help='Solver options as key=value pairs.')
     parser.add_argument('--scenarios', type=str, nargs='+', 
                        default=["AD","BAU"],
-                       choices=["BAU", "AD"],
-                       help='Scenarios to run.')
+                       choices=["BAU", "AD", "AD_25", "AD_50", "AD_75"],
+                       help='Scenarios to run. Available: BAU, AD, AD_25 (1/4 AD), AD_50 (1/2 AD), AD_75 (3/4 AD).')
     parser.add_argument('--price-scenarios', type=str, nargs='+',
                        default=["AvgPPAPrice", "MarketPrice"],
                        choices=["MarketPrice", "AvgPPAPrice"],
@@ -375,7 +384,18 @@ def run_scenario(model_data, scenario, price_scenario, solver):
     # from model_check import check_plf_constraints, verify_cost_calculations,check_capacity_constraints,validate_retirement_economics
     model = build_model(model_data, scenario, price_scenario)
 
+    # Write the model to an LP file before solving
+    model.write(f"{scenario}_{price_scenario}.lp", io_options={'symbolic_solver_labels': True})
+
     result = solver.solve(model, tee=True)
+    logging.getLogger('pyomo.core').setLevel(logging.INFO)
+    log_infeasible_constraints(model, log_expression=True)    
+
+    # FIXED: Removed problematic log_infeasible_constraints call with logger object
+    # log = logging.getLogger('pyomo.core')
+    # log.setLevel(logging.INFO)
+    # log_infeasible_constraints(model, log)
+
     # if scenario == "AD":
     # debug_AD_scenario(model,scenario)
     # print("\nPost-solve checks:")    
@@ -388,6 +408,8 @@ def run_scenario(model_data, scenario, price_scenario, solver):
 
     if (result.solver.status != SolverStatus.ok) or \
        (result.solver.termination_condition != TerminationCondition.optimal):
+        print(f"\nModel is infeasible. LP file has been written to {scenario}_{price_scenario}.lp")
+        log_infeasible_constraints(model, log_expression=True)
         raise RuntimeError(f"Solver failed for scenario {scenario}_{price_scenario}")
     
     return process_model_results(model)
@@ -432,6 +454,12 @@ def main():
         
         data = load_excel_data(file_path)
         model_data = initialize_model_data(data)
+        
+        # NEW: Generate intermediate scenarios if any are requested
+        if any(scenario in args.scenarios for scenario in ["AD_25", "AD_50", "AD_75"]):
+            print("Generating intermediate decarbonization scenarios...")
+            from energy_data_processor import generate_intermediate_scenarios
+            model_data = generate_intermediate_scenarios(model_data)
         
         # Initialize solver
         solver = initialize_solver(args)

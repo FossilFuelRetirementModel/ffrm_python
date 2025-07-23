@@ -1,6 +1,8 @@
 import pandas as pd
 from pyomo.core.util import quicksum
 from pyomo.environ import value
+from config import Config  # NEW: Import Config class for constants
+
 def process_model_results(model):
     """
     Process the results from a solved model.
@@ -44,7 +46,8 @@ def save_results_to_excel(results, output_file):
     try:
         # Save each scenario's data to separate files
         for key, result in results.items():
-            scenario_output_file = f"{key}_results.xlsx"
+            # NEW: Using Config constant for scenario output file template
+            scenario_output_file = Config.SCENARIO_OUTPUT_TEMPLATE.format(key=key)
             with pd.ExcelWriter(scenario_output_file) as scenario_writer:
            
                 # Save each component to a separate sheet
@@ -123,25 +126,28 @@ def calculate_annual_summary(model):
         for y in model.y:
             summary[y] = {
                 # Total Coal Generation (TWh)
+                # NEW: Using Config constants for time conversion (was hardcoded 8.76/1000)
                 "Total Coal Gen TWh": sum(
-                    model.Gen[g, y, t].value * model.Price_dur[t] * 8.76 / 1000
+                    model.Gen[g, y, t].value * model.Price_dur[t] * Config.HOURS_PER_YEAR / Config.USD_TO_MILLIONS
                     for g in model.g 
                     for t in model.t
                 ),
                 
                 # Total Capacity (GW)
+                # NEW: Using Config constant for MW to GW conversion (was hardcoded /1000)
                 "Total Capacity GW": sum(
                     model.Cap[g, y].value for g in model.g
-                ) / 1000,
+                ) / Config.MW_TO_GW,
                 
                 # Total Undiscounted Net Revenue ($b)
+                # NEW: Using Config constant for conversion to billions (was hardcoded /1000)
                 "Total Undiscounted Net Revenue $b":
                    sum(
                     plant_netrev[g][y] for g in model.g
-                ) / 1000  ,# Convert to billions
+                ) / Config.USD_TO_THOUSANDS,  # Convert to billions
                 "Discounted Net Revenue $b": sum(
                     plant_netrev[g][y] * model.DR[y] for g in model.g
-                ) / 1000  # Convert to billions
+                ) / Config.USD_TO_THOUSANDS  # Convert to billions
                 }
         
         return summary
@@ -182,29 +188,31 @@ def calculate_plant_netrev(model):
                     print
                 '''
                 netrev = -(
-                            # 根据场景直接使用相应的容量
+                            # Use the corresponding capacity based on scenario
                             model.Cap[g, y].value if model.s.at(1) == "AD" else model.GenData[g]["CAPACITY"]
                         ) *(
-                            # 根据价格场景直接使用相应的价格
-                            model.FC_PPA[g, y]/1e3 if model.p.at(1) == "AvgPPAPrice" else 100
+                            # NEW: Using Config constants for price scenario handling (was hardcoded /1e3 and 100)
+                            model.FC_PPA[g, y]/Config.USD_TO_THOUSANDS if model.p.at(1) == "AvgPPAPrice" else Config.DEFAULT_COST_PER_MW_MarketPrice
                         ) + quicksum(
                         (
                             model.rev_unit[g, y, model.p.at(1)] * 
                             model.Price_Dist1[y, model.p.at(1), t] - 
                             model.cost[g, y]
-                        ) * model.Gen[g, y, t].value * model.Price_dur[t] * 8760
+                        ) * model.Gen[g, y, t].value * model.Price_dur[t] * Config.HOURS_PER_YEAR
                         for t in model.t
                     )
                
-                plant_netrev["annual"][g][y] = netrev/1e6
+                # NEW: Using Config constant for conversion to millions (was hardcoded /1e6)
+                plant_netrev["annual"][g][y] = netrev/Config.USD_TO_MILLIONS
             
             # Calculate depreciated capex
+            # NEW: Using Config constant for conversion to thousands (was hardcoded /1000)
             plant_netrev["depreciated_capex"][g] = max(
                 model.GenData[g]["CAPACITY"] * 
                 model.Other["CoalCapex", "Value"] * 
                 (1 - model.Other["SLD", "Value"] * model.life[g]), 
                 0
-            ) / 1000
+            ) / Config.USD_TO_THOUSANDS
         print(model.p[1])
         return plant_netrev
     except Exception as e:
@@ -223,24 +231,24 @@ def calculate_annual_total_netrev(model):
     try:
         annual_netrev = {"nominal": {}, "discounted": {}}
         
-        # 使用已有的 calculate_net_revenue 函数获取每个电厂的净收入
+        # Use the existing calculate_net_revenue function to get the net revenue for each plant
         plant_netrev = calculate_net_revenue(model)
         
-        # 获取所有年份
+        # Get all years
         years = list(plant_netrev[list(plant_netrev.keys())[0]].keys())
         
-        # 计算每年的总净收入
+        # Calculate total net revenue for each year
         for year in years:
-            # 计算名义值：所有电厂该年的净收入之和
+            # Calculate nominal value: sum of net revenue for all plants in the year
             annual_netrev["nominal"][year] = sum(
                 plant_netrev[plant][year] 
                 for plant in plant_netrev.keys()
             )
             
-            # 计算折现值：使用相同的折现率(10%)
+            # NEW: Using Config constants for discount rate and base year (was hardcoded 0.06 and 2021)
             annual_netrev["discounted"][year] = (
                 annual_netrev["nominal"][year] / 
-                (1 + 0.06) ** (int(year) - 2021)  # 假设基准年为2021，折现率为10%
+                (1 + Config.DISCOUNT_RATE) ** (int(year) - Config.BASE_YEAR)
             )
 
         return annual_netrev
@@ -274,8 +282,9 @@ def calculate_total_generation(model):
             for y in model.y:
             #         for t in model.t:
             #             print(model.Gen[g, y, t])
+                # NEW: Using Config constant for hours per year (was hardcoded 8.76)
                 gen[g][y] = round(sum(
-                    model.Gen[g, y, t].value * model.Price_dur[t] * 8.76 for t in model.t),5)
+                    model.Gen[g, y, t].value * model.Price_dur[t] * Config.HOURS_PER_YEAR/Config.USD_TO_THOUSANDS for t in model.t),5)
         
         return gen
     except Exception as e:
@@ -314,7 +323,8 @@ def calculate_total_capacity(model):
                 model.Cap[g, y].value for g in model.g
             )
             # print(f"Total Capacity: {total_capacity_mw}")
-            total_capacity[y] = total_capacity_mw/1000
+            # NEW: Using Config constant for MW to GW conversion (was hardcoded /1000)
+            total_capacity[y] = total_capacity_mw/Config.MW_TO_GW
         # print(total_capacity)
         return total_capacity
     except Exception as e:

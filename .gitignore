@@ -23,6 +23,10 @@ model_old.py
 *.log
 *.lst
 *.lxi
+
+# Generated model files
+*.lp
+
 # IDE
 .vscode/
 .idea/
@@ -38,8 +42,16 @@ model_old.py
 .DS_Store
 Thumbs.db
 
-# Excel
-~$*.xlsx
+# Excel files - exclude all Excel files to prevent data upload
 *.xlsx
-!InputDataCoalUpdated.xlsx
-!Input File (India-Coal Retirements).xlsx
+*.xls
+*.xlsm
+*.xlsb
+~$*.xlsx
+~$*.xls
+~$*.xlsm
+~$*.xlsb
+
+# Allow specific input files if needed (uncomment and modify as required)
+# !InputDataCoalUpdated.xlsx
+# !Input File (India-Coal Retirements).xlsx
