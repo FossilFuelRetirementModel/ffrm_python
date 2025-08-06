@@ -14,11 +14,11 @@ from flask import send_from_directory
 def read_data_from_excel(file_path):
     data = pd.read_excel(file_path, sheet_name=None)
     return data
-# 读取和处理 benchmark 数据的函数 - 已移除
+# Function to read and process benchmark data - Removed
 def read_benchmark_data(file_path):
     return {}
 
-# 处理 benchmark 数据，将其整合到相应的图表中 - 已移除
+# Function to process benchmark data and integrate it into corresponding charts - Removed
 def process_benchmark_data(benchmark_data):
     """Process benchmark data and integrate it into corresponding charts"""
     return {}
@@ -80,9 +80,9 @@ def create_profit_plot(scenario_data, benchmark_data=None, title_prefix=""):
                                       f"{title_prefix} Avg PPA Price Scenario",
                                       f"{title_prefix} Market Price Scenario - Cumulative",
                                       f"{title_prefix} Avg PPA Price Scenario - Cumulative"),
-                       shared_yaxes=True,vertical_spacing=0.2)  # 增加垂直间距
+                       shared_yaxes=True,vertical_spacing=0.2)  # Increase vertical spacing
     
-    # 更新子图标题字体大小
+    # Update subplot title font size
     fig.update_annotations(font_size=16)
     
     # Market Price subplot
@@ -92,7 +92,7 @@ def create_profit_plot(scenario_data, benchmark_data=None, title_prefix=""):
             y=scenario_data['MarketPrice']['profits_bau'],
             mode='lines+markers',
             name='BAU - Market Price',
-            line=dict(color='#1f77b4', width=2.5),  # 经济学人深蓝色
+            line=dict(color='#1f77b4', width=2.5),  # deep blue
             marker=dict(size=7, color='#1f77b4')
         ),
         row=1, col=1
@@ -103,7 +103,7 @@ def create_profit_plot(scenario_data, benchmark_data=None, title_prefix=""):
             y=scenario_data['MarketPrice']['profits_ad'],
             mode='lines+markers',
             name='AD - Market Price',
-            line=dict(color='#d62728', width=2.5),  # 经济学人红色
+            line=dict(color='#d62728', width=2.5),  # red
             marker=dict(size=7, color='#d62728')
         ),
         row=1, col=1
@@ -116,7 +116,7 @@ def create_profit_plot(scenario_data, benchmark_data=None, title_prefix=""):
             y=scenario_data['AvgPPAPrice']['profits_bau'],
             mode='lines+markers',
             name='BAU - Avg PPA Price',
-            line=dict(color='#2ca02c', width=2.5),  # 经济学人绿色
+            line=dict(color='#2ca02c', width=2.5),  # green
             marker=dict(size=7, color='#2ca02c')
         ),
         row=1, col=2
@@ -127,7 +127,7 @@ def create_profit_plot(scenario_data, benchmark_data=None, title_prefix=""):
             y=scenario_data['AvgPPAPrice']['profits_ad'],
             mode='lines+markers',
             name='AD - Avg PPA Price',
-            line=dict(color='#ff7f0e', width=2.5),  # 经济学人橙色
+            line=dict(color='#ff7f0e', width=2.5),  # orange
             marker=dict(size=7, color='#ff7f0e')
         ),
         row=1, col=2
@@ -218,29 +218,29 @@ def create_profit_plot(scenario_data, benchmark_data=None, title_prefix=""):
         row=2, col=2
     )
     
-    # Add benchmark data (if available) - 已移除
+    # Add benchmark data (if available) - Removed
     # Update layout
     fig.update_layout(
         # title=f'{title_prefix} Profits Comparison Across Price Scenarios',
-        height=800,  # 进一步增加图表高度
+        height=800,  # Further increase chart height
         legend_title='Scenario',
         hovermode='x unified',
         template='plotly_white',
-        title_font=dict(size=24, family='Georgia, serif', color='#1a1a1a'),  # 经济学人风格标题
+        title_font=dict(size=24, family='Georgia, serif', color='#1a1a1a'),  #   style title
         legend=dict(
             orientation="h",
             yanchor="bottom",
-            y=1.08,  # 进一步调整图例位置，远离标题
+            y=1.08,  # Further adjust legend position, away from title
             xanchor="right",
             x=1,
-            font=dict(size=14, family='Georgia, serif'),  # 经济学人风格字体
-            bgcolor='rgba(255,255,255,0.9)',  # 更不透明的背景
-            bordercolor='rgba(0,0,0,0.3)',    # 更深的边框
+            font=dict(size=14, family='Georgia, serif'),  #   style font
+            bgcolor='rgba(255,255,255,0.9)',  # More opaque background
+            bordercolor='rgba(0,0,0,0.3)',    # Darker border
             borderwidth=1.5
         ),
-        margin=dict(l=80, r=50, t=120, b=80),  # 增加顶部边距
-        font=dict(size=14, family='Georgia, serif'),  # 经济学人风格字体
-        plot_bgcolor='rgba(248,248,248,0.8)',  # 经济学人风格背景色
+        margin=dict(l=80, r=50, t=120, b=80),  # Increase top margin
+        font=dict(size=14, family='Georgia, serif'),  #   style font
+        plot_bgcolor='rgba(248,248,248,0.8)',  #   style background color
         paper_bgcolor='white'
     )
     
@@ -265,10 +265,10 @@ def create_profit_plot(scenario_data, benchmark_data=None, title_prefix=""):
         title_text='Year', 
         showgrid=True, 
         gridwidth=1, 
-        gridcolor='rgba(200,200,200,0.5)',  # 经济学人风格网格线
-        title_font=dict(size=16, family='Georgia, serif'),  # 经济学人风格字体
-        tickfont=dict(size=14, family='Georgia, serif'),     # 经济学人风格字体
-        zeroline=False,  # 移除零线
+        gridcolor='rgba(200,200,200,0.5)',  #
+        title_font=dict(size=16, family='Georgia, serif'),  # 
+        tickfont=dict(size=14, family='Georgia, serif'),     # 
+        zeroline=False,  # 
         showline=True,
         linecolor='rgba(0,0,0,0.3)',
         linewidth=1
@@ -278,12 +278,12 @@ def create_profit_plot(scenario_data, benchmark_data=None, title_prefix=""):
         title_text='Annual Profit (Billion $)', 
         showgrid=True, 
         gridwidth=1, 
-        gridcolor='rgba(200,200,200,0.5)',  # 经济学人风格网格线
+        gridcolor='rgba(200,200,200,0.5)',  #   style grid lines
         range=[0, annual_max],
         row=1,
-        title_font=dict(size=16, family='Georgia, serif'),  # 经济学人风格字体
-        tickfont=dict(size=14, family='Georgia, serif'),     # 经济学人风格字体
-        zeroline=False,  # 移除零线
+        title_font=dict(size=16, family='Georgia, serif'),  #   style font
+        tickfont=dict(size=14, family='Georgia, serif'),     #   style font
+        zeroline=False,  # Remove zero line
         showline=True,
         linecolor='rgba(0,0,0,0.3)',
         linewidth=1
@@ -294,12 +294,12 @@ def create_profit_plot(scenario_data, benchmark_data=None, title_prefix=""):
         title_text='Cumulative Profit (Billion $)', 
         showgrid=True, 
         gridwidth=1, 
-        gridcolor='rgba(200,200,200,0.5)',  # 经济学人风格网格线
+        gridcolor='rgba(200,200,200,0.5)',  #   style grid lines
         range=[0, cumulative_max],
         row=2,
-        title_font=dict(size=16, family='Georgia, serif'),  # 经济学人风格字体
-        tickfont=dict(size=14, family='Georgia, serif'),     # 经济学人风格字体
-        zeroline=False,  # 移除零线
+        title_font=dict(size=16, family='Georgia, serif'),  #   style font
+        tickfont=dict(size=14, family='Georgia, serif'),     #   style font
+        zeroline=False,  # Remove zero line
         showline=True,
         linecolor='rgba(0,0,0,0.3)',
         linewidth=1
@@ -312,7 +312,7 @@ def create_total_generation_plot(processed_data,benchmark_data=None):
                        subplot_titles=("Market Price Scenario", "Avg PPA Price Scenario"),
                        shared_yaxes=True)
     
-    # 更新子图标题字体大小
+    # Update subplot title font size
     fig.update_annotations(font_size=18)
     # Market Price subplot
     fig.add_trace(
@@ -321,7 +321,7 @@ def create_total_generation_plot(processed_data,benchmark_data=None):
             y=processed_data['MarketPrice']['BAU_Total_Generation']['Total Generation (TWh)'],
             mode='lines+markers',
             name='BAU - Market Price',
-            line=dict(color='#1f77b4', width=2.5),  # 经济学人深蓝色
+            line=dict(color='#1f77b4', width=2.5),  #  deep blue
             marker=dict(size=7, color='#1f77b4')
         ),
         row=1, col=1
@@ -332,7 +332,7 @@ def create_total_generation_plot(processed_data,benchmark_data=None):
             y=processed_data['MarketPrice']['AD_Total_Generation']['Total Generation (TWh)'],
             mode='lines+markers',
             name='AD - Market Price',
-            line=dict(color='#d62728', width=2.5),  # 经济学人红色
+            line=dict(color='#d62728', width=2.5),  # Economist red
             marker=dict(size=7, color='#d62728')
         ),
         row=1, col=1
@@ -345,7 +345,7 @@ def create_total_generation_plot(processed_data,benchmark_data=None):
             y=processed_data['AvgPPAPrice']['BAU_Total_Generation']['Total Generation (TWh)'],
             mode='lines+markers',
             name='BAU - Avg PPA Price',
-            line=dict(color='#2ca02c', width=2.5),  # 经济学人绿色
+            line=dict(color='#2ca02c', width=2.5),  # Economist green
             marker=dict(size=7, color='#2ca02c')
         ),
         row=1, col=2
@@ -357,12 +357,12 @@ def create_total_generation_plot(processed_data,benchmark_data=None):
             y=processed_data['AvgPPAPrice']['AD_Total_Generation']['Total Generation (TWh)'],
             mode='lines+markers',
             name='AD - Avg PPA Price',
-            line=dict(color='#ff7f0e', width=2.5),  # 经济学人橙色
+            line=dict(color='#ff7f0e', width=2.5),  # Economist orange
             marker=dict(size=7, color='#ff7f0e')
         ),
         row=1, col=2
     )
-    # 添加 benchmark 数据（如果有） - 已移除
+    # Add benchmark data (if available) - Removed
     
     fig.update_layout(
         # title='Total Generation Comparison Across Price Scenarios',
@@ -421,7 +421,7 @@ def create_total_capacity_plot(processed_data,benchmark_data=None):
                        subplot_titles=("Market Price Scenario", "Avg PPA Price Scenario"),
                        shared_yaxes=True)
     
-    # 更新子图标题字体大小
+    # Update subplot title font size
     fig.update_annotations(font_size=18)
  
     # Market Price subplot
@@ -472,7 +472,7 @@ def create_total_capacity_plot(processed_data,benchmark_data=None):
         row=1, col=2
     )
     
-       # 添加 benchmark 数据（如果有） - 已移除
+       # Add benchmark data (if available) - Removed
     
     
     fig.update_layout(
