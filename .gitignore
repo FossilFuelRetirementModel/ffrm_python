@@ -55,3 +55,6 @@ Thumbs.db
 # Allow specific input files if needed (uncomment and modify as required)
 # !InputDataCoalUpdated.xlsx
 # !Input File (India-Coal Retirements).xlsx
+# Ignore generated dashboard exports
+exports/
+
