@@ -366,25 +366,25 @@ def create_total_generation_plot(processed_data,benchmark_data=None):
     
     fig.update_layout(
         # title='Total Generation Comparison Across Price Scenarios',
-        height=700,  # 增加图表高度
+        height=700,  # Increase chart height
         legend_title='Scenario',
         hovermode='x unified',
         template='plotly_white',
-        title_font=dict(size=24, family='Georgia, serif', color='#1a1a1a'),  # 经济学人风格标题
+        title_font=dict(size=24, family='Georgia, serif', color='#1a1a1a'),  
         legend=dict(
             orientation="h",
             yanchor="bottom",
-            y=1.08,  # 调整图例位置，远离标题
+            y=1.08,  # Adjust legend position, away from title
             xanchor="right",
             x=1,
-            font=dict(size=14, family='Georgia, serif'),  # 经济学人风格字体
-            bgcolor='rgba(255,255,255,0.9)',  # 更不透明的背景
-            bordercolor='rgba(0,0,0,0.3)',    # 更深的边框
+            font=dict(size=14, family='Georgia, serif'),  
+            bgcolor='rgba(255,255,255,0.9)',  # More opaque background
+            bordercolor='rgba(0,0,0,0.3)',    # Darker border
             borderwidth=1.5
         ),
-        margin=dict(l=80, r=50, t=120, b=80),  # 增加顶部边距
-        font=dict(size=14, family='Georgia, serif'),  # 经济学人风格字体
-        plot_bgcolor='rgba(248,248,248,0.8)',  # 经济学人风格背景色
+        margin=dict(l=80, r=50, t=120, b=80),  # Increase top margin
+        font=dict(size=14, family='Georgia, serif'),  
+        plot_bgcolor='rgba(248,248,248,0.8)',  
         paper_bgcolor='white'
     )
     
@@ -392,10 +392,10 @@ def create_total_generation_plot(processed_data,benchmark_data=None):
         title_text='Year', 
         showgrid=True, 
         gridwidth=1, 
-        gridcolor='rgba(200,200,200,0.5)',  # 经济学人风格网格线
-        title_font=dict(size=16, family='Georgia, serif'),  # 经济学人风格字体
-        tickfont=dict(size=14, family='Georgia, serif'),     # 经济学人风格字体
-        zeroline=False,  # 移除零线
+        gridcolor='rgba(200,200,200,0.5)',  #
+        title_font=dict(size=16, family='Georgia, serif'),  
+        tickfont=dict(size=14, family='Georgia, serif'),     
+        zeroline=False,  # Remove zero line
         showline=True,
         linecolor='rgba(0,0,0,0.3)',
         linewidth=1
@@ -404,10 +404,10 @@ def create_total_generation_plot(processed_data,benchmark_data=None):
         title_text='Total Generation (TWh)', 
         showgrid=True, 
         gridwidth=1, 
-        gridcolor='rgba(200,200,200,0.5)',  # 经济学人风格网格线
-        title_font=dict(size=16, family='Georgia, serif'),  # 经济学人风格字体
-        tickfont=dict(size=14, family='Georgia, serif'),     # 经济学人风格字体
-        zeroline=False,  # 移除零线
+        gridcolor='rgba(200,200,200,0.5)',  
+        title_font=dict(size=16, family='Georgia, serif'),  
+        tickfont=dict(size=14, family='Georgia, serif'),     
+        zeroline=False,  
         showline=True,
         linecolor='rgba(0,0,0,0.3)',
         linewidth=1
@@ -431,7 +431,7 @@ def create_total_capacity_plot(processed_data,benchmark_data=None):
             y=processed_data['MarketPrice']['BAU_Total_Capacity']['Total Capacity (GW)'],
             mode='lines+markers',
             name='BAU - Market Price',
-            line=dict(color='#1f77b4', width=2.5),  # 经济学人深蓝色
+            line=dict(color='#1f77b4', width=2.5),  # deep blue
             marker=dict(size=7, color='#1f77b4')
         ),
         row=1, col=1
@@ -442,7 +442,7 @@ def create_total_capacity_plot(processed_data,benchmark_data=None):
             y=processed_data['MarketPrice']['AD_Total_Capacity']['Total Capacity (GW)'],
             mode='lines+markers',
             name='AD - Market Price',
-            line=dict(color='#d62728', width=2.5),  # 经济学人红色
+            line=dict(color='#d62728', width=2.5),  # red
             marker=dict(size=7, color='#d62728')
         ),
         row=1, col=1
@@ -455,7 +455,7 @@ def create_total_capacity_plot(processed_data,benchmark_data=None):
             y=processed_data['AvgPPAPrice']['BAU_Total_Capacity']['Total Capacity (GW)'],
             mode='lines+markers',
             name='BAU - Avg PPA Price',
-            line=dict(color='#2ca02c', width=2.5),  # 经济学人绿色
+            line=dict(color='#2ca02c', width=2.5),  # green
             marker=dict(size=7, color='#2ca02c')
         ),
         row=1, col=2
@@ -466,7 +466,7 @@ def create_total_capacity_plot(processed_data,benchmark_data=None):
             y=processed_data['AvgPPAPrice']['AD_Total_Capacity']['Total Capacity (GW)'],
             mode='lines+markers',
             name='AD - Avg PPA Price',
-            line=dict(color='#ff7f0e', width=2.5),  # 经济学人橙色
+            line=dict(color='#ff7f0e', width=2.5),  # orange
             marker=dict(size=7, color='#ff7f0e')
         ),
         row=1, col=2
@@ -477,25 +477,25 @@ def create_total_capacity_plot(processed_data,benchmark_data=None):
     
     fig.update_layout(
         # title='Total Capacity Comparison Across Price Scenarios',
-        height=700,  # 增加图表高度
+        height=700,  # Increase chart height
         legend_title='Scenario',
         hovermode='x unified',
         template='plotly_white',
-        title_font=dict(size=24, family='Georgia, serif', color='#1a1a1a'),  # 经济学人风格标题
+        title_font=dict(size=24, family='Georgia, serif', color='#1a1a1a'),  # 
         legend=dict(
             orientation="h",
             yanchor="bottom",
-            y=1.08,  # 调整图例位置，远离标题
+            y=1.08,  # Adjust legend position, away from title
             xanchor="right",
             x=1,
-            font=dict(size=14, family='Georgia, serif'),  # 经济学人风格字体
-            bgcolor='rgba(255,255,255,0.9)',  # 更不透明的背景
-            bordercolor='rgba(0,0,0,0.3)',    # 更深的边框
+            font=dict(size=14, family='Georgia, serif'),  # 
+            bgcolor='rgba(255,255,255,0.9)',  # More opaque background
+            bordercolor='rgba(0,0,0,0.3)',    # Darker border
             borderwidth=1.5
         ),
-        margin=dict(l=80, r=50, t=120, b=80),  # 增加顶部边距
-        font=dict(size=14, family='Georgia, serif'),  # 经济学人风格字体
-        plot_bgcolor='rgba(248,248,248,0.8)',  # 经济学人风格背景色
+        margin=dict(l=80, r=50, t=120, b=80),  # Increase top margin
+        font=dict(size=14, family='Georgia, serif'),  # 
+        plot_bgcolor='rgba(248,248,248,0.8)',  # 
         paper_bgcolor='white'
     )
     
@@ -503,10 +503,10 @@ def create_total_capacity_plot(processed_data,benchmark_data=None):
         title_text='Year', 
         showgrid=True, 
         gridwidth=1, 
-        gridcolor='rgba(200,200,200,0.5)',  # 经济学人风格网格线
-        title_font=dict(size=16, family='Georgia, serif'),  # 经济学人风格字体
-        tickfont=dict(size=14, family='Georgia, serif'),     # 经济学人风格字体
-        zeroline=False,  # 移除零线
+        gridcolor='rgba(200,200,200,0.5)',  # 
+        title_font=dict(size=16, family='Georgia, serif'),  # 
+        tickfont=dict(size=14, family='Georgia, serif'),     # 
+        zeroline=False,  # 
         showline=True,
         linecolor='rgba(0,0,0,0.3)',
         linewidth=1
@@ -515,10 +515,10 @@ def create_total_capacity_plot(processed_data,benchmark_data=None):
         title_text='Total Capacity (GW)', 
         showgrid=True, 
         gridwidth=1, 
-        gridcolor='rgba(200,200,200,0.5)',  # 经济学人风格网格线
-        title_font=dict(size=16, family='Georgia, serif'),  # 经济学人风格字体
-        tickfont=dict(size=14, family='Georgia, serif'),     # 经济学人风格字体
-        zeroline=False,  # 移除零线
+        gridcolor='rgba(200,200,200,0.5)',  # 
+        title_font=dict(size=16, family='Georgia, serif'),  # 
+        tickfont=dict(size=14, family='Georgia, serif'),     # 
+        zeroline=False,  # 
         showline=True,
         linecolor='rgba(0,0,0,0.3)',
         linewidth=1
@@ -538,17 +538,17 @@ def create_retirement_tables(processed_data):
             # Convert all column names to strings to avoid DataTable errors
             df.columns = [str(col) for col in df.columns]
             
-            # 创建条件样式列表，根据单元格值设置颜色
+            # Create conditional style list based on cell values
             style_data_conditional = [
                 {'if': {'row_index': 'odd'}, 'backgroundColor': '#f9f9f9'},
                 {'if': {'column_type': 'numeric'}, 'textAlign': 'right'}
             ]
             
-            # 为不同的退役年份添加不同的颜色
-            # 数值越大（越晚退役）颜色越深
+            # Add different colors for different retirement years
+            # Higher values (later retirement) have darker colors
             for i, year in enumerate(range(2021, 2051)):
                 if str(year) in df.columns:
-                    intensity = min(100, int(30 + i * 2.5))  # 颜色强度随年份增加
+                    intensity = min(100, int(30 + i * 2.5))  # Color intensity increases with year
                     style_data_conditional.append({
                         'if': {
                             'column_id': str(year),
@@ -560,7 +560,7 @@ def create_retirement_tables(processed_data):
                     })
             
             tables[key] = html.Div([
-                # 添加搜索和筛选功能
+                # Add search and filter functionality
                 html.Div([
                     html.Div([
                         html.Label("Search:"),
@@ -585,14 +585,14 @@ def create_retirement_tables(processed_data):
                     ], style={'width': '60%', 'display': 'inline-block'})
                 ], style={'marginBottom': '20px'}),
                 
-                # 增强的数据表
+                # Enhanced data table
                 dash_table.DataTable(
                     id=f'retirement-table-{key}',
                     columns=[{"name": str(i), "id": str(i)} for i in df.columns],
                     data=df.to_dict('records'),
-                    filter_action="native",  # 启用内置筛选
-                    sort_action="native",    # 启用内置排序
-                    sort_mode="multi",       # 允许多列排序
+                    filter_action="native",  # Enable built-in filtering
+                    sort_action="native",    # Enable built-in sorting
+                    sort_mode="multi",       # Allow multi-column sorting
                     style_table={
                         'overflowX': 'auto', 
                         'maxHeight': '400px',
@@ -630,7 +630,7 @@ def create_retirement_tables(processed_data):
                     }]
                 ),
                 
-                # 添加图形化展示 - 退役时间线
+                # Add graphical display - retirement timeline
                 html.Div([
                     html.H4("Retirement Schedule", style={'textAlign': 'center', 'marginTop': '20px'}),
                     dcc.Graph(
@@ -846,7 +846,7 @@ def export_dashboard(n_clicks):
     
     return ""
 
-# 添加保存图片功能的回调
+# Add callback for saving images functionality
 @app.callback(
     Output('save-images-status', 'children'),
     Input('save-images-button', 'n_clicks'),
@@ -891,12 +891,12 @@ def save_images(n_clicks):
     return ""
 
 
-# 添加路由以访问导出的文件
+# Add route to access exported files
 @app.server.route('/exports/<path:path>')
 def serve_static(path):
     return send_from_directory(EXPORT_DIRECTORY, path)
 
-# 添加路由以访问图片文件
+# Add route to access image files
 @app.server.route('/exports/images/<path:path>')
 def serve_images(path):
     images_dir = os.path.join(EXPORT_DIRECTORY, 'images')
@@ -979,7 +979,7 @@ data = read_data_from_excel(file_path)
 scenario_data = process_data_all_scenarios(data)
 processed_data = preprocess_dash_data(data)
 
-# 读取和处理 benchmark 数据 - 已移除
+# Read and process benchmark data - Removed
 benchmark_data = None
 
 # Create the plots
