@@ -1,6 +1,7 @@
 import dash
 from dash import dcc, html, dash_table
 from dash.dependencies import Input, Output, State
+from dash.exceptions import PreventUpdate
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -8,6 +9,7 @@ import plotly.express as px
 import os
 from datetime import datetime
 import webbrowser
+import json
 from flask import send_from_directory
 
 # Function to read data from Excel
@@ -54,17 +56,18 @@ def preprocess_dash_data(data):
         processed_data[price_scenario] = {}
         
         for scenario in ['BAU', 'AD']:
-            df = data[f'{scenario}_{price_scenario}_AnnualSummary']
-            if 'Year' not in df.columns:
-                df['Year'] = df.iloc[0:, 0].values.tolist()
+            df = data[f'{scenario}_{price_scenario}_AnnualSummary'].copy()
+            
+            # Add Year column using the first column (Unnamed: 0)
+            df['Year'] = df.iloc[:, 0]
                 
             # Create a DataFrame for Total Generation
-            total_generation_df = data[f'{scenario}_{price_scenario}_AnnualSummary'][['Year', 'Total Coal Gen TWh']].copy()
+            total_generation_df = df[['Year', 'Total Coal Gen TWh']].copy()
             total_generation_df.columns = ['Year', 'Total Generation (TWh)']
             processed_data[price_scenario][f'{scenario}_Total_Generation'] = total_generation_df
             
             # Create a DataFrame for Total Capacity
-            total_capacity_df = data[f'{scenario}_{price_scenario}_AnnualSummary'][['Year', 'Total Capacity GW']].copy()
+            total_capacity_df = df[['Year', 'Total Capacity GW']].copy()
             total_capacity_df.columns = ['Year', 'Total Capacity (GW)']
             processed_data[price_scenario][f'{scenario}_Total_Capacity'] = total_capacity_df
             
@@ -222,7 +225,7 @@ def create_profit_plot(scenario_data, benchmark_data=None, title_prefix=""):
     # Update layout
     fig.update_layout(
         # title=f'{title_prefix} Profits Comparison Across Price Scenarios',
-        height=800,  # Further increase chart height
+        height=800,  # restore height, card will now expand
         legend_title='Scenario',
         hovermode='x unified',
         template='plotly_white',
@@ -317,8 +320,8 @@ def create_total_generation_plot(processed_data,benchmark_data=None):
     # Market Price subplot
     fig.add_trace(
         go.Scatter(
-            x=processed_data['MarketPrice']['BAU_Total_Generation']['Year'],
-            y=processed_data['MarketPrice']['BAU_Total_Generation']['Total Generation (TWh)'],
+            x=processed_data['MarketPrice']['BAU_Total_Generation']['Year'].tolist(),
+            y=processed_data['MarketPrice']['BAU_Total_Generation']['Total Generation (TWh)'].tolist(),
             mode='lines+markers',
             name='BAU - Market Price',
             line=dict(color='#1f77b4', width=2.5),  #  deep blue
@@ -328,8 +331,8 @@ def create_total_generation_plot(processed_data,benchmark_data=None):
     )
     fig.add_trace(
         go.Scatter(
-            x=processed_data['MarketPrice']['AD_Total_Generation']['Year'],
-            y=processed_data['MarketPrice']['AD_Total_Generation']['Total Generation (TWh)'],
+            x=processed_data['MarketPrice']['AD_Total_Generation']['Year'].tolist(),
+            y=processed_data['MarketPrice']['AD_Total_Generation']['Total Generation (TWh)'].tolist(),
             mode='lines+markers',
             name='AD - Market Price',
             line=dict(color='#d62728', width=2.5),  # Economist red
@@ -341,8 +344,8 @@ def create_total_generation_plot(processed_data,benchmark_data=None):
     # Avg PPA Price subplot
     fig.add_trace(
         go.Scatter(
-            x=processed_data['AvgPPAPrice']['BAU_Total_Generation']['Year'],
-            y=processed_data['AvgPPAPrice']['BAU_Total_Generation']['Total Generation (TWh)'],
+            x=processed_data['AvgPPAPrice']['BAU_Total_Generation']['Year'].tolist(),
+            y=processed_data['AvgPPAPrice']['BAU_Total_Generation']['Total Generation (TWh)'].tolist(),
             mode='lines+markers',
             name='BAU - Avg PPA Price',
             line=dict(color='#2ca02c', width=2.5),  # Economist green
@@ -353,8 +356,8 @@ def create_total_generation_plot(processed_data,benchmark_data=None):
 
     fig.add_trace(
         go.Scatter(
-            x=processed_data['AvgPPAPrice']['AD_Total_Generation']['Year'],
-            y=processed_data['AvgPPAPrice']['AD_Total_Generation']['Total Generation (TWh)'],
+            x=processed_data['AvgPPAPrice']['AD_Total_Generation']['Year'].tolist(),
+            y=processed_data['AvgPPAPrice']['AD_Total_Generation']['Total Generation (TWh)'].tolist(),
             mode='lines+markers',
             name='AD - Avg PPA Price',
             line=dict(color='#ff7f0e', width=2.5),  # Economist orange
@@ -366,7 +369,7 @@ def create_total_generation_plot(processed_data,benchmark_data=None):
     
     fig.update_layout(
         # title='Total Generation Comparison Across Price Scenarios',
-        height=700,  # Increase chart height
+        height=500,  # Increase chart height
         legend_title='Scenario',
         hovermode='x unified',
         template='plotly_white',
@@ -427,8 +430,8 @@ def create_total_capacity_plot(processed_data,benchmark_data=None):
     # Market Price subplot
     fig.add_trace(
         go.Scatter(
-            x=processed_data['MarketPrice']['BAU_Total_Capacity']['Year'],
-            y=processed_data['MarketPrice']['BAU_Total_Capacity']['Total Capacity (GW)'],
+            x=processed_data['MarketPrice']['BAU_Total_Capacity']['Year'].tolist(),
+            y=processed_data['MarketPrice']['BAU_Total_Capacity']['Total Capacity (GW)'].tolist(),
             mode='lines+markers',
             name='BAU - Market Price',
             line=dict(color='#1f77b4', width=2.5),  # deep blue
@@ -438,8 +441,8 @@ def create_total_capacity_plot(processed_data,benchmark_data=None):
     )
     fig.add_trace(
         go.Scatter(
-            x=processed_data['MarketPrice']['AD_Total_Capacity']['Year'],
-            y=processed_data['MarketPrice']['AD_Total_Capacity']['Total Capacity (GW)'],
+            x=processed_data['MarketPrice']['AD_Total_Capacity']['Year'].tolist(),
+            y=processed_data['MarketPrice']['AD_Total_Capacity']['Total Capacity (GW)'].tolist(),
             mode='lines+markers',
             name='AD - Market Price',
             line=dict(color='#d62728', width=2.5),  # red
@@ -451,8 +454,8 @@ def create_total_capacity_plot(processed_data,benchmark_data=None):
     # Avg PPA Price subplot
     fig.add_trace(
         go.Scatter(
-            x=processed_data['AvgPPAPrice']['BAU_Total_Capacity']['Year'],
-            y=processed_data['AvgPPAPrice']['BAU_Total_Capacity']['Total Capacity (GW)'],
+            x=processed_data['AvgPPAPrice']['BAU_Total_Capacity']['Year'].tolist(),
+            y=processed_data['AvgPPAPrice']['BAU_Total_Capacity']['Total Capacity (GW)'].tolist(),
             mode='lines+markers',
             name='BAU - Avg PPA Price',
             line=dict(color='#2ca02c', width=2.5),  # green
@@ -462,8 +465,8 @@ def create_total_capacity_plot(processed_data,benchmark_data=None):
     )
     fig.add_trace(
         go.Scatter(
-            x=processed_data['AvgPPAPrice']['AD_Total_Capacity']['Year'],
-            y=processed_data['AvgPPAPrice']['AD_Total_Capacity']['Total Capacity (GW)'],
+            x=processed_data['AvgPPAPrice']['AD_Total_Capacity']['Year'].tolist(),
+            y=processed_data['AvgPPAPrice']['AD_Total_Capacity']['Total Capacity (GW)'].tolist(),
             mode='lines+markers',
             name='AD - Avg PPA Price',
             line=dict(color='#ff7f0e', width=2.5),  # orange
@@ -477,7 +480,7 @@ def create_total_capacity_plot(processed_data,benchmark_data=None):
     
     fig.update_layout(
         # title='Total Capacity Comparison Across Price Scenarios',
-        height=700,  # Increase chart height
+        height=500,  # Increase chart height
         legend_title='Scenario',
         hovermode='x unified',
         template='plotly_white',
@@ -742,6 +745,16 @@ def export_dashboard(n_clicks):
             filename = f"ffrm_dashboard_{timestamp}.html"
             filepath = os.path.join(EXPORT_DIRECTORY, filename)
             
+            # Recreate plots for export to ensure fresh data
+            # Re-read and process data for export
+            export_data = read_data_from_excel(file_path)
+            export_scenario_data = process_data_all_scenarios(export_data)
+            export_processed_data = preprocess_dash_data(export_data)
+            
+            export_profit_plot = create_profit_plot(export_scenario_data)
+            export_generation_plot = create_total_generation_plot(export_processed_data)
+            export_capacity_plot = create_total_capacity_plot(export_processed_data)
+            
             # Get current page HTML and save
             with open(filepath, 'w', encoding='utf-8') as f:
                 # Write HTML header
@@ -787,6 +800,7 @@ def export_dashboard(n_clicks):
                             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
                             padding: 20px;
                             margin-bottom: 20px;
+                            overflow: visible;
                         }
                         .export-info {
                             text-align: center;
@@ -795,6 +809,15 @@ def export_dashboard(n_clicks):
                             border-radius: 5px;
                             margin: 10px 0;
                         }
+                        button:active {
+                            transform: scale(0.97);
+                            opacity: 0.85;
+                        }
+                        #profit-plot, #generation-plot, #capacity-plot {
+                            width: 100%;
+                            min-height: 600px;
+                        }
+                        .card{height:auto!important; overflow:visible;}
                     </style>
                     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
                 </head>
@@ -814,12 +837,14 @@ def export_dashboard(n_clicks):
                 f.write('<div class="card"><h3>Total Generation</h3><div id="generation-plot"></div></div>')
                 f.write('<div class="card"><h3>Total Capacity</h3><div id="capacity-plot"></div></div>')
                 
-                # Add script to render charts - using placeholder data for now
-                f.write('<script>')
-                f.write('''
-                    // Placeholder data - charts will be generated when data is available
-                    console.log("Export functionality requires data to be available");
-                ''')
+                # Embed all plots as JSON strings and render them
+                f.write('<script>\n')
+                f.write('var profitData     = JSON.parse(' + json.dumps(export_profit_plot.to_json()) + ');\n')
+                f.write('var generationData = JSON.parse(' + json.dumps(export_generation_plot.to_json()) + ');\n')
+                f.write('var capacityData   = JSON.parse(' + json.dumps(export_capacity_plot.to_json()) + ');\n')
+                f.write('Plotly.newPlot("profit-plot",     profitData.data,     profitData.layout);\n')
+                f.write('Plotly.newPlot("generation-plot", generationData.data, generationData.layout);\n')
+                f.write('Plotly.newPlot("capacity-plot",   capacityData.data,   capacityData.layout);\n')
                 f.write('</script>')
                 
                 # Add footer
@@ -836,8 +861,13 @@ def export_dashboard(n_clicks):
             webbrowser.open('file://' + filepath)
             
             return html.Div([
-                html.P(f"Dashboard exported as HTML", style={'color': 'green'}),
-                html.A("Download", href=f"/exports/{filename}", download=filename, target="_blank")
+                html.P(f"✅ Successfully exported HTML file!", style={'color': 'green', 'fontWeight': 'bold', 'fontSize': '16px'}),
+                html.P(f"📄 Filename: {filename}", style={'color': 'blue', 'fontWeight': 'bold'}),
+                html.P(f"📁 Save location: {filepath}", style={'color': 'blue', 'fontStyle': 'italic'}),
+                html.A("📥 Click to download", href=f"/exports/{filename}", download=filename, target="_blank", 
+                      style={'color': 'white', 'backgroundColor': '#2a5298', 'padding': '8px 16px', 
+                             'textDecoration': 'none', 'borderRadius': '5px', 'display': 'inline-block', 'marginTop': '10px'}),
+                html.P("💡 Tip: HTML file has been automatically opened in browser, containing complete dashboard content", style={'color': 'green', 'fontSize': '14px', 'marginTop': '10px'})
             ])
         except Exception as e:
             return html.Div([
@@ -848,11 +878,14 @@ def export_dashboard(n_clicks):
 
 # Add callback for saving images functionality
 @app.callback(
-    Output('save-images-status', 'children'),
+    [Output('save-images-status', 'children'),
+     Output('save-images-button', 'disabled')],
     Input('save-images-button', 'n_clicks'),
     prevent_initial_call=True
 )
 def save_images(n_clicks):
+    if n_clicks is None:
+        raise PreventUpdate
     if n_clicks:
         try:
             # Generate timestamp
@@ -871,24 +904,73 @@ def save_images(n_clicks):
                 fig.write_image(filepath, format='png', width=1200, height=600, scale=2)
                 return filepath
             
-            # Save all charts
+            # Save all charts with progress tracking
             saved_files = []
+            total_files = 7  # 3 main charts + 4 retirement timeline charts
+            current_file = 0
             
-            # Note: This function will need access to the actual plot objects
-            # which are created later in the code. For now, we'll return a message
-            # indicating that this feature needs to be implemented differently.
+            # Progress messages for each step
+            progress_messages = [
+                "🔄 Starting image export...",
+                "📊 Saving profits comparison chart...",
+                "⚡ Saving total generation chart...",
+                "🏭 Saving total capacity chart...",
+                "📅 Saving BAU Market Price retirement timeline...",
+                "📅 Saving AD Market Price retirement timeline...",
+                "📅 Saving BAU Avg PPA Price retirement timeline...",
+                "📅 Saving AD Avg PPA Price retirement timeline...",
+                "✅ All images saved successfully!"
+            ]
+            
+            # Save profit plot
+            current_file += 1
+            profit_filename = f"profits_comparison_{timestamp}.png"
+            profit_filepath = save_plot_as_image(profit_plot, profit_filename)
+            saved_files.append(profit_filepath)
+            
+            # Save generation plot
+            current_file += 1
+            generation_filename = f"total_generation_{timestamp}.png"
+            generation_filepath = save_plot_as_image(total_generation_plot, generation_filename)
+            saved_files.append(generation_filepath)
+            
+            # Save capacity plot
+            current_file += 1
+            capacity_filename = f"total_capacity_{timestamp}.png"
+            capacity_filepath = save_plot_as_image(total_capacity_plot, capacity_filename)
+            saved_files.append(capacity_filepath)
+            
+            # Save retirement timeline plots
+            for price_scenario in ['MarketPrice', 'AvgPPAPrice']:
+                for scenario in ['BAU', 'AD']:
+                    current_file += 1
+                    df = processed_data[price_scenario][f'{scenario}_Retirement_Schedule']
+                    timeline_fig = create_retirement_timeline(df, scenario, price_scenario)
+                    timeline_filename = f"retirement_timeline_{scenario}_{price_scenario}_{timestamp}.png"
+                    timeline_filepath = save_plot_as_image(timeline_fig, timeline_filename)
+                    saved_files.append(timeline_filepath)
             
             return html.Div([
-                html.P("Image saving feature requires plot objects to be available.", style={'color': 'blue'}),
-                html.P("This feature will be implemented in a future update.", style={'color': 'blue'})
-            ])
+                html.P(f"✅ Successfully saved {len(saved_files)} image files!", style={'color': 'green', 'fontWeight': 'bold', 'fontSize': '16px'}),
+                html.P(f"⏱️ Export completed at {datetime.now().strftime('%H:%M:%S')}", style={'color': 'blue', 'fontSize': '14px'}),
+                html.P("📋 Export Summary:", style={'color': 'blue', 'fontWeight': 'bold', 'marginTop': '10px'}),
+                html.Div([
+                    html.P("📊 1x Profits comparison chart", style={'margin': '2px 0', 'color': '#2a5298'}),
+                    html.P("⚡ 1x Total generation chart", style={'margin': '2px 0', 'color': '#2a5298'}),
+                    html.P("🏭 1x Total capacity chart", style={'margin': '2px 0', 'color': '#2a5298'}),
+                    html.P("📅 4x Retirement timeline charts", style={'margin': '2px 0', 'color': '#2a5298'})
+                ], style={'backgroundColor': '#f8f9fa', 'padding': '10px', 'borderRadius': '5px', 'margin': '10px 0'}),
+                html.P("📁 File location:", style={'color': 'blue', 'fontWeight': 'bold'}),
+                html.P(f"   {os.path.join(EXPORT_DIRECTORY, 'images')}", style={'color': 'blue', 'fontStyle': 'italic', 'fontFamily': 'monospace'}),
+                html.P("💡 Tip: Images saved in high-quality PNG format (1200x600px, 2x scale), suitable for reports and presentations", style={'color': 'green', 'fontSize': '14px', 'marginTop': '10px'})
+            ]), False
             
         except Exception as e:
             return html.Div([
                 html.P(f"Error saving images: {str(e)}", style={'color': 'red'})
-            ])
+            ]), False
     
-    return ""
+    return "", False
 
 
 # Add route to access exported files
@@ -946,6 +1028,7 @@ app.index_string = '''
                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
                 padding: 20px;
                 margin-bottom: 20px;
+                overflow: visible;
             }
             .tab-content {
                 padding: 20px;
@@ -959,6 +1042,10 @@ app.index_string = '''
                 color: #666;
                 font-size: 12px;
                 margin-top: 40px;
+            }
+            button:active {
+                transform: scale(0.97);
+                opacity: 0.85;
             }
         </style>
     </head>
@@ -1021,15 +1108,15 @@ app.layout = html.Div([
                        'float': 'right',
                        'marginBottom': '10px'
                    }),
-        html.Div(id='export-status'),
-        html.Div(id='save-images-status')
+        dcc.Loading(id='export-loading', type='circle', children=html.Div(id='export-status')),
+        dcc.Loading(id='save-images-loading', type='circle', children=html.Div(id='save-images-status'))
     ], className="card"),
     # Main content
     html.Div([
         # Summary Cards
         html.Div([
             html.Div([
-                html.H3("Introduction", style={'margin-top': '0'}),
+                html.H3("Introduction", style={'marginTop': '0'}),
                 html.P("... ... Market Price and Avg PPA Price"),
                 html.P("BAU (Business As Usual)，AD (Accelerated Depreciation) to fit goals of different levels")
             ], className="card")
@@ -1037,26 +1124,26 @@ app.layout = html.Div([
         
         # Profit Plot
         html.Div([
-            html.H3("Revenues", style={'margin-top': '0'}),
+            html.H3("Revenues", style={'marginTop': '0'}),
             dcc.Graph(id='profit-plot', figure=profit_plot)
         ], className="card"),
         
         # Generation and Capacity Plots
         html.Div([
             html.Div([
-                html.H3("Total Generation", style={'margin-top': '0'}),
+                html.H3("Total Generation", style={'marginTop': '0'}),
                 dcc.Graph(id='total-generation-plot', figure=total_generation_plot)
             ], className="card"),
             
             html.Div([
-                html.H3("Total Capacity", style={'margin-top': '0'}),
+                html.H3("Total Capacity", style={'marginTop': '0'}),
                 dcc.Graph(id='total-capacity-plot', figure=total_capacity_plot)
             ], className="card"),
         ]),
         
         # Retirement Schedules
         html.Div([
-            html.H3("Retirement Schedule", style={'margin-top': '0'}),
+            html.H3("Retirement Schedule", style={'marginTop': '0'}),
             
             # Tabs for different scenarios
             dcc.Tabs([
