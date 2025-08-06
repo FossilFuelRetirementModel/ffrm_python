@@ -259,7 +259,7 @@ def build_model(model_data, scenario, price_scenario):
                 model.Cap[g, y] for g in model.g
             ) >= model.Price_gen[y][scenario] * Config.TWH_TO_MWH / (Config.HOURS_PER_YEAR * Config.MAX_LOAD_FACTOR)
           
-        model.MinCapacity = Constraint(model.y, rule=min_capacity_rule)
+        # model.MinCapacity = Constraint(model.y, rule=min_capacity_rule)
         
         # Define objective function
         # print("DR:::::")
