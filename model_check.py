@@ -46,7 +46,9 @@ def check_plf_constraints(model):
                 )
                 plf = gen_sum / (value(model.Cap[g, y]) * 8.76 / 1000)
                 
-                if plf < value(model.Other["MinPLF", "Value"]) - 1e-6:
+                # Get technology type for this plant
+        tech_type = value(model.GenData[g]["TECHNOLOGY"])
+        if plf < value(model.TechParams[tech_type, "MinPLF"]) - 1e-6:
                     print(f"Warning: Plant {g} Year {y} PLF {plf:.3f} below minimum")
 def verify_cost_calculations(model):
     """验证成本计算"""
@@ -54,15 +56,19 @@ def verify_cost_calculations(model):
         for y in model.y:
             # 计算GAMS版本的成本
             gams_cost = 0
+            # Use dynamic base year from model data
+            base_year = min(model.y)
+            # Get technology type for this plant
+            tech_type = value(model.GenData[g]["TECHNOLOGY"])
             if model.life[g] < 10:
                 gams_cost = (model.GenData[g]["COST"] * 
-                           (1 + model.Other["CostEsc_Lessthan10","Value"]) ** (y - 2021))
+                           (1 + model.TechParams[tech_type,"CostEsc_Lessthan10"]) ** (y - base_year))
             elif model.life[g] <= 30:
                 gams_cost = (model.GenData[g]["COST"] * 
-                           (1 + model.Other["CostEsc_10-30years","Value"]) ** (y - 2021))
+                           (1 + model.TechParams[tech_type,"CostEsc_10-30years"]) ** (y - base_year))
             else:
                 gams_cost = (model.GenData[g]["COST"] * 
-                           (1 + model.Other["CostEsc_30plus","Value"]) ** (y - 2021))
+                           (1 + model.TechParams[tech_type,"CostEsc_30plus"]) ** (y - base_year))
             
             # 比较与模型中的成本
             model_cost = value(model.cost[g, y])

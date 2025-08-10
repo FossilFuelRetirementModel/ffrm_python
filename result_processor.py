@@ -1,6 +1,7 @@
 import pandas as pd
 from pyomo.core.util import quicksum
 from pyomo.environ import value
+from pathlib import Path
 from config import Config  # NEW: Import Config class for constants
 
 def process_model_results(model):
@@ -22,6 +23,11 @@ def process_model_results(model):
         # net_rev = calculate_net_revenue(model)
         annual_summary = calculate_annual_summary(model) 
         plant_netrev = calculate_plant_netrev(model)
+        # NEW: per-technology aggregations
+        tech_gen = calculate_generation_by_technology(model)
+        tech_cap = calculate_capacity_by_technology(model)
+        tech_netrev = calculate_net_revenue_by_technology(model)
+        tech_targets = get_technology_targets(model)
         return {
             "PlantGen": gen,
             # "NetRev": net_rev,
@@ -30,12 +36,17 @@ def process_model_results(model):
             "retire_sched": retirement_schedule,
             "plant_cap": plant_cap,
             "AnnualSummary": annual_summary,
-            "plant_netrev": plant_netrev
+            "plant_netrev": plant_netrev,
+            # NEW: technology-level results
+            "TechGen": tech_gen,
+            "TechCap": tech_cap,
+            "TechNetRev": tech_netrev,
+            "TechTargets": tech_targets
         }
     except Exception as e:
         raise RuntimeError(f"Error processing model results: {str(e)}")
 
-def save_results_to_excel(results, output_file):
+def save_results_to_excel(results, output_file, output_dir=None):
     """
     Save the processed results to an Excel file.
     
@@ -48,6 +59,8 @@ def save_results_to_excel(results, output_file):
         for key, result in results.items():
             # NEW: Using Config constant for scenario output file template
             scenario_output_file = Config.SCENARIO_OUTPUT_TEMPLATE.format(key=key)
+            if output_dir:
+                scenario_output_file = str(Path(output_dir) / scenario_output_file)
             with pd.ExcelWriter(scenario_output_file) as scenario_writer:
            
                 # Save each component to a separate sheet
@@ -64,6 +77,10 @@ def save_results_to_excel(results, output_file):
                         # Save depreciated capex as an additional column
                         annual_df['Depreciated_Capex_$m'] = data["depreciated_capex"]
                         annual_df.to_excel(scenario_writer, sheet_name=f"PlantNetRev")
+                    elif sheet_name in ("TechGen", "TechCap", "TechNetRev", "TechTargets"):
+                        # Aggregate dict[tech][year] into DataFrame with tech as rows, years as columns
+                        df = pd.DataFrame(data).transpose()
+                        df.to_excel(scenario_writer, sheet_name=f"{sheet_name}")
                     else:
                         df = pd.DataFrame.from_dict(data, orient='index')
                         df.to_excel(scenario_writer, sheet_name=f"{sheet_name}")            
@@ -73,6 +90,30 @@ def save_results_to_excel(results, output_file):
                     for sheet_name, data in result.items():
                         df = pd.DataFrame.from_dict(data, orient='index')
                         df.to_excel(scenario_writer, sheet_name=sheet_name)
+            
+            # NEW: Also create one Excel per technology with its own sheets
+            if "TechGen" in result:
+                tech_keys = list(result["TechGen"].keys())
+                for tech in tech_keys:
+                    tech_file = f"{key}_{tech}_results.xlsx"
+                    if output_dir:
+                        tech_file = str(Path(output_dir) / tech_file)
+                    with pd.ExcelWriter(tech_file) as tech_writer:
+                        # Generation by year for this technology
+                        gen_series = pd.Series(result["TechGen"][tech])
+                        gen_series.to_excel(tech_writer, sheet_name="GenByYear")
+                        # Capacity by year for this technology
+                        if "TechCap" in result and tech in result["TechCap"]:
+                            cap_series = pd.Series(result["TechCap"][tech])
+                            cap_series.to_excel(tech_writer, sheet_name="CapByYear")
+                        # Net revenue by year for this technology
+                        if "TechNetRev" in result and tech in result["TechNetRev"]:
+                            nr_series = pd.Series(result["TechNetRev"][tech])
+                            nr_series.to_excel(tech_writer, sheet_name="NetRevByYear")
+                        # Targets by year for this technology
+                        if "TechTargets" in result and tech in result["TechTargets"]:
+                            tgt_series = pd.Series(result["TechTargets"][tech])
+                            tgt_series.to_excel(tech_writer, sheet_name="TargetsByYear")
     except Exception as e:
         raise IOError(f"Error saving results to Excel: {str(e)}")
     try:
@@ -100,6 +141,9 @@ def save_results_to_excel(results, output_file):
                         #     columns=['Depreciated_Capex_$m']
                         # )
                         # capex_df.to_excel(writer, sheet_name=f"{key}_Plant")
+                    elif sheet_name in ("TechGen", "TechCap", "TechNetRev", "TechTargets"):
+                        df = pd.DataFrame(data).transpose()
+                        df.to_excel(writer, sheet_name=f"{key}_{sheet_name}")
                     else:
                         df = pd.DataFrame.from_dict(data, orient='index')
                         df.to_excel(writer, sheet_name=f"{key}_{sheet_name}")
@@ -174,7 +218,7 @@ def calculate_plant_netrev(model):
             for y in model.y:
                 # Calculate net revenue according to GAMS formula
                 '''
-                if y ==2021:
+                if y == min(model.y):  # Use dynamic base year
                     print("--------------------------------")
                     print('BAU',model.GenData[g]["CAPACITY"])
                     print('AD',model.Cap[g, y].value)
@@ -207,10 +251,12 @@ def calculate_plant_netrev(model):
             
             # Calculate depreciated capex
             # NEW: Using Config constant for conversion to thousands (was hardcoded /1000)
+            # Get technology type for this plant
+            tech_type = value(model.GenData[g]["TECHNOLOGY"])
             plant_netrev["depreciated_capex"][g] = max(
                 model.GenData[g]["CAPACITY"] * 
-                model.Other["CoalCapex", "Value"] * 
-                (1 - model.Other["SLD", "Value"] * model.life[g]), 
+                model.TechParams[tech_type, "CoalCapex $/kW"] *
+                (1 - model.TechParams[tech_type, "Straight-line depreciation"] * model.life[g]), 
                 0
             ) / Config.USD_TO_THOUSANDS
         print(model.p[1])
@@ -370,3 +416,54 @@ def calculate_retirement_schedule(model):
         return retirement
     except Exception as e:
         raise RuntimeError(f"Error calculating retirement schedule: {str(e)}")
+
+# NEW: Per-technology aggregations
+def calculate_generation_by_technology(model):
+    try:
+        gen_by_tech = {}
+        for tech in model.tech:
+            gen_by_tech[tech] = {}
+            for y in model.y:
+                gen_by_tech[tech][y] = round(sum(
+                    sum(model.Gen[g, y, t].value * model.Price_dur[t] * Config.HOURS_PER_YEAR/Config.USD_TO_THOUSANDS for t in model.t)
+                    for g in model.plants_by_tech[tech]
+                ), 5)
+        return gen_by_tech
+    except Exception as e:
+        raise RuntimeError(f"Error calculating generation by technology: {str(e)}")
+
+def calculate_capacity_by_technology(model):
+    try:
+        cap_by_tech = {}
+        for tech in model.tech:
+            cap_by_tech[tech] = {}
+            for y in model.y:
+                cap_by_tech[tech][y] = sum(model.Cap[g, y].value for g in model.plants_by_tech[tech])
+        return cap_by_tech
+    except Exception as e:
+        raise RuntimeError(f"Error calculating capacity by technology: {str(e)}")
+
+def calculate_net_revenue_by_technology(model):
+    try:
+        plant_nr = calculate_plant_netrev(model)["annual"]
+        nr_by_tech = {}
+        for tech in model.tech:
+            nr_by_tech[tech] = {}
+            for y in model.y:
+                nr_by_tech[tech][y] = sum(
+                    plant_nr[g][y] for g in model.plants_by_tech[tech]
+                )
+        return nr_by_tech
+    except Exception as e:
+        raise RuntimeError(f"Error calculating net revenue by technology: {str(e)}")
+
+def get_technology_targets(model):
+    try:
+        targets = {}
+        for tech in model.tech:
+            targets[tech] = {}
+            for y in model.y:
+                targets[tech][y] = float(model.PriceGenTech[y, tech]) if (y, tech) in model.PriceGenTech else 0.0
+        return targets
+    except Exception as e:
+        raise RuntimeError(f"Error collecting technology targets: {str(e)}")

@@ -2,7 +2,7 @@ from pathlib import Path
 
 class Config:
     DATA_DIR = Path("")
-    INPUT_FILE = "input_template.xlsx"  # Updated to use new template
+    INPUT_FILE = "250810 FFRM Data Input File - Philippines.xlsx"  # Updated to use new template
     EXCEL_PATH = DATA_DIR / INPUT_FILE
     
     # Sheet names - Updated for new template
@@ -23,8 +23,9 @@ class Config:
             'index_col': None  # Don't use index_col to preserve all columns
         },
         'PlantData': {  # Updated from CoalPlantData
-            'usecols': 'A:I',  # 9 columns (0-8)
-            'skiprows': 1,     # Updated skip rows
+            'usecols': 'A:J',  # 9 columns (0-8)
+            'skiprows': 0,
+            'header': 2,       # Use 3rd row as header (1-indexed)
             'index_col': 0
         },
         'Price_Distribution': {
@@ -46,8 +47,8 @@ class Config:
         },
         'Price_Gen': {
             'usecols': 'A:AS',  # 49 columns (0-48) for technology-specific data
-            'skiprows': 1,     # Updated skip rows
-            'index_col': 0
+            'skiprows': 1,     # Skip first 2 rows (title and description)
+            'index_col': None  # Don't use index_col to preserve row structure
         },
         'Other': {
             'usecols': 'A:C',  # 3 columns (0-2)
@@ -104,8 +105,8 @@ class Config:
             'description': 'Technology types table position'
         },
         'scenarios': {
-            'start_row': 23,  # Updated to actual scenario data location
-            'end_row': 28,    # Updated to include all NZ scenarios
+            'start_row': 23,  # Updated to actual scenario data location (E23)
+            'end_row': 31,    # Updated to include all scenarios (F31)
             'name_col': 4,    # Column E (0-indexed) - Scenario names
             'value_col': 5,   # Column F (0-indexed) - Scenario descriptions
             'description': 'Scenarios table position'
@@ -132,21 +133,16 @@ class Config:
     
     # Year range - Will be read from Excel file
     # YEARS will be dynamically set based on Excel data
-    DEFAULT_START_YEAR = 2021  # Fallback default
-    DEFAULT_END_YEAR = 2070    # Fallback default
+    DEFAULT_START_YEAR = 2025  # Updated to match new Excel file
+    DEFAULT_END_YEAR = 2090    # Limited to 20 years for testing
     
-    # Scenarios
+    # Scenarios - Will be dynamically loaded from Excel
     SCENARIOS = {
-        'BAU': 1,   # Business as Usual
-        'AD': 0     # Accelerated Decarbonization
+        'BAU': 1   # Business as Usual (default)
     }
     
-    # NEW: Intermediate decarbonization scenarios
-    INTERMEDIATE_SCENARIOS = {
-        'AD_25': 0.25,   # 25% of the way from BAU to AD (1/4 AD)
-        'AD_50': 0.50,   # 50% of the way from BAU to AD (1/2 AD) 
-        'AD_75': 0.75    # 75% of the way from BAU to AD (3/4 AD)
-    }
+    # NEW: Intermediate decarbonization scenarios - Will be dynamically generated from Excel scenarios
+    INTERMEDIATE_SCENARIOS = {}
     
     # Price scenarios
     PRICE_SCENARIOS = {
@@ -191,8 +187,8 @@ class Config:
     # NEW: Base Year and Time Period Constants (moved from hardcoded values)
     # ============================================================================
     
-    BASE_YEAR = 2021  # Base year for all calculations
-    INITIAL_YEAR = 2021  # Initial year of the model
+    BASE_YEAR = 2025  # Base year for all calculations (updated to match Excel)
+    INITIAL_YEAR = 2025  # Initial year of the model (updated to match Excel)
     
     # ============================================================================
     # NEW: Plant Life Categories (moved from hardcoded values)

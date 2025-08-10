@@ -58,3 +58,7 @@ Thumbs.db
 # Ignore generated dashboard exports
 exports/
 
+# Ignore results directories
+results/
+results_*/
+

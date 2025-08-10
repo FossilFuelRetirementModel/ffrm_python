@@ -7,14 +7,23 @@ from dataclasses import dataclass
 # from pyomo.environ import *
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('data_loading.log'),
-        logging.StreamHandler()
-    ]
-)
+def setup_logging(output_dir=None):
+    """Setup logging with optional output directory"""
+    log_file = 'data_loading.log'
+    if output_dir:
+        log_file = str(Path(output_dir) / 'data_loading.log')
+    
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler(log_file),
+            logging.StreamHandler()
+        ]
+    )
+
+# Initialize logging without output directory for standalone use
+setup_logging()
 logger = logging.getLogger(__name__)
 
 @dataclass
@@ -103,61 +112,151 @@ def process_price_gen_data(price_gen_df: pd.DataFrame, years: list) -> pd.DataFr
     if price_gen_df is None or price_gen_df.empty:
         return pd.DataFrame()
     
-    price_gen_df = clean_dataframe(price_gen_df)
+    # Just remove completely empty rows and columns
+    price_gen_df = price_gen_df.dropna(how='all').dropna(axis=1, how='all')
     
-    # Filter for valid technology and scenario combinations
-    valid_mask = (price_gen_df['Unnamed: 1'].notna() & 
-                  price_gen_df['Unnamed: 2'].notna())
-    filtered_df = price_gen_df[valid_mask].copy()
+    logger.info(f"PRICE_GEN: Processing data with shape: {price_gen_df.shape}")
     
-    if filtered_df.empty:
+    # Get column headers from first row (index 0) where years are located
+    headers = price_gen_df.iloc[0]
+    logger.info(f"PRICE_GEN: Headers from first row: {list(headers)[:10]}")
+    
+    # Technology and scenario columns are in columns 0 and 1
+    tech_col = 0  # Technology column
+    scen_col = 1  # Scenario column
+    
+    logger.info(f"PRICE_GEN: Using columns tech={tech_col}, scenario={scen_col}")
+    
+    # Get data rows starting from the second row (skip header)
+    data_rows = price_gen_df.iloc[1:].copy()
+    
+    if data_rows.empty:
+        logger.warning("PRICE_GEN: No data rows found")
         return pd.DataFrame()
     
+    logger.info(f"PRICE_GEN: Found {len(data_rows)} data rows")
+    
+    # Debug: Show the first few rows to understand the data structure
+    logger.info(f"PRICE_GEN: First few data rows:")
+    for i in range(min(10, len(data_rows))):
+        tech_val = data_rows.iloc[i, tech_col]
+        scen_val = data_rows.iloc[i, scen_col]
+        logger.info(f"  Row {i}: tech='{tech_val}', scenario='{scen_val}'")
+    
+    # Filter out rows with empty technology or scenario
+    valid_mask = (data_rows.iloc[:, tech_col].notna() & 
+                  (data_rows.iloc[:, tech_col].astype(str).str.strip() != '') &
+                  (data_rows.iloc[:, tech_col].astype(str).str.strip() != 'Technology') &
+                  data_rows.iloc[:, scen_col].notna() & 
+                  (data_rows.iloc[:, scen_col].astype(str).str.strip() != '') &
+                  (data_rows.iloc[:, scen_col].astype(str).str.strip() != 'Scenario') &
+                  (data_rows.iloc[:, scen_col].astype(str).str.strip() != ' '))
+    
+    data_rows = data_rows[valid_mask].copy()
+    logger.info(f"PRICE_GEN: After filtering, {len(data_rows)} valid tech-scenario combinations")
+    
     # Create technology-scenario keys
-    filtered_df['tech_scenario'] = (filtered_df['Unnamed: 1'].astype(str) + '_' + 
-                                   filtered_df['Unnamed: 2'].astype(str))
+    data_rows['tech_scenario'] = (data_rows.iloc[:, tech_col].astype(str) + '_' + 
+                                 data_rows.iloc[:, scen_col].astype(str))
     
-    # Separate marginal revenue and generation constraint data
-    mr_mask = filtered_df.index.str.contains('Marginal Revenue', na=False)
-    gc_mask = filtered_df.index.str.contains('Generation Constraint', na=False)
-    
-    mr_data = filtered_df[mr_mask]
-    gc_data = filtered_df[gc_mask]
-    
-    # Process year columns (exclude metadata columns)
-    year_cols = [col for col in filtered_df.columns 
-                 if col not in ['Unnamed: 1', 'Unnamed: 2', 'tech_scenario']]
-    
-    # Convert year columns to datetime and extract year
-    year_data = {}
-    for col in year_cols:
+    # Identify year columns from headers (starting from column 2)
+    year_cols_map = {}
+    for i, header in enumerate(headers):
+        if i < 2:  # Skip tech and scenario columns
+            continue
+        
+        # Try to parse year from header
         try:
-            year = pd.to_datetime(col).year
-            if year not in year_data:
-                year_data[year] = {}
-            
-            # Add marginal revenue data
-            for _, row in mr_data.iterrows():
-                if pd.notna(row[col]):
-                    key = row['tech_scenario']
-                    year_data[year][key] = row[col]
-            
-            # Add generation constraint data
-            for _, row in gc_data.iterrows():
-                if pd.notna(row[col]):
-                    key = row['tech_scenario']
-                    year_data[year][key] = row[col]
-                    
-        except (ValueError, TypeError):
+            if hasattr(header, 'year'):
+                y = int(header.year)
+            elif isinstance(header, (int, float)):
+                y = int(header)
+            elif isinstance(header, str):
+                # Handle datetime strings like "2025-01-01 00:00:00"
+                if '-' in str(header):
+                    y = pd.to_datetime(header).year
+                else:
+                    y = int(header)
+            elif hasattr(header, 'dtype') and 'float' in str(header.dtype):
+                # Handle numpy float values (these are the year data)
+                y = int(header)
+            else:
+                continue
+                
+            if y in years:
+                year_cols_map[y] = i  # Use column index directly
+        except Exception:
             continue
     
-    return pd.DataFrame(year_data)
+    if not year_cols_map:
+        logger.warning(f"PRICE_GEN: No year columns detected. Available headers: {list(headers)[:10]}")
+        return pd.DataFrame()
+    
+    logger.info(f"PRICE_GEN: Found year columns: {sorted(year_cols_map.keys())}")
+    
+    # Build generation targets
+    year_data = {y: {} for y in sorted(year_cols_map.keys())}
+    for y, col_idx in year_cols_map.items():
+        for _, row in data_rows.iterrows():
+            val = row.iloc[col_idx]
+            if pd.notna(val):
+                key = row['tech_scenario']
+                year_data[y][key] = val
+    
+    result_df = pd.DataFrame(year_data)
+    logger.info(f"PRICE_GEN: Final result shape: {result_df.shape}")
+    logger.info(f"PRICE_GEN: Technology-scenario combinations: {result_df.index.tolist()}")
+    
+    # 输出 generation target 数据
+    logger.info("PRICE_GEN: Generation Target Data:")
+    logger.info("=" * 80)
+    for tech_scenario in result_df.index:
+        logger.info(f"Technology-Scenario: {tech_scenario}")
+        for year in result_df.columns:
+            value = result_df.loc[tech_scenario, year]
+            if pd.notna(value):
+                logger.info(f"  {year}: {value:.2f}")
+        logger.info("-" * 40)
+    
+    return result_df
+
+def normalize_plant_data(plant_df: pd.DataFrame) -> pd.DataFrame:
+    """Normalize Plant Data: map header names to canonical fields, coerce dtypes, strip tech codes.
+    Assumes the Excel was read with the 3rd row as header (config header=2)."""
+    if plant_df is None or plant_df.empty:
+        return plant_df
+    df = plant_df.copy()
+    # Standardize column names by mapping known headers to canonical names
+    rename_map = {
+        'Variable Cost ($/MWh)': 'COST',
+        'Fixed Cost ($/MWh)': 'FIXED_COST',
+        'PPA Price ($/MWh)': 'AvgPPAPrice',
+        'Market Price ($/MWh)': 'MarketPrice',
+        'Capacity (MW)': 'CAPACITY',
+        'Start Year': 'STARTYEAR',
+        'Plant Type': 'TECHNOLOGY',
+        'Price Regime': 'PriceRegime',
+        'ContractPriceMW': 'ContractPriceMW',
+    }
+    for src, dst in rename_map.items():
+        if src in df.columns:
+            df.rename(columns={src: dst}, inplace=True)
+    # Drop rows with empty index (no plant name)
+    df = df[~df.index.isna()].copy()
+    # Coerce numeric columns
+    for col in ['COST', 'FIXED_COST', 'PPAPrice', 'MarketPrice', 'CAPACITY', 'STARTYEAR', 'ContractPriceMW']:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+    # Clean technology codes
+    if 'TECHNOLOGY' in df.columns:
+        df['TECHNOLOGY'] = df['TECHNOLOGY'].astype(str).str.strip()
+    return df
 
 def initialize_model_data(data: dict) -> ModelData:
     """Initialize model data structures from loaded Excel data."""
-    # Clean all DataFrames
+    # Clean all DataFrames except price_gen (which needs special handling)
     for key, df in data.items():
-        if isinstance(df, pd.DataFrame):
+        if isinstance(df, pd.DataFrame) and key != 'price_gen':
             data[key] = clean_dataframe(df)
     
     # Extract basic parameters
@@ -174,7 +273,30 @@ def initialize_model_data(data: dict) -> ModelData:
     
     # Process data using pandas operations
     tech_params = process_technology_specific_data(data.get('other', pd.DataFrame()))
+    # TEMP OVERRIDE: Set MaxLife to 100 for all technologies
+    if not tech_params.empty and 'MaxLife' in tech_params.columns:
+        tech_params.loc[:, 'MaxLife'] = 80
     processed_price_gen = process_price_gen_data(data.get('price_gen', pd.DataFrame()), years)
+    plant_df_raw = data.get('plant_data', pd.DataFrame())
+    plant_df = normalize_plant_data(plant_df_raw)
+    
+    # Clean time_blocks to remove invalid column names
+    time_blocks = data.get('price_distribution', pd.DataFrame()).columns.tolist() if 'price_distribution' in data else []
+    # Remove 'Unnamed:' columns and other invalid time block names
+    valid_time_blocks = [col for col in time_blocks if not col.startswith('Unnamed:') and col != '']
+    logger.info(f"Cleaned time_blocks: removed invalid columns, kept {len(valid_time_blocks)} valid time blocks")
+    
+    # Fix price_dist index to use integer years instead of timestamps
+    price_dist = data.get('price_distribution', pd.DataFrame())
+    if not price_dist.empty and hasattr(price_dist.index[0], 'year'):
+        # Convert timestamp index to integer years
+        price_dist.index = [idx.year if hasattr(idx, 'year') else idx for idx in price_dist.index]
+        logger.info(f"Fixed price_dist index: converted timestamps to integer years")
+    
+    # Clean price_dist columns to match valid time blocks
+    if not price_dist.empty:
+        price_dist = price_dist[valid_time_blocks]
+        logger.info(f"Cleaned price_dist columns to match valid time blocks")
     
     # Log summary using pandas info
     logger.info("EXCEL_READ: Data loading summary:")
@@ -187,16 +309,16 @@ def initialize_model_data(data: dict) -> ModelData:
     
     return ModelData(
         years=years,
-        plants=data.get('plant_data', pd.DataFrame()).index.tolist() if 'plant_data' in data else [],
-        time_blocks=data.get('price_distribution', pd.DataFrame()).columns.tolist() if 'price_distribution' in data else [],
+        plants=plant_df.index.tolist() if not plant_df.empty else [],
+        time_blocks=valid_time_blocks,  # Use cleaned time blocks
         scenarios=scenarios,  # Use dynamically read scenarios
         price_scenarios=price_scenarios,  # Use dynamically read price scenarios
         technologies=technologies,
         
         # Data tables
-        gen_data=data.get('plant_data', pd.DataFrame()),
+        gen_data=plant_df,
         price_gen=processed_price_gen,
-        price_dist=data.get('price_distribution', pd.DataFrame()),
+        price_dist=price_dist,  # Use the fixed price_dist
         price_dur=data.get('price_dur', pd.DataFrame()),
         other=data.get('other', pd.DataFrame()),
         fc_ppa=data.get('fc_ppa', pd.DataFrame()),
@@ -212,44 +334,62 @@ def generate_intermediate_scenarios(model_data: ModelData) -> ModelData:
             print("Warning: No price_gen data available")
             return model_data
         
-        # Extract BAU and AD columns using string matching
-        bau_cols = [col for col in model_data.price_gen.columns if 'BAU' in str(col)]
-        ad_cols = [col for col in model_data.price_gen.columns if 'AD' in str(col)]
+        # Get available scenarios from model_data
+        available_scenarios = list(model_data.scenarios.keys())
         
-        if not bau_cols or not ad_cols:
-            print("Warning: Could not find BAU and AD targets in price_gen data")
+        # Find BAU scenario and AD scenarios
+        bau_scenario = None
+        ad_scenarios = []
+        
+        for scenario in available_scenarios:
+            if scenario == 'BAU':
+                bau_scenario = scenario
+            elif scenario.startswith('AD_'):
+                ad_scenarios.append(scenario)
+        
+        if not bau_scenario:
+            print("Warning: Could not find BAU scenario")
             return model_data
         
-        # Use the first BAU and AD column found
-        bau_col = bau_cols[0]
-        ad_col = ad_cols[0]
+        if not ad_scenarios:
+            print("Warning: Could not find AD scenarios")
+            return model_data
         
         # Create extended price_gen DataFrame
         extended_price_gen = model_data.price_gen.copy()
         
-        # Generate intermediate scenarios using vectorized operations
-        for scenario_name, interpolation_factor in Config.INTERMEDIATE_SCENARIOS.items():
-            print(f"\nGenerating {scenario_name} (factor: {interpolation_factor}):")
-            
-            # Vectorized calculation: BAU + factor * (AD - BAU)
-            bau_values = extended_price_gen[bau_col]
-            ad_values = extended_price_gen[ad_col]
-            intermediate_values = bau_values + interpolation_factor * (ad_values - bau_values)
-            
-            # Add new column
-            extended_price_gen[scenario_name] = intermediate_values
-            
-            # Print sample values
-            sample_years = list(model_data.years)[:5]
-            for year in sample_years:
-                if year in extended_price_gen.index:
-                    bau_val = bau_values.get(year, 0)
-                    ad_val = ad_values.get(year, 0)
-                    int_val = intermediate_values.get(year, 0)
-                    print(f"  Year {year}: BAU={bau_val:.2f}, AD={ad_val:.2f}, {scenario_name}={int_val:.2f}")
+        # Generate intermediate scenarios for each AD scenario
+        intermediate_scenarios = {}
         
-        # Create updated scenarios dictionary
-        all_scenarios = {**Config.SCENARIOS, **Config.INTERMEDIATE_SCENARIOS}
+        for ad_scenario in ad_scenarios:
+            # Extract percentage from scenario name (e.g., AD_20 -> 0.20)
+            try:
+                percentage = int(ad_scenario.split('_')[1]) / 100.0
+                intermediate_scenarios[ad_scenario] = percentage
+            except (IndexError, ValueError):
+                print(f"Warning: Could not parse percentage from scenario {ad_scenario}")
+                continue
+            
+            print(f"\nGenerating {ad_scenario} (factor: {percentage}):")
+            
+            # For now, we'll use a simple approach: scale the generation targets
+            # In a more sophisticated approach, you might want to interpolate between BAU and a full AD scenario
+            
+            # Get the generation column for this scenario
+            scenario_col = None
+            for col in extended_price_gen.columns:
+                if ad_scenario in str(col):
+                    scenario_col = col
+                    break
+            
+            if scenario_col:
+                # The scenario data is already in the Excel file, so we don't need to calculate it
+                print(f"  Using existing data for {ad_scenario}")
+            else:
+                print(f"  Warning: Could not find data column for {ad_scenario}")
+        
+        # Create updated scenarios dictionary with all scenarios
+        all_scenarios = model_data.scenarios.copy()
         
         # Create new ModelData object
         updated_model_data = ModelData(
@@ -270,7 +410,7 @@ def generate_intermediate_scenarios(model_data: ModelData) -> ModelData:
             tech_params=model_data.tech_params
         )
         
-        print(f"\nSuccessfully generated intermediate scenarios: {list(Config.INTERMEDIATE_SCENARIOS.keys())}")
+        print(f"\nSuccessfully processed scenarios: {list(all_scenarios.keys())}")
         return updated_model_data
         
     except Exception as e:
@@ -360,8 +500,8 @@ def extract_scenarios_from_definitions(definitions_df: pd.DataFrame) -> dict:
                 for name, desc in zip(scenario_names, scenario_descriptions):
                     if name == 'BAU':
                         scenarios[name] = 1  # Active scenario
-                    elif name.startswith('NZ'):
-                        scenarios[name] = 0  # Inactive scenario (can be activated later)
+                    elif name.startswith('AD_'):
+                        scenarios[name] = 0  # Intermediate scenarios (can be activated later)
                     else:
                         scenarios[name] = 0  # Default for other scenarios
                 
