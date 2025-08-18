@@ -241,7 +241,7 @@ def build_model(model_data, scenario, price_scenario):
         # Retire Plants
         def max_retire_rule(model, g):
             """
-            This function is used to set the MAXIMUM RETIRE rule
+            This function is used to set the MAXIMUM REfTIRE rule
             """
             return sum(
                 model.Retire[g, y] for y in model.y
@@ -259,7 +259,7 @@ def build_model(model_data, scenario, price_scenario):
                 model.Cap[g, y] for g in model.g
             ) >= model.Price_gen[y][scenario] * Config.TWH_TO_MWH / (Config.HOURS_PER_YEAR * Config.MAX_LOAD_FACTOR)
           
-        # model.MinCapacity = Constraint(model.y, rule=min_capacity_rule)
+        model.MinCapacity = Constraint(model.y, rule=min_capacity_rule)
         
         # Define objective function
         # print("DR:::::")
@@ -280,16 +280,17 @@ def build_model(model_data, scenario, price_scenario):
                 cost = 0 
                 for g in model.g:
                     # NEW: Handle intermediate scenarios - use capacity for AD and intermediate scenarios, fixed capacity for BAU
-                    if scenario in ["AD", "AD_25", "AD_50", "AD_75"]:
-                        capacity = model.Cap[g, y]
-                    elif scenario == "BAU":
-                        capacity = model.GenData[g]["CAPACITY"]
+                    # Commented out for Deb's comment
+                    # if scenario in ["AD", "AD_25", "AD_50", "AD_75"]:
+                    #     capacity = model.Cap[g, y]
+                    # elif scenario == "BAU":
+                    #     capacity = model.GenData[g]["CAPACITY"]
                 
-                    if price_scenario == "AvgPPAPrice":
-                        cost_per_mw = model.FC_PPA[g, y]/Config.USD_TO_THOUSANDS
-                    elif price_scenario == "MarketPrice":
-                        cost_per_mw = Config.DEFAULT_COST_PER_MW_MarketPrice
-                    cost+=cost_per_mw * capacity
+                    # if price_scenario == "AvgPPAPrice":
+                    #     cost_per_mw = model.FC_PPA[g, y]/Config.USD_TO_THOUSANDS
+                    # elif price_scenario == "MarketPrice":
+                    #     cost_per_mw = Config.DEFAULT_COST_PER_MW_MarketPrice
+                    # cost+=cost_per_mw * capacity
                 # year_contribution += -(capacity_sum * price_sum)  # to billion dollars
                 
                 # Calculate the second part of the objective function

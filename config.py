@@ -2,7 +2,7 @@ from pathlib import Path
 
 class Config:
     DATA_DIR = Path("")
-    INPUT_FILE = "InputDataCoalUpdated.xlsx"
+    INPUT_FILE = "InputCoalDataUpdated copy.xlsx"
     EXCEL_PATH = DATA_DIR / INPUT_FILE
     
     # Sheet names
@@ -127,9 +127,9 @@ class Config:
     # NEW: Base Year and Time Period Constants (moved from hardcoded values)
     # ============================================================================
     
-    BASE_YEAR = 2024  # The START YEAR of the model
+    BASE_YEAR = 2021  # The START YEAR of the model
     INITIAL_YEAR = BASE_YEAR  
-    END_YEAR = 2050  # The END YEAR of the model
+    END_YEAR = 2040  # The END YEAR of the model
     # Year range
     YEARS = list(range(INITIAL_YEAR, END_YEAR + 1))
     # ============================================================================
