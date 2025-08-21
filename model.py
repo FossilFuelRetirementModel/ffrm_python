@@ -278,7 +278,7 @@ def build_model(model_data, scenario, price_scenario):
                 capacity = 0
                 cost_per_mw= 0
                 cost = 0 
-                for g in model.g:
+                # for g in model.g:
                     # NEW: Handle intermediate scenarios - use capacity for AD and intermediate scenarios, fixed capacity for BAU
                     # Commented out for Deb's comment
                     # if scenario in ["AD", "AD_25", "AD_50", "AD_75"]:
