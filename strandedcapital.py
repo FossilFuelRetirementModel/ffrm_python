@@ -1,57 +1,66 @@
-
 import pandas as pd
+import matplotlib.pyplot as plt
 
-# Load Excel input file
-excel_path = "stranded_capital_template.xlsx"
-inputs = pd.read_excel(excel_path, sheet_name="Inputs", index_col="Parameter").squeeze()
-generation = pd.read_excel(excel_path, sheet_name="Generation")
-price = pd.read_excel(excel_path, sheet_name="Price")
-cost = pd.read_excel(excel_path, sheet_name="Cost")
+# === User inputs ===
+total_rab = 68270270270   # Total Regulatory Asset Base (USD)
+cost_of_equity = 0.0815      # 8.15 % return
+base_year = 2024             # Base year for discounting
+nz_retire = 2050             # Net Zero retirement year
+cf_bau_ret = 2051            # Counterfactual BAU retirement year
 
-# Try to load future capex assumptions (optional sheet)
-try:
-    future_capex_df = pd.read_excel(excel_path, sheet_name="FutureCapex")
-    has_future_capex = True
-except:
-    has_future_capex = False
-    future_capex_df = pd.DataFrame(columns=["Year", "Capacity_MW", "Tech", "Capex_per_kW"])
+# === Load Allocation (RAB shares by station) ===
+alloc = pd.read_excel("Coal_RR_allocation.xlsx", sheet_name="Allocation")
+alloc.columns = alloc.columns.str.strip().str.lower()
+plant_cols = [c for c in alloc.columns if c not in ["year", "rr_coal", "total_allocated"]]
 
-# Extract parameters
-discount_rate = inputs["DiscountRate"]
-operational_life = int(inputs["OperationalLife"])
-ownership_share = inputs["OwnershipShare"]
-historical_capex_bau = inputs["Capex_BAU"]
-historical_capex_css = inputs["Capex_CSS"]
+# Convert wide to long
+alloc_long = alloc.melt(id_vars=["year"], value_vars=plant_cols,
+                        var_name="station", value_name="rr_alloc")
 
-# Merge data into one DataFrame
-df = generation.merge(price, on="Year").merge(cost, on="Year")
+# Average allocation share across years
+alloc_clean = alloc_long.groupby("station", as_index=False)["rr_alloc"].mean()
 
-# Calculate annual operating returns
-df["Return_BAU"] = (df["Price ($/MWh)"] - df["Cost ($/MWh)"]) * df["Gen_BAU (GWh)"] * 1000
-df["Return_CSS"] = (df["Price ($/MWh)"] - df["Cost ($/MWh)"]) * df["Gen_CSS (GWh)"] * 1000
+# Proper case names
+alloc_clean["station"] = alloc_clean["station"].str.strip().str.capitalize()
 
-# Filter for analysis years (e.g. 2022–2050)
-start_year = 2022
-end_year = 2050
-df_filtered = df[df["Year"].between(start_year, end_year)].copy()
-df_filtered = df_filtered.iloc[:operational_life]
+# === Remove debt-funded plants ===
+alloc_clean = alloc_clean[~alloc_clean["station"].isin(["Medupi", "Kusile"])]
 
-# Calculate NPV of lost returns
-df_filtered["Discount Factor"] = 1 / ((1 + discount_rate) ** (df_filtered["Year"] - start_year + 1))
-df_filtered["NPV Difference"] = (df_filtered["Return_BAU"] - df_filtered["Return_CSS"]) * df_filtered["Discount Factor"]
-npv_foregone_returns = df_filtered["NPV Difference"].sum()
+# === Allocate RAB to stations ===
+alloc_clean["rab_alloc"] = total_rab * alloc_clean["rr_alloc"] / alloc_clean["rr_alloc"].sum()
+alloc_clean["annual_equity_return"] = alloc_clean["rab_alloc"] * cost_of_equity
 
-# Calculate future capex if data is available
-if has_future_capex and not future_capex_df.empty:
-    future_capex_df["Capex_USD"] = future_capex_df["Capacity_MW"] * 1000 * future_capex_df["Capex_per_kW"] * ownership_share
-    total_future_capex_bau = future_capex_df["Capex_USD"].sum()
-else:
-    total_future_capex_bau = 0
+# === Stranded equity (1 year foregone, discounted back to base year) ===
+years_lost = cf_bau_ret - nz_retire   # = 1
+discount_factor = (1 + cost_of_equity) ** (nz_retire - base_year)
 
-# Combine all capex
-total_ec_bau = (historical_capex_bau * 1e6 * ownership_share) + total_future_capex_bau
-total_ec_css = historical_capex_css * 1e6 * ownership_share  # typically zero
+alloc_clean["stranded_equity"] = alloc_clean["annual_equity_return"] * years_lost / discount_factor
+alloc_clean["stranded_equity_million"] = alloc_clean["stranded_equity"] / 1e6  # USD Millions
 
-# Final stranded capital
-stranded_capital = total_ec_bau - total_ec_css + npv_foregone_returns
-print(f"Stranded Capital (with future investment): ${stranded_capital / 1e6:.2f} million USD")
+# === Print results ===
+print("\n=== Plant-level Stranded Equity (BAU=2051 vs NZ=2050, Equity-funded only) ===")
+for _, row in alloc_clean.iterrows():
+    print(f"{row['station']:<10} : {row['stranded_equity_million']:.2f} Million USD")
+
+system_total = alloc_clean["stranded_equity_million"].sum()
+print(f"\n  System Total Stranded Equity (Equity-funded plants only): {system_total:.2f} Million USD")
+
+# === Save results ===
+alloc_clean.to_excel("Stranded_Equity_Counterfactual.xlsx", index=False)
+
+# === Plot plant-level bar chart ===
+plt.figure(figsize=(12,6))
+bars = plt.bar(alloc_clean["station"],
+               alloc_clean["stranded_equity_million"],
+               color="lightblue", edgecolor="black", linewidth=1.2)
+plt.ylabel("Stranded Equity (Million USD)")
+plt.title("State-Owned Stranded Equity per Power Plant")
+plt.grid(True, axis="y", linestyle="--", alpha=0.7)
+plt.xticks(rotation=45, ha="right")
+for bar in bars:
+    h = bar.get_height()
+    if h > 0:
+        plt.text(bar.get_x()+bar.get_width()/2, h, f"{h:.0f}", ha="center", va="bottom", fontsize=8)
+plt.tight_layout()
+plt.savefig("Stranded_Equity_Counterfactual_NoLoans.png", dpi=300)
+plt.show()

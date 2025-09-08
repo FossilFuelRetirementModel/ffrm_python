@@ -1,55 +1,51 @@
-
 import pandas as pd
+import numpy as np
 
-# Load Excel input
-input_file = "debt_input_with_retirement.xlsx"
-debt_df = pd.read_excel(input_file, sheet_name="DebtStructure")
-retirement_df = pd.read_excel(input_file, sheet_name="RetirementSchedule")
+# === Input loan data ===
+data = [
+    {"plant": "Medupi", "loan": 1537.78, "rate": 0.0575, "term": 15, "grace": 5, "start_year": 2017},
+    {"plant": "Kusile", "loan": 2700.00, "rate": 0.0575, "term": 15, "grace": 5, "start_year": 2018},
+]
 
-# Merge both sheets
-df = pd.merge(debt_df, retirement_df, on="Plant Name")
+df = pd.DataFrame(data)
 
-# Initialize result container
-results = []
+# === Parameters ===
+retire_year_nz = 2050   # Net Zero scenario retirement
+base_year = 2024        # Analysis starts
 
-# Loop over each plant
+# === Function to calculate outstanding debt ===
+def calc_stranded_debt(row, retire_year):
+    start = row["start_year"]
+    term = row["term"]
+    grace = row["grace"]
+    principal = row["loan"]
+
+    # Equal Principal Payment schedule
+    repayment_years = list(range(start + grace, start + term + 1))
+    repayment = principal / (term - grace) if term > grace else principal
+
+    # Track outstanding debt
+    outstanding = principal
+    for y in repayment_years:
+        if y >= retire_year:  # retirement before loan maturity
+            return outstanding
+        outstanding -= repayment
+    return 0.0
+
+# === Apply function ===
+df["stranded_debt"] = df.apply(lambda r: calc_stranded_debt(r, retire_year_nz), axis=1)
+
+# === Convert to USD Millions ===
+df["stranded_debt_million"] = df["stranded_debt"]
+
+# === Results ===
+print("\n=== Stranded Debt (if retired in 2050) ===")
 for _, row in df.iterrows():
-    plant = row["Plant Name"]
-    start_year = int(row["Loan Start Year"])
-    loan_amount = row["Loan Amount (USD million)"]
-    term = int(row["Loan Term (years)"])
-    rate = row["Interest Rate (%)"] / 100
-    repayment_type = row["Repayment Type"]
-    end_year = start_year + term - 1
+    print(f"{row['plant']:<10} : {row['stranded_debt_million']:.2f} Million USD")
 
-    # Create amortization schedule
-    principal_annual = loan_amount / term
-    debt_schedule = []
-    remaining_principal = loan_amount
+system_total = df["stranded_debt_million"].sum()
+print(f"\n System Total Stranded Debt: {system_total:.2f} Million USD")
 
-    for year in range(start_year, start_year + term):
-        interest_payment = remaining_principal * rate
-        total_payment = principal_annual + interest_payment
-        remaining_principal -= principal_annual
-        debt_schedule.append({
-            "Year": year,
-            "Remaining Principal": max(0, remaining_principal)
-        })
-
-    debt_df_schedule = pd.DataFrame(debt_schedule)
-
-    # Determine stranded debt under each scenario
-    for scenario in ["BAU", "NZ"]:
-        retire_year = int(row[f"Retirement Year ({scenario})"])
-        stranded_debt = debt_df_schedule[debt_df_schedule["Year"] >= retire_year]["Remaining Principal"].sum()
-        results.append({
-            "Plant Name": plant,
-            "Scenario": scenario,
-            "Retirement Year": retire_year,
-            "Stranded Debt (USD million)": stranded_debt
-        })
-
-# Output results
-results_df = pd.DataFrame(results)
-print("=== Stranded Debt Summary ===")
-print(results_df.to_string(index=False))
+# === Export ===
+df.to_excel("Stranded_Debt_Results.xlsx", index=False)
+ 
