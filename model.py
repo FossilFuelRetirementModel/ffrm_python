@@ -12,6 +12,7 @@ from result_processor import process_model_results, save_results_to_excel
 import argparse
 import time
 import logging
+import pyomo.contrib.appsi
 from config import Config  # NEW: Import Config class for constants
 
 def build_model(model_data, scenario, price_scenario):
@@ -322,8 +323,8 @@ def setup_argument_parser():
     """
     parser = argparse.ArgumentParser(description="Run Pyomo model with solver options.")
     parser.add_argument('--solver', type=str, default='gurobi', 
-                       choices=['glpk', 'cplex', 'gurobi', 'cbc'],
-                       help='Solver to use (e.g., glpk, cplex, gurobi, cbc).')
+                       choices=['glpk', 'cplex', 'gurobi', 'cbc','highs'],
+                       help='Solver to use (e.g., glpk, cplex, gurobi, cbc, highs).')
     parser.add_argument('--solver-options', type=str, nargs='*',
                        help='Solver options as key=value pairs.')
     parser.add_argument('--scenarios', type=str, nargs='+', 
@@ -340,34 +341,55 @@ def setup_argument_parser():
     parser.add_argument('--output-file', type=str,
                        default="Results.xlsx",
                        help='Path to output Excel file.')
-    return parser
+    return parser 
 
 def initialize_solver(args):
     """
     Initialize and configure the solver based on command line arguments.
-    
-    Parameters:
-    args: Parsed command line arguments
-    
-    Returns:
-    SolverFactory: Configured solver instance
     """
-    # solvername='glpk'
+    # Map CLI name -> Pyomo SolverFactory name
+    name_map = {
+        'highs': 'appsi_highs',  # APPSI's HiGHS interface
+        'gurobi': 'gurobi',
+        'cplex': 'cplex',
+        'cbc': 'cbc',
+        'glpk': 'glpk',
+    }
+    sf_name = name_map.get(args.solver, args.solver)
+    solver = SolverFactory(sf_name)
+    if solver is None or not solver.available(exception_flag=False):
+        raise RuntimeError(
+            f"Solver {args.solver} is not available. "
+            f"If using highs, ensure 'highspy' is installed in this env."
+        )
 
-    # solverpath_folder='C:/w64/glpk-4.65' #does not need to be directly on c drive
-
-    # solverpath_exe='C:/w64/glpk-4.65/w64/glpsol' 
-    
-    solver = SolverFactory(args.solver)#,executable=solverpath_exe)
-    if solver is None:
-        raise RuntimeError(f"Solver {args.solver} not available")
-    
+    # Parse solver options once (key=value)
+    opts = {}
     if args.solver_options:
-        options = {k: v for opt in args.solver_options for k, v in [opt.split('=')]}
-        for key, value in options.items():
-            solver.options[key] = value
-    
-    return solver
+        for opt in args.solver_options:
+            k, v = opt.split('=', 1)
+            opts[k] = v
+
+    if args.solver == 'highs':
+        # Generic time limit (seconds) via APPSI config
+        if 'time_limit' in opts:
+            try:
+                solver.config.time_limit = float(opts.pop('time_limit'))
+            except Exception:
+                pass
+        # Remaining options go to native HiGHS options (e.g., mip_rel_gap, mip_abs_gap, threads, presolve, solver)
+        for k, v in opts.items():
+            try:
+                v_cast = float(v) if v.replace('.', '', 1).isdigit() else v
+            except Exception:
+                v_cast = v
+            solver.highs_options[k] = v_cast
+    else:
+        # Existing behavior for other solvers (Pyomo's .options)
+        for k, v in opts.items():
+            solver.options[k] = v
+
+    return solver 
 
 def run_scenario(model_data, scenario, price_scenario, solver):
     """
