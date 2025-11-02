@@ -174,7 +174,7 @@ class Config:
     
     # Default solver settings
     DEFAULT_SOLVER = 'gurobi'
-    AVAILABLE_SOLVERS = ['glpk', 'cplex', 'gurobi', 'cbc']
+    AVAILABLE_SOLVERS = ['glpk', 'cplex', 'gurobi', 'cbc', 'highs']
     
     # ============================================================================
     # NEW: Validation Constants (moved from hardcoded values)
