@@ -1,0 +1,85 @@
+﻿Country,Has_Market,Has_PPA,Has_Regulated,PrimaryBucket,Notes,RegimeEvidenceURL,RegimeEvidenceNote,ValidationStatus
+South Africa,TRUE,TRUE,TRUE,regulated,Eskom legacy coal regulated; thermal IPPs under PPAs; limited merchant.,https://www.eskom.co.za/distribution/wp-content/uploads/2025/07/Tariff-booklet2.pdf,NERSA‚Äëapproved Eskom tariff booklet; regulated cost‚Äëof‚Äëservice for legacy fleet.,validated
+Namibia,FALSE,TRUE,TRUE,regulated,SOE-dominant; IPP PPAs for additions; no real merchant spot.,,,needs_source
+Botswana,FALSE,FALSE,TRUE,regulated,State-owned fossil generation under regulated tariffs.,,,needs_source
+Zambia,FALSE,TRUE,TRUE,regulated,ZESCO cost-of-service; selective IPP PPAs.,,,needs_source
+Mozambique,FALSE,TRUE,TRUE,ppa,IPP PPAs (incl. export) + regulated domestic SOE assets.,,,needs_source
+Kenya,FALSE,TRUE,TRUE,ppa,Thermal IPPs under PPAs; KenGen/KPLC regulated; no merchant.,https://energyandpetroleum.go.ke/downloads/,IPP PPAs with KPLC; KenGen regulated‚Äîpolicy docs available from ministry site.,validated
+Nigeria,FALSE,TRUE,FALSE,ppa,"NBET-backed PPAs (capacity + energy), gas pass-through.",https://nbet.com.ng/pdf/BROWNFIELD.pdf,NBET form PPA shows capacity and energy payments to IPPs.,validated
+Ghana,FALSE,TRUE,FALSE,ppa,Thermal IPPs with take‚Äëor‚Äëpay tolling/availability PPAs.,https://energyforgrowth.org/wp-content/uploads/2021/03/A-Case-Study-of-Ghanas-Power-Purchase-Agreements.pdf,Case study documents take‚Äëor‚Äëpay PPAs with capacity & energy charges.,validated
+C√¥te d'Ivoire,FALSE,TRUE,FALSE,ppa,Azito/CIPREL IPPs under long-term PPAs.,https://www.azitoenergie.com/en/azito-thermal-plant,Azito IPP under long-term PPA; confirms PPA regime.,validated
+Senegal,FALSE,TRUE,FALSE,ppa,Thermal IPPs under PPAs with SENELEC.,https://www.senelec.sn/,SENELEC as buyer; IPPs under PPAs (project docs on SENELEC site).,validated
+Cameroon,FALSE,TRUE,FALSE,ppa,Concessions/IPPs sell under PPAs.,,,needs_source
+Angola,FALSE,FALSE,TRUE,regulated,SOE cost-of-service; limited IPP program.,,,needs_source
+India,TRUE,TRUE,TRUE,regulated,SOE regulated fleet; private IPPs under PPAs; exchanges provide limited merchant.,https://www.cercind.gov.in/2024/market_monitoring/Annual%20Report%202023-24.pdf,CERC Annual Report FY23‚Äì24 shows short‚Äëterm/exchanges are a small share; bulk under PPAs/regulated.,validated
+Pakistan,FALSE,TRUE,FALSE,ppa,"IPP PPAs with capacity payments, take‚Äëor‚Äëpay, fuel pass‚Äëthrough.",https://www.ppib.gov.pk/policies/Power%20Generation%20Policy%202015%20small.pdf,"Power Generation Policy 2015: two‚Äëpart tariff (Capacity + Energy), take‚Äëor‚Äëpay for IPPs.",validated
+Bangladesh,FALSE,TRUE,FALSE,ppa,CCGT/HFO IPPs under availability PPAs; sovereign support.,,,needs_source
+Sri Lanka,FALSE,TRUE,TRUE,regulated,CEB-owned thermal regulated; IPP PPAs for some plants.,,,needs_source
+Indonesia,FALSE,TRUE,TRUE,ppa,IPPs sell to PLN under availability PPAs; PLN fleet regulated.,https://web.pln.co.id/statics/uploads/2017/05/Buku-IPP.pdf,PLN IPP guide explains PPA framework with availability/capacity features.,validated
+Vietnam,FALSE,TRUE,TRUE,ppa,Thermal BOT/IPP PPAs with EVN; EVN plants effectively regulated.,https://ppp.worldbank.org/library/vietnam-sample-power-purchase-agreement,World Bank sample BOT PPA with EVN (capacity + energy structure).,validated
+Thailand,FALSE,TRUE,FALSE,ppa,Gas IPPs/SPPs under EGAT PPAs (availability).,https://www.egat.co.th/en/electricity-generation/independent-power-producers-ipps/,EGAT explains IPP model with Availability Payment and Energy Payment.,validated
+Malaysia,FALSE,TRUE,FALSE,ppa,Gas/coal IPPs under PPAs to TNB/SESB.,,IPP PPAs with TNB include availability/capacity elements (source to be added).,needs_source
+Philippines,TRUE,TRUE,FALSE,ppa,WESM spot exists; many thermal units have PSAs; some merchant exposure.,https://www.wesm.ph/library/downloads/view-download/documents/market-rules-and-market-manuals-for-5-min-market/market-rules-and-manuals,Official WESM rules/manuals establish the spot market; many plants also have PSAs.,validated
+Jordan,FALSE,TRUE,FALSE,ppa,Tolling/availability PPAs with NEPCO.,https://www.ebrd.com/content/dam/ebrd_dxp/documents/project/53334/board-report.pdf,EBRD report notes NEPCO PPAs with capacity and energy payments.,validated
+Egypt,FALSE,TRUE,TRUE,ppa,IPP/IWPP availability PPAs; EEHC-owned plants regulated.,https://www.irena.org/-/media/Files/IRENA/Agency/Publication/2018/Oct/IRENA_Outlook_Egypt_2018_En.pdf,Describes BOO/IPP schemes with PPAs alongside SOE dominance.,validated
+Morocco,FALSE,TRUE,FALSE,ppa,Thermal IPPs under long-term PPAs with ONEE.,https://aln.africa/wp-content/uploads/2024/06/Morocco-Power-Guide-2024.pdf,States ONEE as single buyer purchasing from IPPs under PPAs.,validated
+Saudi Arabia,FALSE,TRUE,TRUE,ppa,IPP/PPP availability PPAs; SOE assets effectively regulated.,https://moenergy.gov.sa/en/electricity,IPP/PPP projects with long-term availability-based PPAs (official framework).,validated
+United Arab Emirates,FALSE,TRUE,TRUE,ppa,IWPPs with capacity payments; SOE cost-of-service elements.,https://www.adpower.ae/en/our-business/iwpp-model,IWPP model in Abu Dhabi with availability payments (water & power).,validated
+Qatar,FALSE,TRUE,TRUE,ppa,IWPP availability PPAs; state support; regulated SOE elements.,,,needs_source
+Oman,FALSE,TRUE,FALSE,ppa,IWPPs under availability PPAs.,,,needs_source
+Kuwait,FALSE,TRUE,TRUE,ppa,IWPP/IPP program; SOE generation regulated.,,,needs_source
+Brazil,TRUE,TRUE,FALSE,ppa,Auctioned contracts dominate; ACL free market enables merchant/C&I exposure.,https://ri.energisa.com.br/en/setor-eletrico-brasileiro/,Explains dual environments: ACR (auctioned PPAs) and ACL (free market).,validated
+Chile,TRUE,TRUE,FALSE,ppa,Auction PPAs + liquid spot; capacity payments; merchant exposure for some units.,https://energia.gob.cl/,Chile‚Äôs contracting + capacity payment framework; liquid spot settlement.,validated
+Colombia,TRUE,TRUE,FALSE,ppa,Spot + bilaterals; Firm Energy Obligations (capacity) top-up.,https://www.creg.gov.co/,CREG framework including Reliability Charge (Firm Energy Obligations).,validated
+Mexico,TRUE,TRUE,TRUE,ppa,Legacy CFE cost-of-service + IPP PPAs; WEM (policy shifts) allowed merchant exposure.,https://www.cenace.gob.mx/,CENACE MEM pages/manuals (wholesale market operation).,validated
+Argentina,TRUE,TRUE,TRUE,regulated,MEM spot + CAMMESA-admin contracts; cost-plus/administrative elements prevalent.,,,needs_source
+Turkey,TRUE,TRUE,FALSE,market,Spot + bilaterals; capacity mechanism for selected plants.,https://www.epias.com.tr/en/day-ahead-market/,EPƒ∞A≈û official pages for Day‚ÄëAhead/Intraday confirm functioning spot (merchant exposure).,validated
+Ukraine,FALSE,TRUE,TRUE,regulated,Current conditions atypical; historically cost-plus elements.,,,needs_source
+Kazakhstan,TRUE,FALSE,TRUE,regulated,Capacity remuneration + admin pricing; day-ahead exists but generation largely regulated.,,,needs_source
+Uzbekistan,FALSE,TRUE,TRUE,ppa,New BOO CCGTs under sovereign-backed availability PPAs; SOE fleet regulated.,https://www.mift.uz/en/invest/investment-projects/energy,Recent BOO CCGTs under sovereign-backed availability PPAs.,validated
+Algeria,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Benin,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Burkina Faso,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Burundi,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Central African Republic,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Chad,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Democratic Republic of Congo,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Djibouti,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Equatorial Guinea,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Eritrea,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Eswatini,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Ethiopia,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Gabon,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Gambia,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Guinea,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Guinea-Bissau,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Lesotho,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Liberia,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Libya,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Malawi,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Mali,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Mauritania,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Niger,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Republic of Congo,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Rwanda,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Sierra Leone,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Somalia,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+South Sudan,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Sudan,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Tanzania,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Togo,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Tunisia,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Uganda,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Zimbabwe,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Cambodia,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Laos,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Myanmar,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+South Korea,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Taiwan,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Papua New Guinea,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Bolivia,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Ecuador,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Paraguay,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Peru,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Uruguay,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source
+Venezuela,FALSE,FALSE,FALSE,,Regime TBD,,,needs_source

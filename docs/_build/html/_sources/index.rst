@@ -16,10 +16,11 @@ Welcome to the documentation of ``FFRM``!
 
 **F**\ossil **F**\uel **R**\etirement **M**\odel (FFRM) is an open-source Python-based fossil fuel retirement model. It was originally developed by the `World Bank <https://www.worldbank.org/>`_ as a coal retirement optimisation model. It can be used to estimate the stranded cost associated with retiring fossil fuel power plants.
 
-The model utilises a `Pyomo-based optimisation framework <http://www.pyomo.org>`_ to endogenously calculate stranded cost, taking into consideration commercial and market issues. It uses projections for capacity and production of fossil fuel power plants to explore their retirement profile under two types of price regimes: **PPA** and **Market Price regime**. The model assesses at what capacity fossil fuel power plants become stranded and explores how this influences total compensation for stranded plants.
+The model utilises a `Pyomo-based optimisation framework <http://www.pyomo.org>`_ to endogenously calculate stranded cost, taking into consideration commercial and market issues. It uses projections for capacity and production of fossil fuel power plants to explore their retirement profile under three types of price regimes: **PPA**, **Market Price regime** and **Cost of Service Regime**. 
 
-The model is designed to complement more detailed long-term capacity expansion models, such as OSeMOSYS, TIMES, LEAP, and others, but but can also be used as a standalone retirement model.
+The model assesses at what capacity fossil fuel power plants become stranded and explores how this influences total compensation for stranded plants.The model is designed to complement more detailed long-term capacity expansion models, such as OSeMOSYS, TIMES, LEAP, and others, but can also be used as a standalone retirement model.
 
+ 
 Background
 ==========
 
@@ -28,14 +29,45 @@ The model defines stranded cost as the difference in plant revenue. In particula
 of plants that reach the end of their economic life in the decarbonisation scenarios, relative to the baseline scenario. A recent application of the tool by Suski et al (2022) can be found `here <https://www.sciencedirect.com/science/article/abs/pii/S0973082622002022>`_, in which a GAMS-based version of FFRM was applied to the power sectors of India and the Philippines to calculate the stranded cost implications of early retirement of its coal fleet.
 
 Aims
-====
+==== 
 
-The objective function of the model is set as maximisation of the net revenue at the fossil fuel power plants fleet, based on either:
+The objective function of the model is set as maximisation of the net revenue at the fleet, based on either under the following regimes: 
 
-- **Financial analysis** of Power Purchase Agreements (PPAs), where these are in place with known contractual terms.
-- **Economic optimization** of the market price, where marginal costs derived from a least-cost planning are considered.
+- **Power Purchase Agreements (PPAs)**: Revenues are based on known contractual terms specific to each plant.
+- **Market Price Regime**: Revenues are linked to variable, market-determined electricity prices.
+- **Cost of Service Regime**: Revenues are set to recover allowable costs through regulated electricity tariffs.
+The difference in net revenue between the BAU and a decarbonization scenario is used as a measure of forgone revenue.
 
-The difference in net revenue between the BAU and a decarbonization scenario is used as a measure of foregone revenue.
+Electricity Market Structures Map
+=================================
+This map provides an indicative classification of electricity market
+structures for emerging markets and developing economies (EMDEs). Each
+country is assigned a single **primary market structure**
+(``PrimaryBucket``) used in FFRM: market-based, PPA-based, or
+cost of service. 
+
+In reality, many countries operate mixed systems (for
+example, regulated tariffs alongside IPP PPAs and short-term power
+markets). This mix is captured in the underlying data through separate
+flags (``Has_Market``, ``Has_PPA``, ``Has_Regulated``) and a mixed-system
+indicator. The map and model, however, highlight only one primary
+structure per country so that regimes can be compared consistently
+across countries. It should therefore be read as a simplified modelling
+representation of the main market structure.
+
+
+.. raw:: html
+
+   <div style="width: 100%; max-width: 1100px; margin: 0 auto;">
+     <iframe
+       src="_static/emde_regime_map.html"
+       width="100%"
+       height="600"
+       style="border: none;"
+     ></iframe>
+   </div>
+
+
 
 Contents
 ========
@@ -53,8 +85,7 @@ Contents
    Key Publications <KeyPublications>
 
 
-Indices and tables
+Search
 ==================
-
-* :ref:`genindex` 
+ 
 * :ref:`search`
