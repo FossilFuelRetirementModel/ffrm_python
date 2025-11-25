@@ -50,11 +50,7 @@ In reality, many countries operate mixed systems (for
 example, regulated tariffs alongside IPP PPAs and short-term power
 markets). This mix is captured in the underlying data through separate
 flags (``Has_Market``, ``Has_PPA``, ``Has_Regulated``) and a mixed-system
-indicator. The map and model, however, highlight only one primary
-structure per country so that regimes can be compared consistently
-across countries. It should therefore be read as a simplified modelling
-representation of the main market structure.
-
+indicator.   
 
 .. raw:: html
 
