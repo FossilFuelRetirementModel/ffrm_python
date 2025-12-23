@@ -52,9 +52,9 @@ Thumbs.db
 ~$*.xlsm
 ~$*.xlsb
 
-# Allow specific input files if needed (uncomment and modify as required)
-# !InputDataCoalUpdated.xlsx
-# !Input File (India-Coal Retirements).xlsx
-# Ignore generated dashboard exports
-exports/
+# Allow specific input files if needed
+!InputDataCoalUpdated.xlsx
+!Examples/FFRM Data Input File.xlsx
 
+exports/
+ 
