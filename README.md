@@ -1,4 +1,4 @@
-# Welcome to the FFRM(Preview) 
+# Welcome to the FFRM 
 
 Fossil Fuel Retirement Model (FFRM) is an open-source python based fossil fuel retirement model. It was originally developed by the [World Bank](https://www.worldbank.org/ext/en/home) as a coal retirement optimisation model. It can be used to estimate the stranded cost associated with retiring fossil fuel power plants.
 
