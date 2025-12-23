@@ -74,6 +74,7 @@ Contents
 
    Install <install>
    Structure <structure>
+   Run Options <RunOptions>
    Examples <examples>
    Contributors <contributors>
    License <License>

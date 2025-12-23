@@ -44,7 +44,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Contributors and Partners" href="contributors.html" />
-    <link rel="prev" title="Structure Overview" href="equations.html" />
+    <link rel="prev" title="Run Options" href="RunOptions.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -161,6 +161,7 @@
 <li class="toctree-l2"><a class="reference internal" href="equations.html">Equations</a></li>
 </ul>
 </details></li>
+<li class="toctree-l1"><a class="reference internal" href="RunOptions.html">Run Options</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributors.html">Contributors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="License.html">License</a></li>
@@ -314,6 +315,16 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#before-you-start">Before you start</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-1-run-ffrm-with-the-example-botswana-input-file">Example 1 – Run FFRM with the example Botswana input file</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Examples</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Before you start</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-1-run-ffrm-with-the-example-philippines-input-file">Example 1 – Run FFRM with the example Philippines input file</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-2-change-an-assumption-in-the-excel-file-and-re-run">Example 2 – Change an assumption in the Excel file and re-run</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-3-create-your-own-country-case">Example 3 – Create your own country case</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#next-steps">Next steps</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#run-with-specific-solver-options">Run with specific solver options</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#run-multiple-scenarios">Run multiple scenarios</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#specify-custom-input-output-files">Specify custom input/output files</a></li>
@@ -333,6 +344,158 @@ document.write(`
                   
   <section id="examples">
 <span id="id1"></span><h1>Examples<a class="headerlink" href="#examples" title="Link to this heading">#</a></h1>
+<section id="before-you-start">
+<h2>Before you start<a class="headerlink" href="#before-you-start" title="Link to this heading">#</a></h2>
+<p>Before running any examples, make sure you have:</p>
+<ol class="arabic simple">
+<li><p>installed FFRM and its dependencies (see <a class="reference internal" href="install.html"><span class="doc">Getting Started</span></a>), and</p></li>
+<li><p>activated the Python environment you use for FFRM.</p></li>
+</ol>
+<p>For example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">(</span>base<span class="o">)</span><span class="w"> </span>~/ffrm_python$<span class="w"> </span>conda<span class="w"> </span>activate<span class="w"> </span>ffrm
+<span class="o">(</span>ffrm<span class="o">)</span><span class="w"> </span>~/ffrm_python$
+</pre></div>
+</div>
+</section>
+<section id="example-1-run-ffrm-with-the-example-botswana-input-file">
+<h2>Example 1 – Run FFRM with the example Botswana input file<a class="headerlink" href="#example-1-run-ffrm-with-the-example-botswana-input-file" title="Link to this heading">#</a></h2>
+<p><strong>Goal:</strong> Run FFRM once using the Botswana Excel input file, which consists of primarly a PPA regime.
+This will read plant-level data and prices from the workbook, solve the
+model, and write summary outputs.</p>
+<p><strong>Input file</strong></p>
+<p>The repository includes an example FFRM input workbook for
+Botswana’s fossil fuel plants.</p>
+<section id="id2">
+<h3>Examples<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
+<p>Below are some simple examples you can follow to understand how the
+Fossil Fuel Retirement Model (FFRM) works.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In the grey boxes below, type each line into a terminal
+(or Anaconda Prompt on Windows) and press Enter. You do <strong>not</strong>
+need to type anything before the command itself.</p>
+</div>
+</section>
+</section>
+<section id="id3">
+<h2>Before you start<a class="headerlink" href="#id3" title="Link to this heading">#</a></h2>
+<p>Before running any examples, make sure you have:</p>
+<ul class="simple">
+<li><p>installed FFRM and its dependencies (see <a class="reference internal" href="install.html"><span class="doc">Getting Started</span></a>), and</p></li>
+<li><p>activated the Python environment you use for FFRM.</p></li>
+</ul>
+<p>For example:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">conda activate ffrm</span>
+<span class="go">cd path/to/ffrm_python</span>
+</pre></div>
+</div>
+</section>
+<section id="example-1-run-ffrm-with-the-example-philippines-input-file">
+<h2>Example 1 – Run FFRM with the example Philippines input file<a class="headerlink" href="#example-1-run-ffrm-with-the-example-philippines-input-file" title="Link to this heading">#</a></h2>
+<p><strong>Goal:</strong> Run FFRM once using the bundled Philippines Excel input file.
+This will read plant-level data and prices from the workbook, solve the
+model, and write summary outputs.</p>
+<p>The repository includes an example FFRM input workbook for the
+Philippines:</p>
+<ul class="simple">
+<li><p><code class="file docutils literal notranslate"><span class="pre">docs/data/250810</span> <span class="pre">FFRM</span> <span class="pre">Data</span> <span class="pre">Input</span> <span class="pre">File</span> <span class="pre">.xlsx</span></code></p></li>
+</ul>
+<p>This workbook contains:</p>
+<ul class="simple">
+<li><p>a <strong>Plant Data</strong> sheet with plant-level costs, capacities, start year,
+technology type and price regime</p></li>
+<li><p>an <strong>FC_PPA</strong> sheet with time-varying fixed costs for plants under PPAs</p></li>
+<li><p>a <strong>Price_Gen</strong> sheet with generation price assumptions</p></li>
+<li><p>other sheets used internally by FFRM</p></li>
+</ul>
+<ol class="arabic">
+<li><p>From the project root (<code class="file docutils literal notranslate"><span class="pre">ffrm_python</span></code>), run FFRM pointing to the
+example Excel file:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">python model.py --input-excel &quot;docs/data/250810 FFRM Data Input File .xlsx&quot;</span>
+</pre></div>
+</div>
+<p>Replace the command above with the entry point you normally use to
+run FFRM (for example a different script name or flag), but keep the
+Excel path as shown.</p>
+</li>
+<li><p>When the run finishes, FFRM will create a results folder, for
+example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ffrm_python/
+├── Summary.csv
+├── results_YYYYMMDD_HHMMSS/
+│   ├── plant_results.csv
+│   ├── cashflows.csv
+│   ├── debt_and_equity.csv
+│   └── ...
+</pre></div>
+</div>
+<p>The exact filenames may differ, but you should see a time-stamped
+results folder and a <code class="file docutils literal notranslate"><span class="pre">Summary.csv</span></code> file.</p>
+</li>
+<li><p>Open <code class="file docutils literal notranslate"><span class="pre">Summary.csv</span></code> in your spreadsheet editor. This gives a
+high-level view of key FFRM outputs (for example, stranded asset
+values, lost FCFE, and unamortised debt).</p></li>
+<li><p>(Optional) Use any dashboard or plotting scripts in the repository to
+generate figures from these outputs.</p></li>
+</ol>
+</section>
+<section id="example-2-change-an-assumption-in-the-excel-file-and-re-run">
+<h2>Example 2 – Change an assumption in the Excel file and re-run<a class="headerlink" href="#example-2-change-an-assumption-in-the-excel-file-and-re-run" title="Link to this heading">#</a></h2>
+<p><strong>Goal:</strong> Change one simple assumption in the Excel input file, re-run
+FFRM, and see the impact on the results.</p>
+<p>In this example we will change a coal plant’s variable cost and compare
+the outputs.</p>
+<ol class="arabic">
+<li><p>Make a copy of the example workbook so you have an original and a
+modified version, for example:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">cp &quot;docs/data/250810 FFRM Data Input File .xlsx&quot; \</span>
+<span class="go">   &quot;docs/data/FFRM_Philippines_higher_fuel_cost.xlsx&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>Open <code class="file docutils literal notranslate"><span class="pre">docs/data/FFRM_Philippines_higher_fuel_cost.xlsx</span></code> in
+Excel or LibreOffice.</p></li>
+<li><p>Go to the <strong>Plant Data</strong> sheet and adjust the
+<code class="docutils literal notranslate"><span class="pre">Variable</span> <span class="pre">Cost</span> <span class="pre">($/MWh)</span></code> column for one or more plants (for example,
+increase coal plant fuel costs by 10–20%).</p></li>
+<li><p>Save the workbook.</p></li>
+<li><p>Run FFRM again, this time pointing to the modified workbook:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">python model.py --input-excel &quot;docs/data/FFRM_Philippines_higher_fuel_cost.xlsx&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>Compare the new results folder and <code class="file docutils literal notranslate"><span class="pre">Summary.csv</span></code> to the
+baseline run in Example 1. You should see changes in plant-level
+profitability, retirement timing, and total stranded asset values.</p></li>
+</ol>
+</section>
+<section id="example-3-create-your-own-country-case">
+<h2>Example 3 – Create your own country case<a class="headerlink" href="#example-3-create-your-own-country-case" title="Link to this heading">#</a></h2>
+<p><strong>Goal:</strong> Use the FFRM Excel template to create a new country case
+(starting from the Philippines example), then run FFRM for that case.</p>
+<ol class="arabic">
+<li><p>Copy the Philippines workbook to a new file and rename it, for
+example <code class="file docutils literal notranslate"><span class="pre">FFRM_MyCountry.xlsx</span></code>.</p></li>
+<li><p>Update plant-level information in the <strong>Plant Data</strong> sheet (plant
+names, capacities, start years, technology types, price regimes).</p></li>
+<li><p>Update PPA-related inputs in <strong>FC_PPA</strong> and price assumptions in
+<strong>Price_Gen</strong> to match your country.</p></li>
+<li><p>Run FFRM with your new workbook:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">python model.py --input-excel &quot;docs/data/FFRM_MyCountry.xlsx&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>Inspect the new results folder and <code class="file docutils literal notranslate"><span class="pre">Summary.csv</span></code> and compare
+them to the Philippines example.</p></li>
+</ol>
+</section>
+<section id="next-steps">
+<h2>Next steps<a class="headerlink" href="#next-steps" title="Link to this heading">#</a></h2>
+<p>These examples are deliberately simple and focus on working with the
+Excel input file and basic model runs. For more detail on how FFRM is
+structured and how individual components (e.g. PPAs, regulated plants,
+market-based plants) are modelled, see <a class="reference internal" href="structure.html"><span class="doc">Structure</span></a>.</p>
+</section>
 <section id="run-with-specific-solver-options">
 <h2>Run with specific solver options<a class="headerlink" href="#run-with-specific-solver-options" title="Link to this heading">#</a></h2>
 <p>Run the following command to specify solver options:</p>
@@ -427,12 +590,12 @@ document.write(`
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="equations.html"
+       href="RunOptions.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Structure Overview</p>
+        <p class="prev-next-title">Run Options</p>
       </div>
     </a>
     <a class="right-next"
@@ -460,6 +623,16 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#before-you-start">Before you start</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-1-run-ffrm-with-the-example-botswana-input-file">Example 1 – Run FFRM with the example Botswana input file</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Examples</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Before you start</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-1-run-ffrm-with-the-example-philippines-input-file">Example 1 – Run FFRM with the example Philippines input file</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-2-change-an-assumption-in-the-excel-file-and-re-run">Example 2 – Change an assumption in the Excel file and re-run</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-3-create-your-own-country-case">Example 3 – Create your own country case</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#next-steps">Next steps</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#run-with-specific-solver-options">Run with specific solver options</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#run-multiple-scenarios">Run multiple scenarios</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#specify-custom-input-output-files">Specify custom input/output files</a></li>
