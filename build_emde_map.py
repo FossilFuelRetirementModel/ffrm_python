@@ -163,7 +163,7 @@ for col, alias in [
     ("Has_Market", "Has market?"),
     ("Has_PPA", "Has PPA?"),
     ("Has_Regulated", "Has regulated tariffs?"),
-    ("Notes", "Notes:"),
+#    ("Notes", "Notes:"),
 ]:
     if col in gdf.columns:
         popup_fields.append(col)
