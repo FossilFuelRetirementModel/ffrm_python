@@ -2,7 +2,7 @@ from pathlib import Path
 
 class Config:
     DATA_DIR = Path("")
-    INPUT_FILE = "250810 FFRM Data Input File - Philippines.xlsx"  # Updated to use new template
+    INPUT_FILE = "Examples/FFRM Data Input File.xlsx"  # Updated to use new template
     EXCEL_PATH = DATA_DIR / INPUT_FILE
     
     # Sheet names - Updated for new template

@@ -402,7 +402,7 @@ def setup_argument_parser():
                        choices=["MarketPrice", "AvgPPAPrice"],
                        help='Price scenarios to run.')
     parser.add_argument('--input-file', type=str,
-                       default="250810 FFRM Data Input File - Philippines.xlsx",
+                       default="Examples/FFRM Data Input File.xlsx",
                        help='Path to input Excel file.')
     parser.add_argument('--output-file', type=str,
                        default="Results.xlsx",
@@ -518,7 +518,7 @@ def main():
     try:
         # Load and initialize data first to get available scenarios
         # Use default input file for initial loading
-        default_input_file = "250810 FFRM Data Input File - Philippines.xlsx"
+        default_input_file = "Examples/FFRM Data Input File.xlsx"
         file_path = Path(default_input_file)
         if not file_path.exists():
             raise FileNotFoundError(f"Input file not found: {file_path}")
