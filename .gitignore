@@ -62,3 +62,10 @@ exports/
 results/
 results_*/
 
+# Allow Excel files in Examples/
+!Examples/**/*.xlsx
+!Examples/**/*.xls
+!Examples/**/*.xlsm
+!Examples/**/*.xlsb
+
+
