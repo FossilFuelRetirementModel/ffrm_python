@@ -1,8 +1,6 @@
 from pyomo.environ import *
 import logging
-logging.basicConfig(level=logging.INFO)
 from pyomo.util.infeasible import log_infeasible_constraints
-logging.basicConfig(level=logging.INFO) 
 from pyomo.opt import SolverFactory
 from pyomo.core.util import quicksum
 from pathlib import Path
@@ -10,11 +8,10 @@ import pandas as pd
 from energy_data_processor import load_excel_data, initialize_model_data
 from result_processor import process_model_results, save_results_to_excel
 import argparse
-import time
-import logging
-import shutil
 from datetime import datetime
 from config import Config  # NEW: Import Config class for constants
+
+logging.basicConfig(level=logging.INFO)
 
 def build_model(model_data, scenario, price_scenario):
     """
@@ -122,20 +119,21 @@ def build_model(model_data, scenario, price_scenario):
         
         # NEW: Per-technology generation targets (by year) for selected scenario
         # Build a dict mapping (year, tech) -> target value
+        # price_gen index must be Technology_Scenario (e.g. PWRCOA001_BAU) or just Technology (same target for all scenarios)
         price_gen_by_tech_year = {}
         if hasattr(model_data, "price_gen") and not model_data.price_gen.empty:
             for idx in model_data.price_gen.index:
-                idx_str = str(idx)
-                # Handle different scenario naming patterns
+                idx_str = str(idx).strip()
+                tech_key = None
                 if idx_str.endswith(f"_{scenario}"):
-                    # For BAU, AD_20, AD_40, etc.
                     tech_key = idx_str[:-len(f"_{scenario}")]
                 elif scenario == "BAU" and idx_str.endswith("_BAU"):
-                    # Fallback for BAU
                     tech_key = idx_str[:-4]
-                else:
+                elif "_" not in idx_str and idx_str in model_data.technologies:
+                    # Excel has only Technology column (no Scenario): use for all scenarios
+                    tech_key = idx_str
+                if tech_key is None:
                     continue
-                
                 for y in model_data.years:
                     if y in model_data.price_gen.columns:
                         val = model_data.price_gen.at[idx, y]
@@ -272,15 +270,32 @@ def build_model(model_data, scenario, price_scenario):
             
         model.MaxPLF = Constraint(model.g, model.y, rule=max_plf_rule)
         
-        # NEW: Per-technology generation goal constraints
+        # Per-technology generation goal (capped at max achievable when target exceeds fleet capability)
+        model._gen_goal_capped = []  # records where target exceeds max achievable generation
         def tech_generation_goal_rule(model, y, tech):
-            # Skip if this technology has no plants mapped
             if not any(True for _ in model.plants_by_tech[tech]):
                 return Constraint.Skip
+            if (y, tech) not in model.PriceGenTech or model.PriceGenTech[y, tech] <= 0:
+                return Constraint.Skip
+            max_possible_cap = 0.0
+            for g in model.plants_by_tech[tech]:
+                start_y = row_get(g, ["STARTYEAR", "Start Year"])
+                if start_y <= y and (y - start_y) <= model.TechParams[tech, "MaxLife"]:
+                    max_possible_cap += row_get(g, ["CAPACITY", "Capacity (MW)"])
+            max_gen_twh = max_possible_cap * Config.HOURS_PER_YEAR * model.TechParams[tech, "MaxPLF"] / Config.USD_TO_MILLIONS
+            target_twh = model.PriceGenTech[y, tech]
+            effective_target = min(target_twh, max_gen_twh)
+            if target_twh > max_gen_twh:
+                model._gen_goal_capped.append({
+                    "Year": y, "Technology": tech,
+                    "Target_TWh": round(target_twh, 4),
+                    "MaxPossible_TWh": round(max_gen_twh, 4),
+                    "Note": "Target exceeds max achievable generation",
+                })
             return quicksum(
                 quicksum(model.Gen[g, y, t] * model.Price_dur[t] for t in model.t)
                 for g in model.plants_by_tech[tech]
-            ) * Config.HOURS_PER_YEAR/Config.USD_TO_MILLIONS == model.PriceGenTech[y, tech]
+            ) * Config.HOURS_PER_YEAR / Config.USD_TO_MILLIONS == effective_target
         model.TechGenGoal = Constraint(model.y, model.tech, rule=tech_generation_goal_rule)
         
         # Capacity Balance
@@ -311,15 +326,14 @@ def build_model(model_data, scenario, price_scenario):
             ) <= Config.MAX_RETIREMENTS_PER_PLANT
         model.MaxRetire = Constraint(model.g, rule=max_retire_rule)
 
-        # Minimum Capacity per technology and year
+        # Minimum capacity per technology and year (capped at max possible to avoid infeasibility)
+        model._min_cap_capped = []  # list of {year, tech, required_MW, max_possible_MW} where min capacity could not be fully satisfied
         def min_capacity_tech_rule(model, y, tech):
             """
-            Ensure capacity of plants in a technology meets that technology's generation target for the year.
+            Ensure capacity >= min(required_capacity, max_possible). Record when required > max_possible.
             """
-            # Skip if no target for this (y, tech)
             if (y, tech) not in model.PriceGenTech or model.PriceGenTech[y, tech] <= 0:
                 return Constraint.Skip
-            # Skip if no plants mapped to this technology
             if not any(True for _ in model.plants_by_tech[tech]):
                 return Constraint.Skip
             required_capacity = (
@@ -327,8 +341,20 @@ def build_model(model_data, scenario, price_scenario):
                 * Config.TWH_TO_MWH
                 / (Config.HOURS_PER_YEAR * Config.MAX_LOAD_FACTOR)
             )
-            return sum(model.Cap[g, y] for g in model.plants_by_tech[tech]) >= required_capacity
-        
+            max_possible = 0.0
+            for g in model.plants_by_tech[tech]:
+                start_y = row_get(g, ["STARTYEAR", "Start Year"])
+                if start_y <= y and (y - start_y) <= model.TechParams[tech, "MaxLife"]:
+                    max_possible += row_get(g, ["CAPACITY", "Capacity (MW)"])
+            effective = min(required_capacity, max_possible)
+            if required_capacity > max_possible:
+                model._min_cap_capped.append({
+                    "Year": y, "Technology": tech,
+                    "Required_MW": round(required_capacity, 2),
+                    "MaxPossible_MW": round(max_possible, 2),
+                    "Note": "Minimum capacity requirement exceeds max possible capacity",
+                })
+            return sum(model.Cap[g, y] for g in model.plants_by_tech[tech]) >= effective
         model.MinCapacityTech = Constraint(model.y, model.tech, rule=min_capacity_tech_rule)
         
         # Define objective function
@@ -392,7 +418,7 @@ def setup_argument_parser():
     ArgumentParser: Configured argument parser
     """
     parser = argparse.ArgumentParser(description="Run Pyomo model with solver options.")
-    parser.add_argument('--solver', type=str, default='gurobi', 
+    parser.add_argument('--solver', type=str, default='glpk', 
                        choices=['glpk', 'cplex', 'gurobi', 'cbc'],
                        help='Solver to use (e.g., glpk, cplex, gurobi, cbc).')
     parser.add_argument('--solver-options', type=str, nargs='*',
@@ -409,6 +435,14 @@ def setup_argument_parser():
                        help='Path to output Excel file.')
     parser.add_argument('--output-dir', type=str, default=None,
                        help='Output directory (default: create timestamped directory)')
+    parser.add_argument('--mip-gap', type=float, default=0.01,
+                       help='MIP relative gap: stop when gap <= this (e.g. 0.01 = 1%%, 0.002 = 0.2%%). Default 0.01 for faster finish.')
+    parser.add_argument('--time-limit', type=int, default=None,
+                       help='Solver time limit in seconds (GLPK: tmlim).')
+    parser.add_argument('--generate-intermediate-scenarios', action='store_true',
+                       help='Generate intermediate AD scenarios only when explicitly requested.')
+    parser.add_argument('--solver-tee', action='store_true',
+                       help='Show detailed solver output (disabled by default).')
     return parser
 
 def initialize_solver(args):
@@ -427,18 +461,29 @@ def initialize_solver(args):
 
     # solverpath_exe='C:/w64/glpk-4.65/w64/glpsol' 
     
-    solver = SolverFactory(args.solver)#,executable=solverpath_exe)
+    solver = SolverFactory(args.solver)
     if solver is None:
         raise RuntimeError(f"Solver {args.solver} not available")
-    
+    if args.solver == 'glpk':
+        solver.options['mipgap'] = args.mip_gap
+    elif args.solver == 'gurobi':
+        solver.options['MIPGap'] = args.mip_gap
+    elif args.solver == 'cplex':
+        solver.options['mipgap'] = args.mip_gap
+    if getattr(args, 'time_limit', None) is not None:
+        if args.solver == 'glpk':
+            solver.options['tmlim'] = args.time_limit
+        elif args.solver == 'gurobi':
+            solver.options['TimeLimit'] = args.time_limit
+        elif args.solver == 'cbc':
+            solver.options['seconds'] = args.time_limit
     if args.solver_options:
         options = {k: v for opt in args.solver_options for k, v in [opt.split('=')]}
         for key, value in options.items():
             solver.options[key] = value
-    
     return solver
 
-def run_scenario(model_data, scenario, price_scenario, solver, output_dir=None):
+def run_scenario(model_data, scenario, price_scenario, solver, output_dir=None, solver_tee=False):
     """
     Run a single scenario and return the results.
     
@@ -460,9 +505,8 @@ def run_scenario(model_data, scenario, price_scenario, solver, output_dir=None):
         lp_filename = str(Path(output_dir) / lp_filename)
     model.write(lp_filename, io_options={'symbolic_solver_labels': True})
 
-    result = solver.solve(model, tee=True)
+    result = solver.solve(model, tee=solver_tee)
     logging.getLogger('pyomo.core').setLevel(logging.INFO)
-    log_infeasible_constraints(model, log_expression=True)    
 
     # FIXED: Removed problematic log_infeasible_constraints call with logger object
     # log = logging.getLogger('pyomo.core')
@@ -479,12 +523,16 @@ def run_scenario(model_data, scenario, price_scenario, solver, output_dir=None):
  
     # check_constraints(model)
 
-    if (result.solver.status != SolverStatus.ok) or \
-       (result.solver.termination_condition != TerminationCondition.optimal):
-        print(f"\nModel is infeasible. LP file has been written to {lp_filename}")
+    ok_terminations = (TerminationCondition.optimal, TerminationCondition.feasible)
+    if result.solver.status != SolverStatus.ok or result.solver.termination_condition not in ok_terminations:
+        print(f"\nSolver did not find a usable solution.")
+        print(f"  status: {result.solver.status}, termination: {result.solver.termination_condition}")
+        print(f"  LP file written to: {lp_filename}")
         log_infeasible_constraints(model, log_expression=True)
-        raise RuntimeError(f"Solver failed for scenario {scenario}_{price_scenario}")
-    
+        raise RuntimeError(
+            f"Solver failed for scenario {scenario}_{price_scenario} "
+            f"(status={result.solver.status}, termination={result.solver.termination_condition})"
+        )
     return process_model_results(model)
 
 def check_constraints(model):
@@ -516,8 +564,7 @@ def main():
     Main function to run the optimization model.
     """
     try:
-        # Load and initialize data first to get available scenarios
-        # Use default input file for initial loading
+        logging.getLogger("energy_data_processor").setLevel(logging.WARNING)
         default_input_file = "Examples/FFRM Data Input File.xlsx"
         file_path = Path(default_input_file)
         if not file_path.exists():
@@ -546,26 +593,16 @@ def main():
             data = load_excel_data(file_path)
             model_data = initialize_model_data(data)
         
-        # NEW: Generate intermediate scenarios if any are requested
-        # Check if any requested scenarios are intermediate scenarios (start with 'AD_')
-        if any(scenario.startswith('AD_') for scenario in args.scenarios):
-            print("Generating intermediate decarbonization scenarios...")
+        if args.generate_intermediate_scenarios and any(scenario.startswith('AD_') for scenario in args.scenarios):
             from energy_data_processor import generate_intermediate_scenarios
             model_data = generate_intermediate_scenarios(model_data)
-        
-        # Setup output directory
         output_dir = None
         if args.output_dir:
             output_dir = Path(args.output_dir)
         else:
-            # Create timestamped directory by default
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             output_dir = Path(f"results_{timestamp}")
-        
         output_dir.mkdir(exist_ok=True)
-        print(f"Output directory: {output_dir.absolute()}")
-        
-        # Setup logging to output directory
         from energy_data_processor import setup_logging
         setup_logging(output_dir)
         
@@ -581,23 +618,16 @@ def main():
             for price_scenario in args.price_scenarios:
                 try:
                     key = f"{scenario}_{price_scenario}"
-                    results[key] = run_scenario(model_data, scenario, 
-                                             price_scenario, solver, output_dir)
-                    print(f"Successfully completed scenario: {key}")
+                    results[key] = run_scenario(model_data, scenario,
+                                             price_scenario, solver, output_dir, args.solver_tee)
                 except Exception as e:
                     print(f"Error in scenario {key}: {str(e)}")
                     continue
-        
-        # Save results
         try:
             save_results_to_excel(results, output_file, output_dir)
-            print(f"Results saved to {output_file}")
+            print(f"Results saved to {output_dir}")
         except Exception as e:
             print(f"Error saving results: {str(e)}")
-        
-        print(f"\nAll results saved to: {output_dir}")
-        for file_path in output_dir.glob("*"):
-            print(f"  - {file_path.name}")
             
     except Exception as e:
         print(f"Fatal error: {str(e)}")
@@ -607,7 +637,7 @@ def main():
 
 def debug_AD_scenario(model,s):
     """
-    打印AD场景的关键变量进行对比
+    Print key variables for AD scenario debugging.
     """
     print(f"\n{s} Scenario Debug Info:")
     

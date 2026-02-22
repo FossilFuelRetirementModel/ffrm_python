@@ -28,21 +28,24 @@ def process_model_results(model):
         tech_cap = calculate_capacity_by_technology(model)
         tech_netrev = calculate_net_revenue_by_technology(model)
         tech_targets = get_technology_targets(model)
-        return {
+        min_cap_capped = getattr(model, "_min_cap_capped", [])
+        gen_goal_capped = getattr(model, "_gen_goal_capped", [])
+        out = {
             "PlantGen": gen,
-            # "NetRev": net_rev,
-            # # "TotalNetRevenue": model.TotNetRev.value,
-            # "tot_cap_gw": total_cap,
             "retire_sched": retirement_schedule,
             "plant_cap": plant_cap,
             "AnnualSummary": annual_summary,
             "plant_netrev": plant_netrev,
-            # NEW: technology-level results
             "TechGen": tech_gen,
             "TechCap": tech_cap,
             "TechNetRev": tech_netrev,
-            "TechTargets": tech_targets
+            "TechTargets": tech_targets,
         }
+        if min_cap_capped:
+            out["MinCapacityCapped"] = min_cap_capped
+        if gen_goal_capped:
+            out["GenGoalCapped"] = gen_goal_capped
+        return out
     except Exception as e:
         raise RuntimeError(f"Error processing model results: {str(e)}")
 
@@ -78,18 +81,17 @@ def save_results_to_excel(results, output_file, output_dir=None):
                         annual_df['Depreciated_Capex_$m'] = data["depreciated_capex"]
                         annual_df.to_excel(scenario_writer, sheet_name=f"PlantNetRev")
                     elif sheet_name in ("TechGen", "TechCap", "TechNetRev", "TechTargets"):
-                        # Aggregate dict[tech][year] into DataFrame with tech as rows, years as columns
                         df = pd.DataFrame(data).transpose()
                         df.to_excel(scenario_writer, sheet_name=f"{sheet_name}")
+                    elif sheet_name == "MinCapacityCapped":
+                        df = pd.DataFrame(data)
+                        df.to_excel(scenario_writer, sheet_name="MinCapacityUnmet")
+                    elif sheet_name == "GenGoalCapped":
+                        df = pd.DataFrame(data)
+                        df.to_excel(scenario_writer, sheet_name="GenGoalCapped")
                     else:
                         df = pd.DataFrame.from_dict(data, orient='index')
-                        df.to_excel(scenario_writer, sheet_name=f"{sheet_name}")            
-                    df = pd.DataFrame.from_dict(data, orient='index')
-                    df.to_excel(scenario_writer, sheet_name=f"{sheet_name}")
-
-                    for sheet_name, data in result.items():
-                        df = pd.DataFrame.from_dict(data, orient='index')
-                        df.to_excel(scenario_writer, sheet_name=sheet_name)
+                        df.to_excel(scenario_writer, sheet_name=f"{sheet_name}")
             
             # NEW: Also create one Excel per technology with its own sheets
             if "TechGen" in result:
@@ -144,6 +146,12 @@ def save_results_to_excel(results, output_file, output_dir=None):
                     elif sheet_name in ("TechGen", "TechCap", "TechNetRev", "TechTargets"):
                         df = pd.DataFrame(data).transpose()
                         df.to_excel(writer, sheet_name=f"{key}_{sheet_name}")
+                    elif sheet_name == "MinCapacityCapped":
+                        df = pd.DataFrame(data)
+                        df.to_excel(writer, sheet_name=f"{key}_MinCapacityUnmet")
+                    elif sheet_name == "GenGoalCapped":
+                        df = pd.DataFrame(data)
+                        df.to_excel(writer, sheet_name=f"{key}_GenGoalCapped")
                     else:
                         df = pd.DataFrame.from_dict(data, orient='index')
                         df.to_excel(writer, sheet_name=f"{key}_{sheet_name}")
@@ -259,7 +267,6 @@ def calculate_plant_netrev(model):
                 (1 - model.TechParams[tech_type, "Straight-line depreciation"] * model.life[g]), 
                 0
             ) / Config.USD_TO_THOUSANDS
-        print(model.p[1])
         return plant_netrev
     except Exception as e:
         raise RuntimeError(f"Error calculating plant net revenue: {str(e)}")

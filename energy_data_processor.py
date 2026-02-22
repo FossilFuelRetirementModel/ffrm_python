@@ -121,11 +121,18 @@ def process_price_gen_data(price_gen_df: pd.DataFrame, years: list) -> pd.DataFr
     headers = price_gen_df.iloc[0]
     logger.info(f"PRICE_GEN: Headers from first row: {list(headers)[:10]}")
     
-    # Technology and scenario columns are in columns 0 and 1
-    tech_col = 0  # Technology column
-    scen_col = 1  # Scenario column
+    # Excel Price_Gen layout: Column0=Variable (e.g. "Generation Constraint (TWh)"),
+    # Column1=Technology (e.g. PWRCOA001), Column2=Scenario (e.g. BAU, AD_20), then year columns.
+    # Model expects index = Technology_Scenario (e.g. PWRCOA001_BAU) so PriceGenTech[y, tech] can match.
+    variable_col = 0
+    ncols = price_gen_df.shape[1]
+    if ncols >= 3:
+        tech_col, scen_col, num_id_cols = 1, 2, 3
+    else:
+        tech_col, scen_col, num_id_cols = 0, 1, 2
+    has_scenario_col = ncols >= 3
     
-    logger.info(f"PRICE_GEN: Using columns tech={tech_col}, scenario={scen_col}")
+    logger.info(f"PRICE_GEN: Using columns variable={variable_col}, tech={tech_col}, scenario={scen_col}")
     
     # Get data rows starting from the second row (skip header)
     data_rows = price_gen_df.iloc[1:].copy()
@@ -136,33 +143,39 @@ def process_price_gen_data(price_gen_df: pd.DataFrame, years: list) -> pd.DataFr
     
     logger.info(f"PRICE_GEN: Found {len(data_rows)} data rows")
     
-    # Debug: Show the first few rows to understand the data structure
-    logger.info(f"PRICE_GEN: First few data rows:")
-    for i in range(min(10, len(data_rows))):
-        tech_val = data_rows.iloc[i, tech_col]
-        scen_val = data_rows.iloc[i, scen_col]
-        logger.info(f"  Row {i}: tech='{tech_val}', scenario='{scen_val}'")
+    # Prefer rows for "Generation Constraint (TWh)" when Variable column exists
+    var_vals = data_rows.iloc[:, variable_col].astype(str).str.strip()
+    gen_constraint_mask = var_vals.str.contains('Generation Constraint', case=False, na=False)
+    if gen_constraint_mask.any():
+        data_rows = data_rows.loc[gen_constraint_mask].copy()
+        logger.info(f"PRICE_GEN: Filtered to 'Generation Constraint' rows: {len(data_rows)} rows")
     
-    # Filter out rows with empty technology or scenario
-    valid_mask = (data_rows.iloc[:, tech_col].notna() & 
+    # Filter out rows with empty technology (and scenario if used)
+    valid_mask = (data_rows.iloc[:, tech_col].notna() &
                   (data_rows.iloc[:, tech_col].astype(str).str.strip() != '') &
-                  (data_rows.iloc[:, tech_col].astype(str).str.strip() != 'Technology') &
-                  data_rows.iloc[:, scen_col].notna() & 
-                  (data_rows.iloc[:, scen_col].astype(str).str.strip() != '') &
-                  (data_rows.iloc[:, scen_col].astype(str).str.strip() != 'Scenario') &
-                  (data_rows.iloc[:, scen_col].astype(str).str.strip() != ' '))
-    
-    data_rows = data_rows[valid_mask].copy()
+                  (data_rows.iloc[:, tech_col].astype(str).str.strip() != 'Technology'))
+    if has_scenario_col:
+        valid_mask &= (data_rows.iloc[:, scen_col].notna() &
+                      (data_rows.iloc[:, scen_col].astype(str).str.strip() != '') &
+                      (data_rows.iloc[:, scen_col].astype(str).str.strip() != 'Scenario') &
+                      (data_rows.iloc[:, scen_col].astype(str).str.strip() != ' '))
+    data_rows = data_rows.loc[valid_mask].copy()
     logger.info(f"PRICE_GEN: After filtering, {len(data_rows)} valid tech-scenario combinations")
     
-    # Create technology-scenario keys
-    data_rows['tech_scenario'] = (data_rows.iloc[:, tech_col].astype(str) + '_' + 
-                                 data_rows.iloc[:, scen_col].astype(str))
+    # Build index as Technology_Scenario so model's idx_str.endswith("_BAU") etc. matches
+    if has_scenario_col:
+        data_rows['tech_scenario'] = (data_rows.iloc[:, tech_col].astype(str).str.strip() + '_' +
+                                     data_rows.iloc[:, scen_col].astype(str).str.strip())
+    else:
+        # No scenario column: index = technology only; model uses same target for all scenarios
+        data_rows['tech_scenario'] = data_rows.iloc[:, tech_col].astype(str).str.strip()
+    # Keep first row per tech_scenario so we don't overwrite with different variable rows
+    data_rows = data_rows.drop_duplicates(subset=['tech_scenario'], keep='first').copy()
     
-    # Identify year columns from headers (starting from column 2)
+    # Identify year columns from headers (skip variable + tech + scenario columns)
     year_cols_map = {}
     for i, header in enumerate(headers):
-        if i < 2:  # Skip tech and scenario columns
+        if i < num_id_cols:
             continue
         
         # Try to parse year from header
@@ -207,7 +220,7 @@ def process_price_gen_data(price_gen_df: pd.DataFrame, years: list) -> pd.DataFr
     logger.info(f"PRICE_GEN: Final result shape: {result_df.shape}")
     logger.info(f"PRICE_GEN: Technology-scenario combinations: {result_df.index.tolist()}")
     
-    # 输出 generation target 数据
+    # Output generation target data
     logger.info("PRICE_GEN: Generation Target Data:")
     logger.info("=" * 80)
     for tech_scenario in result_df.index:
@@ -231,7 +244,10 @@ def normalize_plant_data(plant_df: pd.DataFrame) -> pd.DataFrame:
         'Variable Cost ($/MWh)': 'COST',
         'Fixed Cost ($/MWh)': 'FIXED_COST',
         'PPA Price ($/MWh)': 'AvgPPAPrice',
+        'PPA': 'AvgPPAPrice',  # Excel may use "PPA" instead of "AvgPPAPrice"
+        'AvgPPAPrice ($/MWh)': 'AvgPPAPrice',
         'Market Price ($/MWh)': 'MarketPrice',
+        'Market Price': 'MarketPrice',
         'Capacity (MW)': 'CAPACITY',
         'Start Year': 'STARTYEAR',
         'Plant Type': 'TECHNOLOGY',
@@ -244,7 +260,7 @@ def normalize_plant_data(plant_df: pd.DataFrame) -> pd.DataFrame:
     # Drop rows with empty index (no plant name)
     df = df[~df.index.isna()].copy()
     # Coerce numeric columns
-    for col in ['COST', 'FIXED_COST', 'PPAPrice', 'MarketPrice', 'CAPACITY', 'STARTYEAR', 'ContractPriceMW']:
+    for col in ['COST', 'FIXED_COST', 'PPAPrice', 'AvgPPAPrice', 'MarketPrice', 'CAPACITY', 'STARTYEAR', 'ContractPriceMW']:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors='coerce')
     # Clean technology codes
@@ -527,8 +543,25 @@ def extract_scenarios_from_definitions(definitions_df: pd.DataFrame) -> dict:
         logger.info("DEFAULT: Using scenarios from code due to error")
         return Config.SCENARIOS
 
+# Map Excel price scenario names to canonical names used in model (e.g. "PPA" -> "AvgPPAPrice")
+PRICE_SCENARIO_NAME_ALIASES = {
+    'PPA': 'AvgPPAPrice',
+    'PPA Price': 'AvgPPAPrice',
+    'Avg PPA Price': 'AvgPPAPrice',
+    'Avg PPA': 'AvgPPAPrice',
+    'Market Price': 'MarketPrice',
+    'Market': 'MarketPrice',
+}
+
+def _normalize_price_scenario_name(name: str) -> str:
+    """Map Excel price scenario label to canonical name."""
+    key = name.strip()
+    return PRICE_SCENARIO_NAME_ALIASES.get(key, key)
+
 def extract_price_scenarios_from_definitions(definitions_df: pd.DataFrame) -> dict:
-    """Extract price scenarios from the Definitions sheet using pandas operations."""
+    """Extract price scenarios from the Definitions sheet using pandas operations.
+    Excel names like 'PPA' are normalized to 'AvgPPAPrice', 'Market Price' to 'MarketPrice'.
+    """
     try:
         # Get cell positions from config
         price_scenario_config = Config.EXCEL_CELL_POSITIONS['price_scenarios']
@@ -554,14 +587,19 @@ def extract_price_scenarios_from_definitions(definitions_df: pd.DataFrame) -> di
                 # Create dictionary using pandas operations
                 price_scenario_names = valid_price_scenarios.iloc[:, 0].astype(str).str.strip()
                 price_scenario_values = valid_price_scenarios.iloc[:, 1].astype(float)
+                raw_scenarios = dict(zip(price_scenario_names, price_scenario_values))
+                # Normalize names so e.g. "PPA" -> "AvgPPAPrice", "Market Price" -> "MarketPrice"
+                price_scenarios = {}
+                for excel_name, value in raw_scenarios.items():
+                    canonical = _normalize_price_scenario_name(excel_name)
+                    price_scenarios[canonical] = value
                 
-                price_scenarios = dict(zip(price_scenario_names, price_scenario_values))
-                
-                # Log found price scenarios
-                logger.info("EXCEL_READ: Price scenarios found in Excel:")
-                for scenario_name, scenario_value in price_scenarios.items():
+                # Log found price scenarios (show Excel name -> canonical)
+                logger.info("EXCEL_READ: Price scenarios found in Excel (normalized to canonical names):")
+                for excel_name, scenario_value in raw_scenarios.items():
+                    canonical = _normalize_price_scenario_name(excel_name)
                     status = "Active" if scenario_value == 1 else "Inactive"
-                    logger.info(f"  EXCEL_READ: {scenario_name} = {scenario_value} ({status})")
+                    logger.info(f"  EXCEL_READ: {canonical} ({excel_name!r}) = {scenario_value} ({status})")
                 
                 logger.info(f"EXCEL_READ: Extracted {len(price_scenarios)} price scenarios: {list(price_scenarios.keys())}")
                 return price_scenarios
