@@ -21,10 +21,10 @@ Make sure you have:
 Navigating the FFRM input file
 ------------------------------
 
-FFRM is driven by a six-tab Excel input workbook. Users calibrate these inputs before running the Python model.
-
-An example input workbook is available on GitHub:
+FFRM is driven by a six-tab Excel input workbook. Users calibrate these inputs before running the Python model. An example input workbook is available on GitHub:
 `FFRM Data Input File.xlsx <https://github.com/FossilFuelRetirementModel/ffrm_python/blob/new-input-format/Examples/FFRM%20Data%20Input%20File.xlsx>`_.
+
+
 
 The Excel input file consists of six tabs:
 
