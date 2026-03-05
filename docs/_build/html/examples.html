@@ -315,11 +315,12 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#quickstart">Quickstart</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-1-run-ffrm-with-the-botswana-example-workbook">Example 1 — Run FFRM with the Botswana Example Workbook</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-2-change-an-assumption-and-re-run">Example 2 — Change an assumption and Re-run</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-3-create-your-own-country-case">Example 3 — Create your own country case</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reference">Reference</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#downloading-ffrm">Downloading FFRM</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#navigating-the-ffrm-input-file">Navigating the FFRM input file</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-philippines-case-study">Example — Philippines case study</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#outputs-created">Outputs created</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#next-steps">Next steps</a></li>
 </ul>
             </nav>
@@ -334,8 +335,8 @@ document.write(`
                   
   <section id="examples">
 <span id="id1"></span><h1>Examples<a class="headerlink" href="#examples" title="Link to this heading">#</a></h1>
-<section id="quickstart">
-<h2>Quickstart<a class="headerlink" href="#quickstart" title="Link to this heading">#</a></h2>
+<section id="downloading-ffrm">
+<h2>Downloading FFRM<a class="headerlink" href="#downloading-ffrm" title="Link to this heading">#</a></h2>
 <p>Make sure you have:</p>
 <ol class="arabic simple">
 <li><p>Installed FFRM and its dependencies (see <a class="reference internal" href="install.html"><span class="doc">Getting Started</span></a>).</p></li>
@@ -346,128 +347,118 @@ document.write(`
 </pre></div>
 </div>
 </section>
-<section id="example-1-run-ffrm-with-the-botswana-example-workbook">
-<h2>Example 1 — Run FFRM with the Botswana Example Workbook<a class="headerlink" href="#example-1-run-ffrm-with-the-botswana-example-workbook" title="Link to this heading">#</a></h2>
-<p><strong>Goal:</strong> Run FFRM once using the bundled Botswana Excel input file. This is primarily a PPA regime.</p>
-<p><strong>Input file:</strong>
-* <code class="file docutils literal notranslate"><span class="pre">Examples/FFRM</span> <span class="pre">Data</span> <span class="pre">Input</span> <span class="pre">File.xlsx</span></code>
-* Browse on GitHub: <a class="reference external" href="https://github.com/FossilFuelRetirementModel/ffrm_python/tree/main/Examples">Examples folder on GitHub</a>.</p>
-<p><strong>Steps:</strong></p>
-<ol class="arabic">
-<li><p>From the project root (<code class="file docutils literal notranslate"><span class="pre">ffrm_python</span></code>), run:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">python model.py --input-excel &quot;Examples/FFRM Data Input File.xlsx&quot;</span>
-</pre></div>
-</div>
-</li>
-<li><p>When the run finishes, you should see outputs similar to:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ffrm_python/
-├── Summary.csv
-└── results_YYYYMMDD_HHMMSS/        (optional; depends on configuration)
-    ├── plant_results.csv
-    └── ...
-</pre></div>
-</div>
-</li>
-<li><p>Open <code class="file docutils literal notranslate"><span class="pre">Summary.csv</span></code> in your spreadsheet editor to review high-level outputs.</p></li>
-</ol>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Exact filenames can differ depending on your configuration and version of FFRM.</p>
-</div>
-</section>
-<section id="example-2-change-an-assumption-and-re-run">
-<h2>Example 2 — Change an assumption and Re-run<a class="headerlink" href="#example-2-change-an-assumption-and-re-run" title="Link to this heading">#</a></h2>
-<p><strong>Goal:</strong> Change one assumption in an Excel input file, re-run FFRM, and compare results.</p>
-<p><strong>Steps:</strong></p>
-<ol class="arabic">
-<li><p>Make a copy of the workbook:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">cp &quot;Examples/FFRM Data Input File.xlsx&quot; \</span>
-<span class="go">   &quot;Examples/FFRM_Botswana_higher_fuel_cost.xlsx&quot;</span>
-</pre></div>
-</div>
-</li>
-<li><p>Open <code class="file docutils literal notranslate"><span class="pre">Examples/FFRM_Botswana_higher_fuel_cost.xlsx</span></code> in Excel or LibreOffice.</p></li>
-<li><p>In the <span class="guilabel">Plant Data</span> sheet, increase a plant’s variable cost by 10–20%.</p></li>
-<li><p>Save the workbook.</p></li>
-<li><p>Run FFRM again:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">python model.py --input-excel &quot;Examples/FFRM_Botswana_higher_fuel_cost.xlsx&quot;</span>
-</pre></div>
-</div>
-</li>
-<li><p>Compare the new <code class="file docutils literal notranslate"><span class="pre">Summary.csv</span></code> (and any results folder outputs) to the baseline run.</p></li>
-</ol>
-</section>
-<section id="example-3-create-your-own-country-case">
-<h2>Example 3 — Create your own country case<a class="headerlink" href="#example-3-create-your-own-country-case" title="Link to this heading">#</a></h2>
-<p><strong>Goal:</strong> Create a new country workbook based on an existing example and run FFRM.</p>
-<p><strong>Steps:</strong></p>
-<ol class="arabic">
-<li><p>Copy an example workbook and rename it (e.g. <code class="file docutils literal notranslate"><span class="pre">Examples/FFRM_MyCountry.xlsx</span></code>).</p></li>
-<li><p>Update plant-level information in <span class="guilabel">Plant Data</span>:</p>
-<ul class="simple">
-<li><p>plant names, capacities, start years</p></li>
-<li><p>technology types and price regimes</p></li>
-</ul>
-</li>
-<li><p>Update regime-specific inputs (e.g. <span class="guilabel">FC_PPA</span>) and price assumptions
-(e.g. <span class="guilabel">Price_Gen</span>) to match your country.</p></li>
-<li><p>Run FFRM:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">python model.py --input-excel &quot;Examples/FFRM_MyCountry.xlsx&quot;</span>
-</pre></div>
-</div>
-</li>
-<li><p>Inspect <code class="file docutils literal notranslate"><span class="pre">Summary.csv</span></code> and compare it with the example outputs.</p></li>
-</ol>
-</section>
-<section id="reference">
-<h2>Reference<a class="headerlink" href="#reference" title="Link to this heading">#</a></h2>
-<p><strong>Common required sheets:</strong></p>
-<p>The input <strong>Excel file</strong> must contain the following sheets:</p>
+<section id="navigating-the-ffrm-input-file">
+<h2>Navigating the FFRM input file<a class="headerlink" href="#navigating-the-ffrm-input-file" title="Link to this heading">#</a></h2>
+<p>FFRM is driven by a six-tab Excel input workbook. Users calibrate these inputs before running the Python model.</p>
+<p>An example input workbook is available on GitHub:
+<a class="reference external" href="https://github.com/FossilFuelRetirementModel/ffrm_python/blob/new-input-format/Examples/FFRM%20Data%20Input%20File.xlsx">FFRM Data Input File.xlsx</a>.</p>
+<p>The Excel input file consists of six tabs:</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <colgroup>
 <col style="width: 20.0%" />
 <col style="width: 80.0%" />
 </colgroup>
 <thead>
-<tr class="row-odd"><th class="head"><p><strong>Sheet Name</strong></p></th>
-<th class="head"><p><strong>Description</strong></p></th>
+<tr class="row-odd"><th class="head"><p>Tab</p></th>
+<th class="head"><p>Description</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>Generation Capacity</p></td>
-<td><p>Capacity of powerplants  <em>(MW)</em></p></td>
+<tr class="row-even"><td><p>Definitions</p></td>
+<td><p>Overview of key definitions and a brief model description. This tab also defines the <strong>technologies</strong>
+and <strong>scenarios</strong> used in the analysis.</p></td>
 </tr>
-<tr class="row-odd"><td><p>Variable Costs</p></td>
-<td><p>Operational, maintenance, and fuel costs  <em>(USD/MWh)</em></p></td>
+<tr class="row-odd"><td><p>Other</p></td>
+<td><p>Technology-level parameters used across fossil fuel technologies, typically in three groups:
+(1) <strong>Financing assumptions</strong> (e.g., interest rate, loan term, discount rate),
+(2) <strong>Cost and escalation assumptions</strong> (e.g., CAPEX in $/kW, escalation rates by asset age),
+(3) <strong>Operational constraints</strong> (e.g., minimum/maximum plant load factor, maximum technical lifespan).</p></td>
 </tr>
-<tr class="row-even"><td><p>Annual Fixed Costs</p></td>
-<td><p>Annual fixed costs for the original PPA period only</p></td>
+<tr class="row-even"><td><p>Plant Data</p></td>
+<td><p>Plant-level inputs such as capacity (MW), start year, and costs. Depending on the selected regime, this tab
+also includes the relevant price inputs (e.g., PPA prices and/or market prices).</p></td>
 </tr>
-<tr class="row-odd"><td><p>Market Price</p></td>
-<td><p>Dual values (shadow prices) from models like OSeMOSYS if this information isn’t open source</p></td>
+<tr class="row-odd"><td><p>FC_PPA</p></td>
+<td><p>Inputs for the <strong>PPA regime</strong>: fixed-cost component under PPAs, expressed as <strong>$/MW/year</strong>, typically
+calculated at <strong>85% plant load factor</strong>.</p></td>
 </tr>
-<tr class="row-even"><td><p>Commission Year</p></td>
-<td><p>The start year when a plant connects to the grid and starts generating electricity</p></td>
+<tr class="row-even"><td><p>Price_Gen</p></td>
+<td><p>Projected electricity generation limits/targets applied to each fossil fuel technology (used to constrain
+generation trajectories under each scenario).</p></td>
 </tr>
-<tr class="row-odd"><td><p>Time blocks</p></td>
-<td><p>Duration of the 10 time blocks, as a percentage of hours in the year, reflecting average Market Prices for each time block <em>(USD/MWh)</em></p></td>
-</tr>
-<tr class="row-even"><td><p>Generation targets</p></td>
-<td><p>Annual generation targets for defined scenarios <em>(TWh)</em></p></td>
+<tr class="row-odd"><td><p>Price_Distribution</p></td>
+<td><p>Inputs for the <strong>market regime</strong>: the annual electricity price is distributed across representative
+hour-types (e.g., peak, shoulder, off-peak) to reflect intra-year price variation.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>If you see errors like <code class="docutils literal notranslate"><span class="pre">usecols</span> <span class="pre">...</span> <span class="pre">out-of-bounds</span></code> for <span class="guilabel">Plant Data</span>,
-it usually means the workbook layout (columns/headers) doesn’t match what your parser expects.</p>
+</section>
+<section id="example-philippines-case-study">
+<h2>Example — Philippines case study<a class="headerlink" href="#example-philippines-case-study" title="Link to this heading">#</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This example uses the Philippines as a case study with a proxy dataset compiled from publicly available sources.
+Because data transparency can be limited in EMDEs, inputs and assumptions are simplified for learning purposes and results
+should be treated as illustrative.</p>
 </div>
-<p><strong>Typical outputs:</strong></p>
-<ul class="simple">
-<li><p><code class="file docutils literal notranslate"><span class="pre">Summary.csv</span></code> (high-level summary outputs)</p></li>
-<li><p>plant-level results (e.g. <code class="file docutils literal notranslate"><span class="pre">plant_results.csv</span></code>)</p></li>
-</ul>
+<p>To begin, identify which pricing regime(s) apply in your country.</p>
+<p><strong>Hands-on task:</strong> Go to the <a class="reference internal" href="index.html#electricity-market-structure-map"><span class="std std-ref">Electricity Market Structure Map</span></a> on the
+<a class="reference internal" href="index.html"><span class="doc">home page</span></a>, then search for <code class="docutils literal notranslate"><span class="pre">Philippines</span></code>. To assist with this process, a pre-calibrated Philippines input workbook is available
+<a class="reference external" href="https://github.com/FossilFuelRetirementModel/ffrm_python/blob/new-input-format/Examples/FFRM%20Data%20Input%20File.xlsx">here</a>. Once you have downloaded the input workbook, run FFRM from the project root with the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">python model.py</span>
+</pre></div>
+</div>
+<p>The time to build and solve the model will vary depending on your computer, but in general, this example will finish within minutes. Navigate to the newly created results/ folder. All available automatically generated results are summarized below.</p>
+<section id="outputs-created">
+<h3>Outputs created<a class="headerlink" href="#outputs-created" title="Link to this heading">#</a></h3>
+<p>When the run finishes, you should see outputs similar to:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>results_YYYYYMMDD/
+├── AD_20_AvgPPAPrice.lp
+├── AD_20_AvgPPAPrice_PWRCOA001_results.xlsx
+├── AD_20_AvgPPAPrice_PWRNGS001_results.xlsx
+├── AD_20_AvgPPAPrice_PWRNGS002_results.xlsx
+├── AD_20_AvgPPAPrice_PWROHC001_results.xlsx
+├── AD_20_AvgPPAPrice_PWROHC002_results.xlsx
+├── AD_20_AvgPPAPrice_PWROHC003_results.xlsx
+├── AD_20_AvgPPAPrice_results.xlsx
+├── AD_20_MarketPrice.lp
+├── AD_20_MarketPrice_PWRCOA001_results.xlsx
+├── AD_20_MarketPrice_PWRNGS001_results.xlsx
+├── AD_20_MarketPrice_PWRNGS002_results.xlsx
+├── AD_20_MarketPrice_PWROHC001_results.xlsx
+├── AD_20_MarketPrice_PWROHC002_results.xlsx
+├── AD_20_MarketPrice_PWROHC003_results.xlsx
+├── AD_20_MarketPrice_results.xlsx
+├── BAU_AvgPPAPrice.lp
+├── BAU_AvgPPAPrice_PWRCOA001_results.xlsx
+├── BAU_AvgPPAPrice_PWRNGS001_results.xlsx
+├── BAU_AvgPPAPrice_PWRNGS002_results.xlsx
+├── BAU_AvgPPAPrice_PWROHC001_results.xlsx
+├── BAU_AvgPPAPrice_PWROHC002_results.xlsx
+├── BAU_AvgPPAPrice_PWROHC003_results.xlsx
+├── BAU_AvgPPAPrice_results.xlsx
+├── BAU_MarketPrice.lp
+├── BAU_MarketPrice_PWRCOA001_results.xlsx
+├── BAU_MarketPrice_PWRNGS001_results.xlsx
+├── BAU_MarketPrice_PWRNGS002_results.xlsx
+├── BAU_MarketPrice_PWROHC001_results.xlsx
+├── BAU_MarketPrice_PWROHC002_results.xlsx
+├── BAU_MarketPrice_PWROHC003_results.xlsx
+├── BAU_MarketPrice_results.xlsx
+├── Results.xlsx
+└── data_loading.log
+</pre></div>
+</div>
+<p>Each <code class="docutils literal notranslate"><span class="pre">*_results.xlsx</span></code> workbook contains a consistent set of sheets (e.g., <code class="docutils literal notranslate"><span class="pre">AnnualSummary</span></code>, <code class="docutils literal notranslate"><span class="pre">PlantGen</span></code>, <code class="docutils literal notranslate"><span class="pre">plant_cap</span></code>,
+<code class="docutils literal notranslate"><span class="pre">retire_sched</span></code>, <code class="docutils literal notranslate"><span class="pre">TechGen</span></code>, <code class="docutils literal notranslate"><span class="pre">TechCap</span></code>) that can be used for analysis and plotting.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Results files are named using the pattern <code class="docutils literal notranslate"><span class="pre">Scenario_PriceScenario[_Technology]_results.xlsx</span></code>.
+For example, <code class="docutils literal notranslate"><span class="pre">BAU_MarketPrice_results.xlsx</span></code> contains the main outputs for the BAU + MarketPrice run, while
+<code class="docutils literal notranslate"><span class="pre">BAU_MarketPrice_PWRCOA001_results.xlsx</span></code> contains outputs for the coal technology in that same run.</p>
+</div>
+</section>
 </section>
 <section id="next-steps">
 <h2>Next steps<a class="headerlink" href="#next-steps" title="Link to this heading">#</a></h2>
@@ -520,11 +511,12 @@ it usually means the workbook layout (columns/headers) doesn’t match what your
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#quickstart">Quickstart</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-1-run-ffrm-with-the-botswana-example-workbook">Example 1 — Run FFRM with the Botswana Example Workbook</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-2-change-an-assumption-and-re-run">Example 2 — Change an assumption and Re-run</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-3-create-your-own-country-case">Example 3 — Create your own country case</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reference">Reference</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#downloading-ffrm">Downloading FFRM</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#navigating-the-ffrm-input-file">Navigating the FFRM input file</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-philippines-case-study">Example — Philippines case study</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#outputs-created">Outputs created</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#next-steps">Next steps</a></li>
 </ul>
   </nav></div>

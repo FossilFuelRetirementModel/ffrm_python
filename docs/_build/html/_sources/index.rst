@@ -42,7 +42,9 @@ The objective function of the model is set as maximisation of the net revenue at
 
 The difference in net revenue between the BAU and a decarbonization scenario is used as a measure of forgone revenue.
 
-
+.. _electricity-market-structure-map:
+ 
+--------------------------------
 Electricity Market Structures Map
 =================================
 

@@ -3,9 +3,9 @@
 ========
 Examples
 ========
- 
-Quickstart
-----------
+
+Downloading FFRM
+----------------
 
 Make sure you have:
 
@@ -18,132 +18,119 @@ Make sure you have:
    cd path/to/ffrm_python
 
 
-Example 1 — Run FFRM with the Botswana Example Workbook
--------------------------------------------------------
+Navigating the FFRM input file
+------------------------------
 
-**Goal:** Run FFRM once using the bundled Botswana Excel input file. This is primarily a PPA regime.  
+FFRM is driven by a six-tab Excel input workbook. Users calibrate these inputs before running the Python model.
 
-**Input file:**
-* :file:`Examples/FFRM Data Input File.xlsx`
-* Browse on GitHub: `Examples folder on GitHub <https://github.com/FossilFuelRetirementModel/ffrm_python/tree/main/Examples>`_.
+An example input workbook is available on GitHub:
+`FFRM Data Input File.xlsx <https://github.com/FossilFuelRetirementModel/ffrm_python/blob/new-input-format/Examples/FFRM%20Data%20Input%20File.xlsx>`_.
 
-**Steps:**
-
-1. From the project root (:file:`ffrm_python`), run:
-
-   .. code-block:: console
-
-      python model.py --input-excel "Examples/FFRM Data Input File.xlsx"
-
-2. When the run finishes, you should see outputs similar to:
-
-   .. code-block:: text
-
-      ffrm_python/
-      ├── Summary.csv
-      └── results_YYYYMMDD_HHMMSS/        (optional; depends on configuration)
-          ├── plant_results.csv 
-          └── ...
-
-3. Open :file:`Summary.csv` in your spreadsheet editor to review high-level outputs.
-
-.. note::
-
-   Exact filenames can differ depending on your configuration and version of FFRM.
-
-
-Example 2 — Change an assumption and Re-run
--------------------------------------------
-
-**Goal:** Change one assumption in an Excel input file, re-run FFRM, and compare results.
-
-**Steps:**
-
-1. Make a copy of the workbook:
-
-   .. code-block:: console
-
-      cp "Examples/FFRM Data Input File.xlsx" \
-         "Examples/FFRM_Botswana_higher_fuel_cost.xlsx"
-
-2. Open :file:`Examples/FFRM_Botswana_higher_fuel_cost.xlsx` in Excel or LibreOffice.
-3. In the :guilabel:`Plant Data` sheet, increase a plant’s variable cost by 10–20%.
-4. Save the workbook.
-5. Run FFRM again:
-
-   .. code-block:: console
-
-      python model.py --input-excel "Examples/FFRM_Botswana_higher_fuel_cost.xlsx"
-
-6. Compare the new :file:`Summary.csv` (and any results folder outputs) to the baseline run.
-
-
-Example 3 — Create your own country case
-----------------------------------------
-
-**Goal:** Create a new country workbook based on an existing example and run FFRM.
-
-**Steps:**
-
-1. Copy an example workbook and rename it (e.g. :file:`Examples/FFRM_MyCountry.xlsx`).
-2. Update plant-level information in :guilabel:`Plant Data`:
-
-   * plant names, capacities, start years
-   * technology types and price regimes
-
-3. Update regime-specific inputs (e.g. :guilabel:`FC_PPA`) and price assumptions
-   (e.g. :guilabel:`Price_Gen`) to match your country.
-4. Run FFRM:
-
-   .. code-block:: console
-
-      python model.py --input-excel "Examples/FFRM_MyCountry.xlsx"
-
-5. Inspect :file:`Summary.csv` and compare it with the example outputs.
-
-
-Reference
----------
-
-**Common required sheets:**
-
-The input **Excel file** must contain the following sheets:
+The Excel input file consists of six tabs:
 
 .. list-table::
    :header-rows: 1
    :widths: 20 80
 
-   * - **Sheet Name**
-     - **Description**
-   * - Generation Capacity
-     - Capacity of powerplants  *(MW)* 
-   * - Variable Costs
-     - Operational, maintenance, and fuel costs  *(USD/MWh)* 
-   * - Annual Fixed Costs
-     - Annual fixed costs for the original PPA period only
-   * - Market Price
-     - Dual values (shadow prices) from models like OSeMOSYS if this information isn’t open source
-   * - Commission Year
-     - The start year when a plant connects to the grid and starts generating electricity
-   * - Time blocks
-     - Duration of the 10 time blocks, as a percentage of hours in the year, reflecting average Market Prices for each time block *(USD/MWh)*
-   * - Generation targets
-     - Annual generation targets for defined scenarios *(TWh)*
+   * - Tab
+     - Description
+   * - Definitions
+     - Overview of key definitions and a brief model description. This tab also defines the **technologies**
+       and **scenarios** used in the analysis.
+   * - Other
+     - Technology-level parameters used across fossil fuel technologies, typically in three groups:
+       (1) **Financing assumptions** (e.g., interest rate, loan term, discount rate),
+       (2) **Cost and escalation assumptions** (e.g., CAPEX in $/kW, escalation rates by asset age),
+       (3) **Operational constraints** (e.g., minimum/maximum plant load factor, maximum technical lifespan).
+   * - Plant Data
+     - Plant-level inputs such as capacity (MW), start year, and costs. Depending on the selected regime, this tab
+       also includes the relevant price inputs (e.g., PPA prices and/or market prices).
+   * - FC_PPA
+     - Inputs for the **PPA regime**: fixed-cost component under PPAs, expressed as **$/MW/year**, typically
+       calculated at **85% plant load factor**.
+   * - Price_Gen
+     - Projected electricity generation limits/targets applied to each fossil fuel technology (used to constrain
+       generation trajectories under each scenario).
+   * - Price_Distribution
+     - Inputs for the **market regime**: the annual electricity price is distributed across representative
+       hour-types (e.g., peak, shoulder, off-peak) to reflect intra-year price variation.
 
-.. tip::
 
-   If you see errors like ``usecols ... out-of-bounds`` for :guilabel:`Plant Data`,
-   it usually means the workbook layout (columns/headers) doesn’t match what your parser expects.
+Example — Philippines case study
+--------------------------------
 
-**Typical outputs:**
+.. note::
 
-* :file:`Summary.csv` (high-level summary outputs)
-* plant-level results (e.g. :file:`plant_results.csv`)
+   This example uses the Philippines as a case study with a proxy dataset compiled from publicly available sources.
+   Because data transparency can be limited in EMDEs, inputs and assumptions are simplified for learning purposes and results
+   should be treated as illustrative.
+
+To begin, identify which pricing regime(s) apply in your country.
+
+**Hands-on task:** Go to the :ref:`Electricity Market Structure Map <electricity-market-structure-map>` on the
+:doc:`home page <index>`, then search for ``Philippines``. To assist with this process, a pre-calibrated Philippines input workbook is available
+`here <https://github.com/FossilFuelRetirementModel/ffrm_python/blob/new-input-format/Examples/FFRM%20Data%20Input%20File.xlsx>`_. Once you have downloaded the input workbook, run FFRM from the project root with the following command:
  
+ 
+.. code-block:: console
 
+   python model.py  
+
+The time to build and solve the model will vary depending on your computer, but in general, this example will finish within minutes. Navigate to the newly created results/ folder. All available automatically generated results are summarized below.
+
+Outputs created
+^^^^^^^^^^^^^^^
+
+When the run finishes, you should see outputs similar to:
+ 
+.. code-block:: text
+
+   results_YYYYYMMDD/
+   ├── AD_20_AvgPPAPrice.lp
+   ├── AD_20_AvgPPAPrice_PWRCOA001_results.xlsx
+   ├── AD_20_AvgPPAPrice_PWRNGS001_results.xlsx
+   ├── AD_20_AvgPPAPrice_PWRNGS002_results.xlsx
+   ├── AD_20_AvgPPAPrice_PWROHC001_results.xlsx
+   ├── AD_20_AvgPPAPrice_PWROHC002_results.xlsx
+   ├── AD_20_AvgPPAPrice_PWROHC003_results.xlsx
+   ├── AD_20_AvgPPAPrice_results.xlsx
+   ├── AD_20_MarketPrice.lp
+   ├── AD_20_MarketPrice_PWRCOA001_results.xlsx
+   ├── AD_20_MarketPrice_PWRNGS001_results.xlsx
+   ├── AD_20_MarketPrice_PWRNGS002_results.xlsx
+   ├── AD_20_MarketPrice_PWROHC001_results.xlsx
+   ├── AD_20_MarketPrice_PWROHC002_results.xlsx
+   ├── AD_20_MarketPrice_PWROHC003_results.xlsx
+   ├── AD_20_MarketPrice_results.xlsx
+   ├── BAU_AvgPPAPrice.lp
+   ├── BAU_AvgPPAPrice_PWRCOA001_results.xlsx
+   ├── BAU_AvgPPAPrice_PWRNGS001_results.xlsx
+   ├── BAU_AvgPPAPrice_PWRNGS002_results.xlsx
+   ├── BAU_AvgPPAPrice_PWROHC001_results.xlsx
+   ├── BAU_AvgPPAPrice_PWROHC002_results.xlsx
+   ├── BAU_AvgPPAPrice_PWROHC003_results.xlsx
+   ├── BAU_AvgPPAPrice_results.xlsx
+   ├── BAU_MarketPrice.lp
+   ├── BAU_MarketPrice_PWRCOA001_results.xlsx
+   ├── BAU_MarketPrice_PWRNGS001_results.xlsx
+   ├── BAU_MarketPrice_PWRNGS002_results.xlsx
+   ├── BAU_MarketPrice_PWROHC001_results.xlsx
+   ├── BAU_MarketPrice_PWROHC002_results.xlsx
+   ├── BAU_MarketPrice_PWROHC003_results.xlsx
+   ├── BAU_MarketPrice_results.xlsx
+   ├── Results.xlsx
+   └── data_loading.log
+
+Each ``*_results.xlsx`` workbook contains a consistent set of sheets (e.g., ``AnnualSummary``, ``PlantGen``, ``plant_cap``,
+``retire_sched``, ``TechGen``, ``TechCap``) that can be used for analysis and plotting.
+ 
+.. note::
+
+   Results files are named using the pattern ``Scenario_PriceScenario[_Technology]_results.xlsx``.
+   For example, ``BAU_MarketPrice_results.xlsx`` contains the main outputs for the BAU + MarketPrice run, while
+   ``BAU_MarketPrice_PWRCOA001_results.xlsx`` contains outputs for the coal technology in that same run. 
 
 Next steps
 ----------
 
-For more detail on how FFRM is structured and how components are modelled, see :doc:`structure`.
- 
+For more detail on how FFRM is structured and how components are modelled, see :doc:`structure`. 
