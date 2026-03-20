@@ -8,6 +8,7 @@ env/
 __pycache__/
 *.py[cod]
 *$py.class
+
 # Temporary files
 test.py
 testing.py
@@ -31,18 +32,7 @@ model_old.py
 .vscode/
 .idea/
 
-# Output files
-*.xlsx
-!InputDataCoalUpdated.xlsx  # 除非这是必需的输入文件
-
-# Logs
-*.log
-
-# System files
-.DS_Store
-Thumbs.db
-
-# Excel files - exclude all Excel files to prevent data upload
+# Excel files - exclude all Excel files to prevent accidental data upload
 *.xlsx
 *.xls
 *.xlsm
@@ -52,9 +42,13 @@ Thumbs.db
 ~$*.xlsm
 ~$*.xlsb
 
-# Allow specific input files if needed (uncomment and modify as required)
-# !InputDataCoalUpdated.xlsx
-# !Input File (India-Coal Retirements).xlsx
+# Logs
+*.log
+
+# System files
+.DS_Store
+Thumbs.db
+
 # Ignore generated dashboard exports
 exports/
 
@@ -62,10 +56,8 @@ exports/
 results/
 results_*/
 
-# Allow Excel files in Examples/
+# Allow example input Excel files in the Examples/ directory
 !Examples/**/*.xlsx
 !Examples/**/*.xls
 !Examples/**/*.xlsm
 !Examples/**/*.xlsb
-
-

@@ -134,7 +134,7 @@ class Config:
     # Year range - Will be read from Excel file
     # YEARS will be dynamically set based on Excel data
     DEFAULT_START_YEAR = 2025  # Updated to match new Excel file
-    DEFAULT_END_YEAR = 2090    # Limited to 20 years for testing
+    DEFAULT_END_YEAR = 2090    # End year for model simulation (65-year horizon)
     
     # Scenarios - Will be dynamically loaded from Excel
     SCENARIOS = {
@@ -224,7 +224,7 @@ class Config:
     # ============================================================================
     
     # Default solver settings
-    DEFAULT_SOLVER = 'gurobi'
+    DEFAULT_SOLVER = 'glpk'
     AVAILABLE_SOLVERS = ['glpk', 'cplex', 'gurobi', 'cbc']
     
     # ============================================================================

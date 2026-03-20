@@ -22,8 +22,6 @@ def setup_logging(output_dir=None):
         ]
     )
 
-# Initialize logging without output directory for standalone use
-setup_logging()
 logger = logging.getLogger(__name__)
 
 @dataclass
@@ -289,9 +287,6 @@ def initialize_model_data(data: dict) -> ModelData:
     
     # Process data using pandas operations
     tech_params = process_technology_specific_data(data.get('other', pd.DataFrame()))
-    # TEMP OVERRIDE: Set MaxLife to 100 for all technologies
-    if not tech_params.empty and 'MaxLife' in tech_params.columns:
-        tech_params.loc[:, 'MaxLife'] = 80
     processed_price_gen = process_price_gen_data(data.get('price_gen', pd.DataFrame()), years)
     plant_df_raw = data.get('plant_data', pd.DataFrame())
     plant_df = normalize_plant_data(plant_df_raw)

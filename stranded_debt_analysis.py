@@ -33,10 +33,7 @@ def calc_stranded_debt(row, retire_year):
     return 0.0
 
 # === Apply function ===
-df["stranded_debt"] = df.apply(lambda r: calc_stranded_debt(r, retire_year_nz), axis=1)
-
-# === Convert to USD Millions ===
-df["stranded_debt_million"] = df["stranded_debt"]
+df["stranded_debt_million"] = df.apply(lambda r: calc_stranded_debt(r, retire_year_nz), axis=1)
 
 # === Results ===
 print("\n=== Stranded Debt (if retired in 2050) ===")

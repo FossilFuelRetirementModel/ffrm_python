@@ -16,13 +16,10 @@ def process_model_results(model):
     """
     try:
         gen = calculate_total_generation(model)
-        # net_rev = calculate_net_revenue(model)
-        # total_cap = calculate_total_capacity(model)
         retirement_schedule = calculate_retirement_schedule(model)
         plant_cap = calculate_plant_capacity(model)
-        # net_rev = calculate_net_revenue(model)
-        annual_summary = calculate_annual_summary(model) 
         plant_netrev = calculate_plant_netrev(model)
+        annual_summary = calculate_annual_summary(model, plant_netrev["annual"])
         # NEW: per-technology aggregations
         tech_gen = calculate_generation_by_technology(model)
         tech_cap = calculate_capacity_by_technology(model)
@@ -160,20 +157,23 @@ def save_results_to_excel(results, output_file, output_dir=None):
         raise IOError(f"Error saving results to Excel: {str(e)}")
 
 # def calculate_net_revenue(model):
-def calculate_annual_summary(model):
+def calculate_annual_summary(model, plant_netrev=None):
     """
     Calculate annual summary statistics including total generation and net revenue.
     Based on original GAMS code Summary calculations.
     
     Parameters:
     model (ConcreteModel): The solved Pyomo model
+    plant_netrev (dict, optional): Pre-computed per-plant net revenue by year. If not
+        provided it will be calculated internally (less efficient if already computed).
     
     Returns:
     dict: Dictionary containing summary statistics by year
     """
     try:
         summary = {}
-        plant_netrev = calculate_net_revenue(model)
+        if plant_netrev is None:
+            plant_netrev = calculate_net_revenue(model)
 
         for y in model.y:
             summary[y] = {

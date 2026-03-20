@@ -230,21 +230,9 @@ def build_model(model_data, scenario, price_scenario):
         
         #####################################################################################
           ##### Constraints
-        def max_coal_gen_rule(model, y):
-            '''
-            This function is used to set the maximum generation of coal plants
-            '''
-            
-            
-            # NEW: Using Config constants for time conversion (was hardcoded 8.76/1000)
-            return quicksum(quicksum(
-                model.Gen[g, y, t] * model.Price_dur[t] 
-                for t in model.t
-                    )for g in model.g )* Config.HOURS_PER_YEAR/Config.USD_TO_MILLIONS  == model.Price_gen[y][scenario]#sum(
-                 #for s in model.s
-        
-        # Removed: global generation equality to undefined Price_gen totals
-        # model.MaxCoalGen = Constraint(model.y, rule=max_coal_gen_rule)
+        # Removed: global generation equality constraint (max_coal_gen_rule) was using
+        # model.Price_gen which has been replaced by per-technology PriceGenTech.
+        # The TechGenGoal constraint below handles per-technology generation targets.
         # print("OFFPEAK",model.Price_dur['Offpeak1'])
         # Minimum PLF
         def min_plf_rule(model, g, y):
@@ -528,7 +516,8 @@ def run_scenario(model_data, scenario, price_scenario, solver, output_dir=None, 
         print(f"\nSolver did not find a usable solution.")
         print(f"  status: {result.solver.status}, termination: {result.solver.termination_condition}")
         print(f"  LP file written to: {lp_filename}")
-        log_infeasible_constraints(model, log_expression=True)
+        infeasibility_logger = logging.getLogger('pyomo.core')
+        log_infeasible_constraints(model, logger=infeasibility_logger, log_expression=True)
         raise RuntimeError(
             f"Solver failed for scenario {scenario}_{price_scenario} "
             f"(status={result.solver.status}, termination={result.solver.termination_condition})"
@@ -545,15 +534,19 @@ def check_constraints(model):
             plf = sum(
                 model.Gen[g, y, t].value * model.Price_dur[t]
                 for t in model.t
-            ) / (model.Cap[g, y].value * 8760) if model.Cap[g, y].value > 0 else 0
+            ) / (model.Cap[g, y].value * Config.HOURS_PER_YEAR) if model.Cap[g, y].value > 0 else 0
             
-            if model.Retire[g, y].value == 0 and plf<0.25:  #
+            if model.Retire[g, y].value == 0 and plf < Config.MIN_PLF_THRESHOLD:
                 print(f"Plant {g} Year {y} PLF: {plf:.2f}")
     
     # Check capacity constraints
     for y in model.y:
         total_cap = sum(model.Cap[g, y].value for g in model.g)
-        required_cap = sum(model.PriceGenTech[y, tech] * 1e6 / (8760 * 0.75) for tech in model.tech)
+        required_cap = sum(
+            model.PriceGenTech[y, tech] * Config.USD_TO_MILLIONS /
+            (Config.HOURS_PER_YEAR * Config.MAX_LOAD_FACTOR)
+            for tech in model.tech
+        )
         if total_cap < required_cap:
             print(f"Year {y} Capacity Check:")
             print(f"  Total: {total_cap:.2f} MW")
@@ -577,7 +570,7 @@ def main():
         parser = setup_argument_parser()
         available_scenarios = list(model_data.scenarios.keys())
         parser.add_argument('--scenarios', type=str, nargs='+', 
-                           default=["AD_20","BAU"],
+                           default=available_scenarios[:1],
                            choices=available_scenarios,
                            help=f'Scenarios to run. Available: {", ".join(available_scenarios)}')
         
@@ -635,12 +628,12 @@ def main():
     
     return 0
 
-def debug_AD_scenario(model,s):
+def debug_AD_scenario(model, s):
     """
     Print key variables for AD scenario debugging.
     """
     print(f"\n{s} Scenario Debug Info:")
-    
+
     # 1. Check capacity values
     print("\nCapacity Values:")
     for g in model.g:
@@ -648,38 +641,33 @@ def debug_AD_scenario(model,s):
             print(f"Plant {g}, Year {y}:")
             print(f"Cap: {model.Cap[g, y].value}")
             print(f"GenData Capacity: {model.GenData[g]['CAPACITY']}")
-    
+
     # 2. Check revenue calculation
     print("\nRevenue Calculation:")
+    p = model.p.at(1)
     for g in model.g:
         for y in model.y:
-            for p in model.p:
-                revenue = sum(
-                    (
-                        model.rev_unit[g, y, p] * 
-                        model.Price_Dist1[y, p, t] - 
-                        model.cost[g, y]
-                    ) * model.Gen[g, y, t].value * 
-                    model.Price_dur[t] * 8.76 / 1000
-                    for t in model.t
-                )
-                print(f"Plant {g}, Year {y}, Price Scenario {p}:")
-                print(f"Revenue: {revenue}")
-    
+            revenue = sum(
+                (
+                    model.rev_unit[g, y, p] *
+                    model.Price_Dist1[y, p, t] -
+                    model.cost[g, y]
+                ) * model.Gen[g, y, t].value *
+                model.Price_dur[t] * Config.HOURS_PER_YEAR / Config.USD_TO_THOUSANDS
+                for t in model.t
+            )
+            print(f"Plant {g}, Year {y}, Price Scenario {p}:")
+            print(f"Revenue: {revenue}")
+
     # 3. Check fixed cost
     print("\nFixed Cost Calculation:")
     for g in model.g:
         for y in model.y:
-            fixed_cost = sum(
-                (
-                    model.Cap[g, y].value * 
-                    (
-                        model.FC_PPA[g, y] * (1-model.SetPriceScenario[p])/1e3 +
-                        100 * model.SetPriceScenario[p]
-                    )
-                )
-                for p in model.p
-            ) / 1e6
+            if p == "AvgPPAPrice":
+                cost_per_mw = model.FC_PPA[g, y] / Config.USD_TO_THOUSANDS
+            else:
+                cost_per_mw = Config.DEFAULT_COST_PER_MW_MarketPrice
+            fixed_cost = model.Cap[g, y].value * cost_per_mw / Config.USD_TO_MILLIONS
             print(f"Plant {g}, Year {y}:")
             print(f"Fixed Cost: {fixed_cost}")
 
