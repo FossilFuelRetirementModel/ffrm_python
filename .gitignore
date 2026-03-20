@@ -33,7 +33,7 @@ model_old.py
 
 # Output files
 *.xlsx
-!InputDataCoalUpdated.xlsx  # 除非这是必需的输入文件
+!InputDataCoalUpdated.xlsx  # keep only if this input file is required
 
 # Logs
 *.log
@@ -67,5 +67,4 @@ results_*/
 !Examples/**/*.xls
 !Examples/**/*.xlsm
 !Examples/**/*.xlsb
-
 
