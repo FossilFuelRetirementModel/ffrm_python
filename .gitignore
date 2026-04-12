@@ -1,13 +1,18 @@
+# =========================
 # Virtual Environment
+# =========================
 ffrm/
 venv/
 env/
 .env/
 
+# =========================
 # Python
+# =========================
 __pycache__/
 *.py[cod]
 *$py.class
+
 # Temporary files
 test.py
 testing.py
@@ -15,10 +20,14 @@ trial.py
 pyomo_exercise.py
 model_old.py
 
-#PDF
+# =========================
+# PDF
+# =========================
 *.pdf
 
-#GAMS
+# =========================
+# GAMS
+# =========================
 *.gms
 *.log
 *.lst
@@ -27,22 +36,26 @@ model_old.py
 # Generated model files
 *.lp
 
+# =========================
 # IDE
+# =========================
 .vscode/
 .idea/
 
-# Output files
-*.xlsx
-!InputDataCoalUpdated.xlsx  # 除非这是必需的输入文件
-
+# =========================
 # Logs
+# =========================
 *.log
 
+# =========================
 # System files
+# =========================
 .DS_Store
 Thumbs.db
 
-# Excel files - exclude all Excel files to prevent data upload
+# =========================
+# Excel files (ignore all)
+# =========================
 *.xlsx
 *.xls
 *.xlsm
@@ -52,6 +65,8 @@ Thumbs.db
 ~$*.xlsm
 ~$*.xlsb
 
-# Allow specific input files if needed (uncomment and modify as required)
-# !InputDataCoalUpdated.xlsx
-# !Input File (India-Coal Retirements).xlsx
+# =========================
+# Allow specific Excel files
+# =========================
+!InputDataCoalUpdated.xlsx
+!coal_rr_allocation.xlsx
